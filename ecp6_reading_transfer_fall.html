@@ -1,0 +1,2365 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECP6 Reading Transfer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root{
+    --navy:#153a61;
+    --blue:#2a6fb0;
+    --sky:#eaf5ff;
+    --cloud:#ffffffd9;
+    --mint:#d9f7df;
+    --green:#28a45d;
+    --red:#f8d7dc;
+    --rose:#d94d61;
+    --sand:#f3e4bf;
+    --ink:#1d2b3a;
+    --muted:#667788;
+    --panel:#ffffff;
+    --line:#d8e2ee;
+    --word-stage-scale: 1;
+    --word-stage-counter-offset: -276px;
+    --word-stage-meteor-size: 900px;
+    --word-stage-shadow-width: 360px;
+    --word-stage-shadow-height: 82px;
+  }
+  body{
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(180deg, #edf5fb 0%, #d8edf8 100%);
+    color: var(--ink);
+    height: 100vh;
+    overflow: hidden;
+  }
+  .app{
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .topbar{
+    flex-shrink: 0;
+    background: var(--navy);
+    color: white;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .title-wrap{ min-width: 250px; }
+  .title{
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+  }
+  .subtitle{
+    font-size: 10px;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+  .stage-pills{
+    display: flex;
+    gap: 8px;
+    flex: 1;
+    justify-content: center;
+  }
+  .pill{
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.22);
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.55;
+    transition: all 0.2s ease;
+  }
+  .pill.active{
+    opacity: 1;
+    background: rgba(255,255,255,0.18);
+    transform: translateY(-1px);
+  }
+  .pill.done{
+    opacity: 0.9;
+    background: rgba(40,164,93,0.22);
+    border-color: rgba(255,255,255,0.16);
+  }
+  .toolbar{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  button{
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    transition: transform 0.12s ease, opacity 0.12s ease, background 0.12s ease;
+  }
+  button:active{ transform: scale(0.98); }
+  button:disabled{ opacity: 0.45; cursor: default; transform: none; }
+  .btn-light{
+    background: white;
+    color: var(--navy);
+    padding: 10px 14px;
+  }
+  .btn-primary{
+    background: #ffdb68;
+    color: #644700;
+    padding: 10px 16px;
+  }
+  .workspace{
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.2fr 0.82fr;
+    min-height: 0;
+  }
+  .board-panel,
+  .tablet-panel{
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .board-panel{
+    border-right: 2px solid #d6e1ec;
+    background: #f8fbfe;
+  }
+  .panel-head{
+    padding: 12px 18px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: white;
+  }
+  .board-panel .panel-head{ background: var(--blue); }
+  .tablet-panel .panel-head{ background: #425868; }
+  .board-stage-wrap{
+    flex: 1;
+    padding: 18px;
+    min-height: 0;
+  }
+  .board-stage{
+    position: relative;
+    height: 100%;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 3px solid #cfe1f0;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
+  }
+  /* LEVEL 1 VISUALS LOCKED: do not modify without explicit approval. */
+  .scene-space{
+    background:
+      linear-gradient(180deg, rgba(5,12,27,0.2), rgba(14,36,66,0.28)),
+      url("assets/space background.png") center center / cover no-repeat;
+  }
+  /* LEVEL 2 VISUALS LOCKED: do not modify without explicit approval. */
+  .scene-sky{
+    background:
+      linear-gradient(180deg, rgba(7,18,43,0.06), rgba(14,32,68,0.1)),
+      url("assets/atmo phrase.png") center center / cover no-repeat;
+  }
+  .scene-earth{
+    background:
+      linear-gradient(180deg, rgba(14,24,44,0.06), rgba(18,36,68,0.14)),
+      url("assets/level 3 background.png") center center / cover no-repeat;
+  }
+  .altitude-markers{
+    position: absolute;
+    left: 18px;
+    top: 18px;
+    bottom: 18px;
+    width: 82px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .altitude{
+    background: rgba(255,255,255,0.86);
+    color: var(--navy);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 10px;
+    font-weight: 800;
+    width: fit-content;
+  }
+  .scene-caption{
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255,255,255,0.88);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--navy);
+    box-shadow: 0 8px 20px rgba(12,33,58,0.08);
+    z-index: 50;
+  }
+  .board-zone{
+    position: absolute;
+    inset: 0;
+    padding: 70px 42px 36px 118px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 18px;
+  }
+  .constellation,
+  .cloud-band,
+  .ground-band{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+  }
+  .constellation{
+    min-height: 120px;
+    align-content: flex-start;
+  }
+  .constellation.word-cloud{
+    min-height: 660px;
+    width: 100%;
+    position: relative;
+    display: block;
+  }
+  .cloud-band{
+    min-height: 126px;
+    align-content: center;
+  }
+  .ground-band{
+    min-height: 0;
+    flex: 1;
+    align-content: flex-start;
+    overflow-y: auto;
+    padding-bottom: 8px;
+  }
+  .board-note{
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    background: rgba(255,255,255,0.88);
+    color: var(--muted);
+    border-radius: 14px;
+    padding: 8px 10px;
+    max-width: 250px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+  .board-controls{
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+    pointer-events: all;
+  }
+  .board-next-btn{
+    box-shadow: 0 10px 20px rgba(20, 38, 62, 0.18);
+  }
+  .board-help{
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: -8px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .float-card,
+  .match-slot,
+  .phrase-chip,
+  .sentence-slot{
+    border-radius: 12px;
+    box-shadow: 0 12px 24px rgba(17,44,72,0.08);
+    transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  }
+  .float-card{
+    min-width: 118px;
+    padding: 16px 18px;
+    background: var(--panel);
+    border: 2px solid #dbe7f2;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--navy);
+  }
+  .teacher-card{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 210px;
+  }
+  .teacher-card.word-float{
+    position: absolute;
+    min-width: 0;
+    transform: scale(calc(1.12 * var(--word-stage-scale)));
+    transform-origin: center;
+  }
+  .teacher-count{
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--muted);
+    background: rgba(255,255,255,0.88);
+    border: 1px solid #d9e4ef;
+    border-radius: 999px;
+    padding: 4px 8px;
+    line-height: 1;
+  }
+  .teacher-count.word-count{
+    position: absolute;
+    left: 50%;
+    bottom: var(--word-stage-counter-offset);
+    transform: translateX(-50%);
+    background: rgba(10, 22, 40, 0.62);
+    color: #d9e8fb;
+    border-color: rgba(126, 154, 186, 0.38);
+    box-shadow: 0 8px 16px rgba(6, 12, 24, 0.18);
+  }
+  .teacher-count.phrase-count{
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 195px);
+    transform: translateX(-50%);
+    background: rgba(10, 22, 40, 0.62);
+    color: #d9e8fb;
+    border-color: rgba(126, 154, 186, 0.38);
+    box-shadow: 0 8px 16px rgba(6, 12, 24, 0.18);
+    white-space: nowrap;
+    z-index: 2;
+  }
+  .float-card.small{
+    min-width: 96px;
+    font-size: 20px;
+    padding: 12px 14px;
+  }
+  .float-card.small.phrase-meteor{
+    min-width: 0;
+    min-height: 0;
+    padding: 8px 14px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #fff7d5;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.95), 1px -1px 0 rgba(0,0,0,0.95), -1px 1px 0 rgba(0,0,0,0.95), 1px 1px 0 rgba(0,0,0,0.95);
+    font-size: 17px;
+    font-weight: 900;
+    transform: translateY(34px);
+    white-space: nowrap;
+    position: relative;
+    z-index: 20;
+  }
+  .float-card.small.phrase-meteor::before{
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 420px;
+    height: 420px;
+    transform: translate(-50%, -52%);
+    background: url("assets/meteor.png") center center / contain no-repeat;
+    mix-blend-mode: screen;
+    opacity: 0.96;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .float-card.small.phrase-meteor::after{
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -84px;
+    width: 144px;
+    height: 30px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.06) 58%, transparent 74%);
+    pointer-events: none;
+    z-index: -2;
+  }
+  .float-card.done{
+    background: #e9f9ef;
+    border-color: #8ad5a4;
+    color: var(--green);
+  }
+  .float-card.draggable{
+    cursor: grab;
+  }
+  .float-card.clickable,
+  .phrase-chip.clickable{
+    cursor: pointer;
+  }
+  .float-card.draggable:active{
+    cursor: grabbing;
+  }
+  .match-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    width: 100%;
+  }
+  .phrase-cloud-field{
+    min-height: 720px;
+    width: 100%;
+    position: relative;
+    display: block;
+  }
+  .phrase-cloud{
+    /* dimensions handled by .match-slot.phrase-cloud-slot */
+  }
+  .phrase-sky{
+    min-height: 160px;
+    width: 100%;
+    position: relative;
+    display: block;
+  }
+  .teacher-card.phrase-float{
+    position: absolute;
+    min-width: 0;
+    transform-origin: center;
+  }
+  .match-slot{
+    min-height: 72px;
+    background: var(--cloud);
+    border: 2px dashed #bdd1e3;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--navy);
+    position: relative;
+    overflow: visible;
+  }
+  .match-slot.phrase-cloud-slot{
+    width: 24%;
+    min-width: 190px;
+    aspect-ratio: 300 / 196;
+    height: auto;
+    min-height: unset;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #10355a;
+    isolation: isolate;
+    padding: 0;
+    position: absolute;
+    display: block;
+    transform: translate(-50%, -50%);
+  }
+  .match-slot.phrase-cloud-slot::before{
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    transform: none;
+    background: url("assets/clouds.png") center center / 100% 100% no-repeat;
+    opacity: 1;
+    filter: drop-shadow(0 8px 18px rgba(16, 34, 64, 0.18));
+    pointer-events: none;
+    z-index: 0;
+  }
+  .match-slot.phrase-cloud-slot .slot-text{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: nowrap;
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: clamp(13px, 1.6vw, 18px);
+    font-weight: 900;
+    width: 80%;
+    text-align: center;
+    margin: 0;
+    transform: translate(-50%, -50%);
+    color: #0a2840;
+    text-shadow: 0 0 6px rgba(255,255,255,1), 0 1px 0 rgba(255,255,255,0.95);
+    letter-spacing: 0.2px;
+    pointer-events: none;
+  }
+  .match-slot.phrase-cloud-slot.correct,
+  .match-slot.phrase-cloud-slot.wrong{
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  .match-slot.phrase-cloud-slot.correct .slot-text{
+    color: var(--green);
+  }
+  .match-slot.phrase-cloud-slot.wrong .slot-text{
+    color: var(--rose);
+  }
+  .match-slot.phrase-cloud-slot .blank{
+    min-width: 72px;
+    height: 20px;
+    border-bottom: 3px solid rgba(30, 80, 140, 0.6);
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .match-slot.correct{
+    background: #ecfbf1;
+    border-color: #7fd69d;
+    color: var(--green);
+  }
+  .match-slot.wrong,
+  .sentence-slot.wrong{
+    background: var(--red);
+    border-color: #f29aa7;
+    color: var(--rose);
+  }
+  .slot-text{
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    align-items: center;
+  }
+  .blank{
+    min-width: 76px;
+    border-bottom: 3px solid #9ab6cf;
+    display: inline-block;
+    height: 30px;
+  }
+  .phrase-chip{
+    background: rgba(255,255,255,0.9);
+    border: 2px solid #dde8f2;
+    padding: 12px 16px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--navy);
+  }
+  .phrase-chip.done{
+    background: #ecfbf1;
+    border-color: #7fd69d;
+    color: var(--green);
+  }
+  .meteor-chip{
+    background:
+      radial-gradient(circle at 30% 28%, #fff3b4 0 14%, #ffd86f 15% 45%, #ff975a 46% 72%, #cf5c39 73% 100%);
+    color: #3e2108;
+    border-color: rgba(132, 67, 27, 0.28);
+    box-shadow: 0 14px 22px rgba(78, 34, 12, 0.18);
+    position: relative;
+    border-radius: 38% 42% 35% 46% / 44% 36% 48% 38%;
+  }
+  .word-meteor{
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #fff7d5;
+    text-shadow: -1px -1px 0 rgba(0,0,0,0.95), 1px -1px 0 rgba(0,0,0,0.95), -1px 1px 0 rgba(0,0,0,0.95), 1px 1px 0 rgba(0,0,0,0.95);
+    overflow: visible;
+    font-size: clamp(15px, 1.25vw, 20px);
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    line-height: 1;
+    z-index: 0;
+    transform: translateY(88px);
+    white-space: nowrap;
+  }
+  .word-meteor.done{
+    color: #edfff1;
+    filter: drop-shadow(0 0 12px rgba(122, 255, 176, 0.26));
+  }
+  .word-meteor::before{
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--word-stage-meteor-size);
+    height: var(--word-stage-meteor-size);
+    transform: translate(-50%, -51%);
+    background: url("assets/meteor.png") center center / contain no-repeat;
+    mix-blend-mode: screen;
+    opacity: 0.98;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .word-meteor::after{
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -250px;
+    width: var(--word-stage-shadow-width);
+    transform: translateX(-50%);
+    height: var(--word-stage-shadow-height);
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.08) 55%, transparent 72%);
+    pointer-events: none;
+    z-index: -2;
+  }
+  .meteor-chip::after{
+    content: "";
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    width: 38px;
+    height: 12px;
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, rgba(255,246,196,0.7), rgba(255,187,124,0.18), transparent);
+    filter: blur(2px);
+    pointer-events: none;
+  }
+  .sentence-grid{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+    overflow-y: auto;
+    max-height: 100%;
+    padding-right: 4px;
+  }
+  .sentence-slot{
+    min-height: 88px;
+    background: rgba(255,255,255,0.96);
+    border: 2px dashed #c6d6e6;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--navy);
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .sentence-slot.correct{
+    background: #ecfbf1;
+    border-color: #7fd69d;
+    color: var(--green);
+  }
+  .earth-object{
+    width: 100%;
+    min-height: 100%;
+    display: block;
+    align-items: center;
+    position: relative;
+  }
+  .earth-copy{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.9) 100%);
+    border: 1px solid rgba(166, 183, 202, 0.65);
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  .earth-label{
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+  }
+  .earth-frame{
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--navy);
+    line-height: 1.25;
+  }
+  .earth-frame .blank{
+    min-width: 118px;
+    height: 26px;
+    vertical-align: middle;
+  }
+  .sentence-slot.correct .earth-frame{
+    color: var(--green);
+  }
+  .earth-impact{
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    width: 40px;
+    height: 40px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.28s ease;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, #8b5f37 0 24%, #66411f 25% 55%, rgba(0,0,0,0) 56%),
+      radial-gradient(circle, rgba(255,255,255,0.25) 0 64%, transparent 65%);
+  }
+  .sentence-slot.correct .earth-impact{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .fall-out{
+    animation: fallOutDown 0.95s ease-in forwards;
+  }
+  @keyframes fallOutDown{
+    0%{ opacity:1; transform:translateY(0) scale(1); }
+    100%{ opacity:0; transform:translateY(120vh) scale(0.88); }
+  }
+  .tablet-body{
+    flex: 1;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    background: #eef4f9;
+  }
+  .tablet-frame{
+    width: 100%;
+    max-width: 620px;
+    height: 100%;
+    max-height: 430px;
+    background: #fdfefe;
+    border: 5px solid #425868;
+    border-radius: 28px;
+    box-shadow: 0 16px 28px rgba(24,50,76,0.16);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .tablet-screen{
+    flex: 1;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .tablet-top{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .tablet-stage{
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--navy);
+  }
+  .tablet-progress{
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .tablet-hint{
+    background: #edf6ff;
+    color: #35536f;
+    border-radius: 14px;
+    padding: 6px 9px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+  .tablet-area{
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow: hidden;
+  }
+  .tablet-scene-shell{
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    border-radius: 22px;
+    overflow: hidden;
+    border: 2px solid #d7e4ef;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+    background: #dfe9f3;
+  }
+  .tablet-scene{
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+  .tablet-scene-zone{
+    position: absolute;
+    inset: 0;
+    padding: 10px 12px 12px;
+  }
+  .tablet-scene .teacher-count,
+  .tablet-scene .board-controls,
+  .tablet-scene .board-help,
+  .tablet-scene .altitude-markers,
+  .tablet-scene .scene-caption,
+  .tablet-scene .board-note{
+    display: none !important;
+  }
+  .tablet-scene .constellation.word-cloud{
+    min-height: 100%;
+  }
+  .tablet-scene .constellation{
+    min-height: 100%;
+  }
+  .tablet-scene .phrase-cloud-field{
+    min-height: 100%;
+    height: 100%;
+  }
+  .tablet-scene.scene-space{
+    --word-stage-scale: 0.52;
+    --word-stage-counter-offset: -136px;
+    --word-stage-meteor-size: 430px;
+    --word-stage-shadow-width: 150px;
+    --word-stage-shadow-height: 40px;
+  }
+  .tablet-scene .teacher-card.word-float{
+    transform: scale(calc(1.12 * var(--word-stage-scale)));
+  }
+  .tablet-scene .word-meteor{
+    font-size: clamp(12px, 1.8vw, 16px);
+    transform: translateY(44px);
+  }
+  .tablet-scene .float-card.small.phrase-meteor{
+    font-size: 11px;
+    transform: translateY(18px);
+  }
+  .tablet-scene .float-card.small.phrase-meteor::before{
+    width: 190px;
+    height: 190px;
+  }
+  .tablet-scene .float-card.small.phrase-meteor::after{
+    bottom: -40px;
+    width: 70px;
+    height: 15px;
+  }
+  .tablet-scene .match-slot.phrase-cloud-slot{
+    min-width: 108px;
+  }
+  .tablet-scene .match-slot.phrase-cloud-slot .slot-text{
+    font-size: 11px;
+    width: 74%;
+  }
+  .tablet-scene .match-slot.phrase-cloud-slot .blank{
+    min-width: 42px;
+    height: 12px;
+    border-bottom-width: 2px;
+  }
+  .tablet-scene .ground-impact{
+    width: 68px;
+    height: 68px;
+  }
+  .tablet-scene .crater-burst{
+    width: 60px;
+    height: 60px;
+  }
+  .tablet-scene .sentence-frame-card{
+    padding: 8px 10px;
+    border-radius: 16px;
+  }
+  .tablet-scene .sentence-frame-card .earth-frame{
+    font-size: 11px;
+    line-height: 1.22;
+  }
+  .tablet-scene .sentence-frame-card .earth-frame .blank{
+    min-width: 60px;
+    height: 14px;
+    border-bottom-width: 2px;
+  }
+  .tablet-scene .tablet-sentence-meteor{
+    font-size: 10px;
+    transform: translateY(14px);
+  }
+  .tablet-scene .tablet-sentence-meteor::before{
+    width: 162px;
+    height: 162px;
+  }
+  .tablet-scene .tablet-sentence-meteor::after{
+    bottom: -34px;
+    width: 58px;
+    height: 12px;
+  }
+  .tablet-scene .tablet-stage-bottom{
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+  .tablet-scene .tablet-stage-overlay{
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12;
+  }
+  .tablet-scene .tablet-stage-overlay .teacher-card{
+    pointer-events: all;
+  }
+  .tablet-area::-webkit-scrollbar{
+    width: 10px;
+  }
+  .tablet-area::-webkit-scrollbar-thumb{
+    background: #c7d7e6;
+    border-radius: 999px;
+  }
+  .word-grid{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .word-btn{
+    padding: 14px 10px;
+    background: white;
+    color: var(--navy);
+    border: 2px solid #d9e4ef;
+    border-radius: 18px;
+    font-size: 18px;
+    font-weight: 900;
+    min-height: 72px;
+  }
+  .word-btn.done{
+    background: #ecfbf1;
+    border-color: #8cd6a7;
+    color: var(--green);
+  }
+  .tablet-match-pool,
+  .tablet-phrase-pool{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding-bottom: 0;
+  }
+  .pool-label{
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .draggable-chip{
+    padding: 8px 10px;
+    background: white;
+    border: 2px solid #d9e4ef;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--navy);
+    cursor: grab;
+  }
+  .draggable-chip:active{ cursor: grabbing; }
+  .tablet-match-grid,
+  .tablet-sentence-grid{
+    display: grid;
+    gap: 8px;
+  }
+  .tablet-match-grid{ grid-template-columns: 1fr 1fr; }
+  .tablet-sentence-grid{ grid-template-columns: 1fr 1fr; }
+  .tablet-slot{
+    min-height: 54px;
+    background: #f7fbff;
+    border: 2px dashed #c8d9ea;
+    border-radius: 18px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1.2;
+  }
+  .tablet-slot.correct{
+    background: #ecfbf1;
+    border-color: #7fd69d;
+    color: var(--green);
+  }
+  .tablet-slot.wrong{
+    background: var(--red);
+    border-color: #f29aa7;
+    color: var(--rose);
+  }
+  .tablet-actions{
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .tablet-actions .btn-light,
+  .tablet-actions .btn-primary{
+    flex: 1;
+  }
+  .footer-note{
+    padding: 8px 16px 10px;
+    font-size: 10px;
+    color: #607387;
+    background: #f6fafc;
+    border-top: 1px solid #e0e9f2;
+  }
+  .model-zone{
+    background: rgba(255,255,255,0.1);
+    border: 2px dashed rgba(255,255,255,0.32);
+    border-radius: 18px;
+    padding: 12px 22px;
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 200px;
+    text-align: center;
+    cursor: copy;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .model-zone:hover{
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.9);
+  }
+  .word-btn.selected,
+  .draggable-chip.selected{
+    background: #dceeff;
+    border-color: #2a6fb0;
+    color: #1a4a80;
+    box-shadow: 0 0 0 3px rgba(42,111,176,0.22);
+    transform: scale(1.03);
+  }
+  .tablet-slot.tap-ready{
+    background: #e8f4ff;
+    border-color: #2a6fb0;
+    border-style: solid;
+    cursor: pointer;
+  }
+  .tablet-slot.tap-ready:hover{
+    background: #d4ecff;
+  }
+  @keyframes pulseBtnReady{
+    0%,100%{ box-shadow: 0 10px 20px rgba(20,38,62,0.18); }
+    50%{ box-shadow: 0 10px 28px rgba(20,38,62,0.3), 0 0 0 5px rgba(255,219,104,0.35); }
+  }
+  .board-next-btn.ready{
+    animation: pulseBtnReady 1.8s ease-in-out infinite;
+  }
+  .phrase-meteor.matched{
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  .sentence-frame-card{
+    flex: 1;
+    background: rgba(255,255,255,0.48);
+    border: 2px dashed rgba(192,212,232,0.72);
+    border-radius: 20px;
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(14,36,72,0.08);
+    backdrop-filter: blur(4px);
+  }
+  .sentence-frame-card .earth-frame{
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--navy);
+    line-height: 1.2;
+  }
+  .sentence-frame-card .earth-frame .blank{
+    min-width: 110px;
+    height: 22px;
+    border-bottom: 3px solid #9ab6cf;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .sentence-frame-card.tap-ready{
+    border-color: #2a6fb0;
+    border-style: solid;
+    background: rgba(220,238,255,0.58);
+    box-shadow: 0 0 0 4px rgba(42,111,176,0.18), 0 8px 24px rgba(14,36,72,0.1);
+  }
+  .sentence-frame-card.correct{
+    background: rgba(236,251,241,0.58);
+    border-color: #7fd69d;
+    border-style: solid;
+  }
+  .sentence-frame-card.correct .earth-frame{ color: var(--green); }
+  .sentence-frame-card.wrong{
+    background: rgba(253,232,235,0.62);
+    border-color: #f29aa7;
+    border-style: solid;
+    animation: shakeSlight 0.35s ease;
+  }
+  @keyframes shakeSlight{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-6px); }
+    75%{ transform:translateX(6px); }
+  }
+  @keyframes craterExpand{
+    0%  { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+    60% { transform: translate(-50%,-50%) scale(1.3); opacity: 0.7; }
+    100%{ transform: translate(-50%,-50%) scale(2);   opacity: 0; }
+  }
+  .crater-burst{
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 88px; height: 88px;
+    pointer-events: none;
+    animation: craterExpand 0.85s ease-out forwards;
+    transform: translate(-50%, -50%);
+    background: url("assets/impact.png") center center / contain no-repeat;
+    filter: drop-shadow(0 6px 14px rgba(32,18,8,0.28));
+  }
+  .crater-burst.persistent{
+    animation: none;
+    opacity: 0.92;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .ground-impact{
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    pointer-events: none;
+    z-index: 6;
+    transform: translate(-50%, -50%);
+  }
+  .sentence-impact-fall{
+    transition: left 0.7s cubic-bezier(.22,1,.36,1), top 0.7s cubic-bezier(.22,1,.36,1), transform 0.7s cubic-bezier(.22,1,.36,1), opacity 0.7s ease;
+  }
+  @keyframes slideInUp{
+    from{ opacity:0; transform:translateY(24px); }
+    to{   opacity:1; transform:translateY(0); }
+  }
+  .slide-in{ animation: slideInUp 0.45s cubic-bezier(.22,1,.36,1) both; }
+  .float-card.small.phrase-meteor.selected-meteor{
+    filter: drop-shadow(0 0 14px rgba(255,219,104,0.95));
+  }
+  @media (max-width: 1180px){
+    .workspace{ grid-template-columns: 1fr; }
+    .board-panel{ border-right: none; border-bottom: 2px solid #d6e1ec; }
+    .board-stage-wrap{ min-height: 360px; }
+    body{ overflow: auto; height: auto; }
+    .app{ height: auto; min-height: 100vh; }
+    .constellation.word-cloud{ min-height: 520px; }
+  }
+  @media (max-width: 900px){
+    .word-grid{ grid-template-columns: 1fr 1fr; }
+    .tablet-match-grid{ grid-template-columns: 1fr; }
+    .tablet-sentence-grid{ grid-template-columns: 1fr; }
+    .tablet-frame{ max-height: 640px; }
+    .constellation.word-cloud{ min-height: 420px; }
+    .scene-caption{
+      font-size: 11px;
+      padding: 7px 12px;
+      max-width: 56%;
+      text-align: center;
+    }
+    .board-controls .btn-primary{
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+  }
+  @media (max-width: 720px){
+    .constellation.word-cloud{ min-height: 340px; }
+    .teacher-card.word-float{ transform: scale(calc(0.96 * var(--word-stage-scale))); }
+    .board-zone{
+      padding: 62px 20px 22px 78px;
+    }
+    .scene-caption{
+      max-width: 48%;
+      font-size: 10px;
+    }
+  }
+  .fall-in{
+    animation: fallIn 0.65s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes fallIn{
+    0%{ opacity:0; transform:translateY(-70px) scale(0.92); }
+    100%{ opacity:1; transform:translateY(0) scale(1); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="title-wrap">
+      <div class="title">ECP6 Reading Transfer</div>
+      <div class="subtitle">word -> phrase -> sentence</div>
+    </div>
+    <div class="stage-pills">
+      <div class="pill active" id="pill-word">1. Word Space</div>
+      <div class="pill" id="pill-phrase">2. Phrase Sky</div>
+      <div class="pill" id="pill-sentence">3. Sentence Earth</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn-light" id="readAllBtn">Read Aloud</button>
+      <button class="btn-light" id="resetBtn">Reset Stage</button>
+      
+    </div>
+  </div>
+
+  <div class="workspace">
+    <section class="board-panel">
+      <div class="panel-head">TEACHER BOARD</div>
+      <div class="board-stage-wrap">
+        <div class="board-stage scene-space" id="boardStage">
+          <div class="altitude-markers">
+            <div class="altitude">Word Space</div>
+            <div class="altitude">Phrase Sky</div>
+            <div class="altitude">Sentence Earth</div>
+          </div>
+          <div class="scene-caption" id="sceneCaption">Teacher models the target words first.</div>
+          <div class="board-zone" id="boardZone"></div>
+          <div class="board-note" id="boardNote"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tablet-panel">
+      <div class="panel-head">STUDENT TABLET</div>
+      <div class="tablet-body">
+        <div class="tablet-frame">
+          <div class="tablet-screen">
+            <div class="tablet-top">
+              <div class="tablet-stage" id="tabletStageLabel">Word Reading</div>
+              <div class="tablet-progress" id="tabletProgress">0 / 5 complete</div>
+            </div>
+            <div class="tablet-hint" id="tabletHint"></div>
+            <div class="tablet-area" id="tabletArea"></div>
+            <div class="tablet-actions">
+              <button class="btn-light" id="tabletReadBtn">Read Stage</button>
+            </div>
+          </div>
+          <div class="footer-note">Read words, build phrases, and read full sentences.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const STAGES = ["word", "phrase", "sentence"];
+const CLASS_SIZE = 12;
+
+const ITEMS = [
+  {
+    id: "bag",
+    word: "bag",
+    phraseLead: "pack a",
+    phrase: "pack a bag",
+    sentenceLead: "bedroom",
+    objectEmoji: "🛏️",
+    sentenceFrame: "In my room, I can",
+    sentence: "In my room, I can pack a bag."
+  },
+  {
+    id: "bat",
+    word: "bat",
+    phraseLead: "swing a",
+    phrase: "swing a bat",
+    sentenceLead: "ball field",
+    objectEmoji: "⚾",
+    sentenceFrame: "At the game, I can",
+    sentence: "At the game, I can swing a bat."
+  },
+  {
+    id: "boat",
+    word: "boat",
+    phraseLead: "ride a",
+    phrase: "ride a boat",
+    sentenceLead: "lake dock",
+    objectEmoji: "🚤",
+    sentenceFrame: "On the lake, we can",
+    sentence: "On the lake, we can ride a boat."
+  },
+  {
+    id: "bean",
+    word: "bean",
+    phraseLead: "eat a",
+    phrase: "eat a bean",
+    sentenceLead: "lunch table",
+    objectEmoji: "🍽️",
+    sentenceFrame: "At lunch, I can",
+    sentence: "At lunch, I can eat a bean."
+  },
+  {
+    id: "bear",
+    word: "bear",
+    phraseLead: "spot a",
+    phrase: "spot a bear",
+    sentenceLead: "forest tree",
+    objectEmoji: "🌲",
+    sentenceFrame: "In the woods, we can",
+    sentence: "In the woods, we can spot a bear."
+  }
+];
+
+// LEVEL 1 VISUAL POSITIONS LOCKED.
+const WORD_FLOAT_POSITIONS = [
+  { left: "4%", top: "4%" },
+  { left: "33%", top: "0%" },
+  { left: "66%", top: "8%" },
+  { left: "8%", top: "46%" },
+  { left: "56%", top: "54%" }
+];
+
+// LEVEL 2 METEOR VISUAL POSITIONS LOCKED.
+const PHRASE_FLOAT_POSITIONS = [
+  { left: "4%",  top: "12%" },
+  { left: "30%", top: "6%"  },
+  { left: "62%", top: "2%"  },
+  { left: "18%", top: "65%" },
+  { left: "52%", top: "44%" }
+];
+
+const TABLET_WORD_FLOAT_POSITIONS = [
+  { left: "2%",  top: "2%"  },
+  { left: "41%", top: "-3%"  },
+  { left: "79%", top: "8%" },
+  { left: "9%", top: "43%" },
+  { left: "61%", top: "53%" }
+];
+
+const TABLET_PHRASE_FLOAT_POSITIONS = [
+  { left: "4%",  top: "9%" },
+  { left: "36%", top: "2%"  },
+  { left: "76%", top: "7%" },
+  { left: "9%", top: "57%" },
+  { left: "56%", top: "45%" }
+];
+
+const TABLET_PHRASE_CLOUD_POSITIONS = [
+  { left: "24%", top: "19%" },
+  { left: "73%", top: "18%" },
+  { left: "23%", top: "51%" },
+  { left: "72%", top: "50%" },
+  { left: "48%", top: "76%" }
+];
+
+const SENTENCE_METEOR_POSITIONS = [
+  { left: "5%",  top: "3%"  },
+  { left: "34%", top: "1%"  },
+  { left: "64%", top: "5%"  },
+  { left: "12%", top: "28%" },
+  { left: "58%", top: "26%" }
+];
+
+const TABLET_SENTENCE_METEOR_POSITIONS = [
+  { left: "4%",  top: "14%"  },
+  { left: "27%", top: "2%"  },
+  { left: "74%", top: "10%"  },
+  { left: "12%", top: "40%" },
+  { left: "57%", top: "24%" }
+];
+
+const TABLET_SENTENCE_IMPACT_POSITIONS = [
+  { left: "13%", top: "82%" },
+  { left: "31%", top: "80%" },
+  { left: "49%", top: "83%" },
+  { left: "68%", top: "80%" },
+  { left: "84%", top: "83%" }
+];
+
+const SENTENCE_IMPACT_POSITIONS = [
+  { left: "16%", top: "60%" },
+  { left: "34%", top: "57%" },
+  { left: "52%", top: "61%" },
+  { left: "69%", top: "58%" },
+  { left: "84%", top: "62%" }
+];
+
+// LEVEL 2 CLOUD VISUAL POSITIONS LOCKED.
+const PHRASE_CLOUD_POSITIONS = [
+  { left: "6%",  top: "2%"  },
+  { left: "54%", top: "18%" },
+  { left: "8%",  top: "38%" },
+  { left: "56%", top: "56%" },
+  { left: "82%", top: "48%" }
+];
+
+const state = {
+  stage: "word",
+  practiced: {},
+  phraseMatches: {},
+  sentenceMatches: {},
+  boardWordSolved: {},
+  boardPhraseMatches: {},
+  boardSentenceMatches: {},
+  boardWordCounts: {},
+  boardPhraseCounts: {},
+  boardSentenceCounts: {},
+  boardWrongPhrase: null,
+  wrongPhrase: null,
+  wrongSentence: null,
+  phonicsProfileLog: [],
+  tabletReleasedStage: null,
+  transitioning: false,
+  animateIn: false,
+  selectedWordId: null,
+  selectedPhraseId: null,
+  selectedSentenceMeteor: null,
+  fallingSentenceMeteor: null,
+  wrongSentenceSlot: null,
+  activeImpactPoint: null,
+  craterMarks: [],
+  showCompleteSlot: null,
+  activeSentenceSlots: [null, null],
+  sentenceQueue: [],
+  boardSelectedSentenceMeteor: null,
+  boardFallingSentenceMeteor: null,
+  boardWrongSentenceSlot: null,
+  boardActiveImpactPoint: null,
+  boardCraterMarks: [],
+  boardShowCompleteSlot: null,
+  boardActiveSentenceSlots: [null, null],
+  boardSentenceQueue: [],
+  tabletFallingPhraseId: null
+};
+
+for (const item of ITEMS) {
+  state.practiced[item.id] = false;
+  state.boardWordSolved[item.id] = false;
+  state.boardPhraseMatches[item.id] = null;
+  state.boardSentenceMatches[item.id] = null;
+  state.boardWordCounts[item.id] = 0;
+  state.boardPhraseCounts[item.id] = 0;
+  state.boardSentenceCounts[item.id] = 0;
+}
+
+const boardStage = document.getElementById("boardStage");
+const boardZone = document.getElementById("boardZone");
+const boardNote = document.getElementById("boardNote");
+const altitudeMarkers = document.querySelector(".altitude-markers");
+const sceneCaption = document.getElementById("sceneCaption");
+const tabletArea = document.getElementById("tabletArea");
+const tabletHint = document.getElementById("tabletHint");
+const tabletStageLabel = document.getElementById("tabletStageLabel");
+const tabletProgress = document.getElementById("tabletProgress");
+const nextStageBtn = document.getElementById("nextStageBtn");
+const readAllBtn = document.getElementById("readAllBtn");
+const tabletReadBtn = document.getElementById("tabletReadBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 0.78;
+  utterance.pitch = 1.04;
+  speechSynthesis.speak(utterance);
+}
+
+function currentStageIndex() {
+  return STAGES.indexOf(state.stage);
+}
+
+function stageComplete() {
+  if (state.stage === "word") {
+    return ITEMS.every((item) => state.boardWordSolved[item.id]);
+  }
+  if (state.stage === "phrase") {
+    return ITEMS.every((item) => state.boardPhraseMatches[item.id] === item.id);
+  }
+  return ITEMS.every((item) => !!state.boardSentenceMatches[item.id]);
+}
+
+function setStage(stage) {
+  state.stage = stage;
+  state.tabletReleasedStage = null;
+  state.wrongPhrase = null;
+  state.boardWrongPhrase = null;
+  state.wrongSentence = null;
+  state.boardWrongSentenceSlot = null;
+  state.selectedWordId = null;
+  state.selectedPhraseId = null;
+  state.selectedSentenceMeteor = null;
+  state.boardSelectedSentenceMeteor = null;
+  render();
+}
+
+function transitionClass(index = 0) {
+  if (state.transitioning) {
+    return "fall-out";
+  }
+  if (state.animateIn) {
+    return "fall-in";
+  }
+  return "";
+}
+
+function goNextStage() {
+  const allowAdvance = state.stage === "phrase" ? true : stageComplete();
+  if (!allowAdvance || state.transitioning) return;
+  const index = currentStageIndex();
+  if (index < STAGES.length - 1) {
+    if (STAGES[index + 1] === "sentence") initSentenceStage();
+    state.tabletReleasedStage = null;
+    state.transitioning = true;
+    try { render(); } catch(e) { console.error("transition render:", e); }
+    setTimeout(() => {
+      state.stage = STAGES[index + 1];
+      state.transitioning = false;
+      state.animateIn = true;
+      state.wrongPhrase = null;
+      state.boardWrongPhrase = null;
+      state.wrongSentence = null;
+      state.boardWrongSentenceSlot = null;
+      state.selectedWordId = null;
+      state.selectedPhraseId = null;
+      state.selectedSentenceMeteor = null;
+      state.boardSelectedSentenceMeteor = null;
+      state.tabletFallingPhraseId = null;
+      try {
+        render();
+      } catch(e) {
+        boardNote.textContent = "ERR: " + e.message;
+        console.error("render error:", e);
+      }
+      setTimeout(() => {
+        state.animateIn = false;
+        try { render(); } catch(e) { console.error(e); }
+      }, 760);
+    }, 980);
+  }
+}
+
+function resetStage() {
+  state.tabletReleasedStage = null;
+  if (state.stage === "word") {
+    for (const item of ITEMS) {
+      state.practiced[item.id] = false;
+      state.boardWordSolved[item.id] = false;
+      state.boardWordCounts[item.id] = 0;
+    }
+  } else if (state.stage === "phrase") {
+    state.phraseMatches = {};
+    state.boardPhraseMatches = {};
+    state.wrongPhrase = null;
+    state.boardWrongPhrase = null;
+    state.selectedWordId = null;
+    state.tabletFallingPhraseId = null;
+    for (const item of ITEMS) {
+      state.boardPhraseCounts[item.id] = 0;
+    }
+  } else {
+    initSentenceStage();
+  }
+  render();
+}
+
+function readStage() {
+  if (state.stage === "word") {
+    speak(ITEMS.map((item) => item.word).join(", "));
+  } else if (state.stage === "phrase") {
+    const lines = ITEMS.map((item) => item.phrase).join(". ");
+    speak(lines);
+  } else {
+    const lines = ITEMS.map((item) => item.sentence).join(" ");
+    speak(lines);
+  }
+}
+
+function sendToTablets() {
+  if (state.transitioning) return;
+  state.tabletReleasedStage = state.stage;
+  render();
+}
+
+function markPracticed(id) {
+  if (state.stage !== "word" || state.transitioning) return;
+  state.practiced[id] = true;
+  state.boardWordCounts[id] = Math.min(CLASS_SIZE, state.boardWordCounts[id] + 1);
+  const item = ITEMS.find((entry) => entry.id === id);
+  if (item) speak(item.word);
+  render();
+}
+
+function boardModelWord(id) {
+  if (state.stage !== "word" || state.transitioning) return;
+  const item = ITEMS.find((entry) => entry.id === id);
+  if (!item) return;
+  state.boardWordSolved[id] = true;
+  speak(item.word);
+  render();
+}
+
+function boardPlacePhrase(id) {
+  if (state.stage !== "phrase" || state.transitioning) return;
+  const item = ITEMS.find((entry) => entry.id === id);
+  // Animate the meteor falling before state update hides it
+  const meteorWrap = document.querySelector(`[data-meteor-id="${id}"]`);
+  if (meteorWrap) {
+    meteorWrap.style.transition = "none";
+    meteorWrap.classList.add("fall-out");
+  }
+  setTimeout(() => {
+      state.boardPhraseMatches[id] = id;
+      state.boardWrongPhrase = null;
+      if (item) speak(item.phrase);
+      render();
+  }, 500);
+}
+
+function boardPlaceSentence(id) {
+  if (state.stage !== "sentence" || state.transitioning) return;
+  state.boardSentenceMatches[id] = id;
+  state.boardWrongSentenceSlot = null;
+  const item = ITEMS.find((entry) => entry.id === id);
+  if (item) speak(item.sentence);
+  render();
+}
+
+function completionText(count) {
+  return `${count}/${CLASS_SIZE}`;
+}
+
+function updateWordStageScale() {
+  const root = document.documentElement;
+  const width = boardStage ? boardStage.clientWidth : window.innerWidth;
+  let scale = 1;
+  let counterOffset = -276;
+  let meteorSize = 900;
+  let shadowWidth = 360;
+  let shadowHeight = 82;
+
+  if (width <= 760) {
+    scale = 0.52;
+    counterOffset = -116;
+    meteorSize = 430;
+    shadowWidth = 150;
+    shadowHeight = 36;
+  } else if (width <= 920) {
+    scale = 0.66;
+    counterOffset = -156;
+    meteorSize = 560;
+    shadowWidth = 210;
+    shadowHeight = 48;
+  } else if (width <= 1120) {
+    scale = 0.82;
+    counterOffset = -212;
+    meteorSize = 700;
+    shadowWidth = 280;
+    shadowHeight = 62;
+  } else if (width <= 1320) {
+    scale = 0.94;
+    counterOffset = -246;
+    meteorSize = 810;
+    shadowWidth = 320;
+    shadowHeight = 72;
+  }
+
+  root.style.setProperty("--word-stage-scale", String(scale));
+  root.style.setProperty("--word-stage-counter-offset", `${counterOffset}px`);
+  root.style.setProperty("--word-stage-meteor-size", `${meteorSize}px`);
+  root.style.setProperty("--word-stage-shadow-width", `${shadowWidth}px`);
+  root.style.setProperty("--word-stage-shadow-height", `${shadowHeight}px`);
+}
+
+function initSentenceStage() {
+  state.sentenceMatches = {};
+  state.boardSentenceMatches = {};
+  state.selectedSentenceMeteor = null;
+  state.fallingSentenceMeteor = null;
+  state.wrongSentenceSlot = null;
+  state.activeImpactPoint = null;
+  state.craterMarks = [];
+  state.showCompleteSlot = null;
+  state.sentenceQueue = ITEMS.map((item) => item.id);
+  state.activeSentenceSlots = [
+    state.sentenceQueue.shift() || null,
+    state.sentenceQueue.shift() || null
+  ];
+  state.boardSelectedSentenceMeteor = null;
+  state.boardFallingSentenceMeteor = null;
+  state.boardWrongSentenceSlot = null;
+  state.boardActiveImpactPoint = null;
+  state.boardCraterMarks = [];
+  state.boardShowCompleteSlot = null;
+  state.boardSentenceQueue = ITEMS.map((item) => item.id);
+  state.boardActiveSentenceSlots = [
+    state.boardSentenceQueue.shift() || null,
+    state.boardSentenceQueue.shift() || null
+  ];
+  for (const item of ITEMS) {
+    state.boardSentenceCounts[item.id] = 0;
+  }
+}
+
+function refillSentenceSlots() {
+  for (let i = 0; i < state.activeSentenceSlots.length; i += 1) {
+    if (!state.activeSentenceSlots[i]) {
+      state.activeSentenceSlots[i] = state.sentenceQueue.shift() || null;
+    }
+  }
+}
+
+function refillBoardSentenceSlots() {
+  for (let i = 0; i < state.boardActiveSentenceSlots.length; i += 1) {
+    if (!state.boardActiveSentenceSlots[i]) {
+      state.boardActiveSentenceSlots[i] = state.boardSentenceQueue.shift() || null;
+    }
+  }
+}
+
+function selectSentenceMeteor(id) {
+  if (state.stage !== "sentence" || state.transitioning) return;
+  if (state.fallingSentenceMeteor) return;
+  state.selectedSentenceMeteor = state.selectedSentenceMeteor === id ? null : id;
+  render();
+}
+
+function selectBoardSentenceMeteor(id) {
+  if (state.stage !== "sentence" || state.transitioning) return;
+  if (state.boardFallingSentenceMeteor) return;
+  state.boardSelectedSentenceMeteor = state.boardSelectedSentenceMeteor === id ? null : id;
+  render();
+}
+
+function targetSentenceSlot(slot) {
+  if (state.stage !== "sentence" || state.transitioning) return;
+  const sentenceId = state.activeSentenceSlots[slot];
+  const selectedId = state.selectedSentenceMeteor;
+  if (!sentenceId || !selectedId) return;
+  const item = ITEMS.find((entry) => entry.id === sentenceId);
+  if (!item) return;
+
+  if (sentenceId === selectedId) {
+    const impactPoint = TABLET_SENTENCE_IMPACT_POSITIONS[state.craterMarks.length % TABLET_SENTENCE_IMPACT_POSITIONS.length];
+    state.fallingSentenceMeteor = selectedId;
+    state.activeImpactPoint = impactPoint;
+    state.wrongSentenceSlot = null;
+    state.selectedSentenceMeteor = null;
+    speak(item.sentence);
+    render();
+    setTimeout(() => {
+      state.sentenceMatches[sentenceId] = selectedId;
+      state.boardSentenceCounts[sentenceId] = Math.min(CLASS_SIZE, (state.boardSentenceCounts[sentenceId] || 0) + 1);
+      state.craterMarks.push({
+        id: `${sentenceId}-${state.craterMarks.length}`,
+        left: impactPoint.left,
+        top: impactPoint.top
+      });
+      state.showCompleteSlot = slot;
+      state.fallingSentenceMeteor = null;
+      state.activeImpactPoint = null;
+      render();
+    }, 700);
+    setTimeout(() => {
+      state.activeSentenceSlots[slot] = null;
+      state.showCompleteSlot = null;
+      refillSentenceSlots();
+      render();
+    }, 1250);
+    return;
+  }
+
+  logProfileError("sentence", sentenceId, selectedId);
+  state.wrongSentenceSlot = slot;
+  render();
+  setTimeout(() => {
+    state.wrongSentenceSlot = null;
+    render();
+  }, 550);
+}
+
+function targetBoardSentenceSlot(slot) {
+  if (state.stage !== "sentence" || state.transitioning) return;
+  const sentenceId = state.boardActiveSentenceSlots[slot];
+  const selectedId = state.boardSelectedSentenceMeteor;
+  if (!sentenceId || !selectedId) return;
+  const item = ITEMS.find((entry) => entry.id === sentenceId);
+  if (!item) return;
+
+  if (sentenceId === selectedId) {
+    const impactPoint = SENTENCE_IMPACT_POSITIONS[state.boardCraterMarks.length % SENTENCE_IMPACT_POSITIONS.length];
+    state.boardFallingSentenceMeteor = selectedId;
+    state.boardActiveImpactPoint = impactPoint;
+    state.boardWrongSentenceSlot = null;
+    state.boardSelectedSentenceMeteor = null;
+    speak(item.sentence);
+    render();
+    setTimeout(() => {
+      state.boardSentenceMatches[sentenceId] = selectedId;
+      state.boardShowCompleteSlot = slot;
+      state.boardFallingSentenceMeteor = null;
+      state.boardActiveImpactPoint = null;
+      state.boardCraterMarks.push({
+        id: `board-${sentenceId}-${state.boardCraterMarks.length}`,
+        left: impactPoint.left,
+        top: impactPoint.top
+      });
+      render();
+    }, 700);
+    setTimeout(() => {
+      state.boardActiveSentenceSlots[slot] = null;
+      state.boardShowCompleteSlot = null;
+      refillBoardSentenceSlots();
+      render();
+    }, 1250);
+    return;
+  }
+
+  state.boardWrongSentenceSlot = slot;
+  render();
+  setTimeout(() => {
+    state.boardWrongSentenceSlot = null;
+    render();
+  }, 550);
+}
+
+function tapSelectWord(id) {
+  if (state.stage !== "phrase" || state.transitioning) return;
+  state.selectedWordId = state.selectedWordId === id ? null : id;
+  render();
+}
+
+function tapTabletPhraseSlot(slotId) {
+  if (state.stage !== "phrase" || state.transitioning || !state.selectedWordId) return;
+  const wordId = state.selectedWordId;
+  const item = ITEMS.find((entry) => entry.id === wordId);
+  if (!item) return;
+
+  if (slotId === wordId) {
+    state.tabletFallingPhraseId = wordId;
+    state.wrongPhrase = null;
+    state.selectedWordId = null;
+    speak(item.phrase);
+    render();
+    setTimeout(() => {
+      state.phraseMatches[wordId] = slotId;
+      state.boardPhraseCounts[wordId] = Math.min(CLASS_SIZE, state.boardPhraseCounts[wordId] + 1);
+      state.tabletFallingPhraseId = null;
+      render();
+    }, 500);
+    return;
+  }
+
+  logProfileError("phrase", slotId, wordId);
+  state.wrongPhrase = slotId;
+  render();
+  setTimeout(() => {
+    state.wrongPhrase = null;
+    render();
+  }, 550);
+}
+
+function tabletDropWordOnPhrase(event, slotId) {
+  if (state.stage !== "phrase" || state.transitioning) return;
+  event.preventDefault();
+  const payload = parseDropData(event);
+  const wordId = payload.id;
+  const item = ITEMS.find((entry) => entry.id === wordId);
+  if (!item) return;
+
+  if (slotId === wordId) {
+    state.tabletFallingPhraseId = wordId;
+    state.wrongPhrase = null;
+    state.selectedWordId = null;
+    speak(item.phrase);
+    render();
+    setTimeout(() => {
+      state.phraseMatches[wordId] = slotId;
+      state.boardPhraseCounts[wordId] = Math.min(CLASS_SIZE, state.boardPhraseCounts[wordId] + 1);
+      state.tabletFallingPhraseId = null;
+      render();
+    }, 500);
+    return;
+  }
+
+  logProfileError("phrase", slotId, wordId);
+  state.wrongPhrase = slotId;
+  render();
+  setTimeout(() => {
+    state.wrongPhrase = null;
+    render();
+  }, 550);
+}
+
+function tabletDropSentenceSlot(event, slot) {
+  if (state.stage !== "sentence" || state.transitioning) return;
+  event.preventDefault();
+  const payload = parseDropData(event);
+  if (!payload.id) return;
+  state.selectedSentenceMeteor = payload.id;
+  targetSentenceSlot(slot);
+}
+
+function renderAltitude(label) {
+  altitudeMarkers.innerHTML = `<div class="altitude">${label}</div>`;
+}
+
+function boardControlsHtml() {
+  const complete = stageComplete();
+  const phraseBypass = state.stage === "phrase";
+  const disabled = (!complete && !phraseBypass) || state.stage === "sentence" || state.transitioning ? "disabled" : "";
+  const readyClass = (complete || phraseBypass) && state.stage !== "sentence" && !state.transitioning ? "ready" : "";
+  const label = state.stage === "sentence" ? "All Done ✓" : "Move Down ↓";
+  const tabletLabel = state.tabletReleasedStage === state.stage ? "Resend to Tablets" : "Send to Tablets";
+  const tabletReadyClass = state.tabletReleasedStage === state.stage ? "ready" : "";
+  const tabletDisabled = state.transitioning ? "disabled" : "";
+  return `<div class="board-controls">
+    <button class="btn-light ${tabletReadyClass}" onclick="sendToTablets()" ${tabletDisabled}>${tabletLabel}</button>
+    <button class="btn-primary board-next-btn ${readyClass}" onclick="goNextStage()" ${disabled}>${label}</button>
+  </div>`;
+}
+
+function renderTabletReleasedWordScene() {
+  return `
+    <div class="tablet-scene-shell">
+      <div class="tablet-scene scene-space">
+        <div class="tablet-scene-zone">
+          <div class="constellation word-cloud">
+            ${ITEMS.map((item, index) => `
+              <div class="teacher-card word-float" style="left:${TABLET_WORD_FLOAT_POSITIONS[index].left}; top:${TABLET_WORD_FLOAT_POSITIONS[index].top};">
+                <div class="float-card meteor-chip word-meteor clickable ${state.practiced[item.id] ? "done" : ""}"
+                     onclick="markPracticed('${item.id}')">${item.word}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTabletReleasedPhraseScene() {
+  return `
+    <div class="tablet-scene-shell">
+      <div class="tablet-scene scene-sky">
+        <div class="tablet-scene-zone">
+          <div class="phrase-cloud-field">
+            ${ITEMS.map((item) => {
+              const correct = state.phraseMatches[item.id] === item.id;
+    const wrong = state.wrongPhrase === item.id;
+              const tapReady = !!state.selectedWordId && !correct;
+              return `
+                <div class="match-slot phrase-cloud-slot phrase-cloud ${correct ? "correct" : wrong ? "wrong" : tapReady ? "tap-ready" : ""}"
+                     style="left:${TABLET_PHRASE_CLOUD_POSITIONS[ITEMS.indexOf(item)].left}; top:${TABLET_PHRASE_CLOUD_POSITIONS[ITEMS.indexOf(item)].top};"
+                     ondragover="allowDrop(event)"
+                     ondrop="tabletDropWordOnPhrase(event, '${item.id}')"
+                     onclick="tapTabletPhraseSlot('${item.id}')">
+                  <span class="slot-text">${item.phraseLead} ${correct ? item.word : '<span class="blank"></span>'}</span>
+                </div>
+              `;
+            }).join("")}
+          </div>
+          <div class="tablet-stage-overlay">
+            ${ITEMS.map((item, index) => {
+              const matched = state.phraseMatches[item.id] === item.id;
+              const falling = state.tabletFallingPhraseId === item.id;
+              return `
+                <div class="teacher-card phrase-float"
+                     style="left:${TABLET_PHRASE_FLOAT_POSITIONS[index].left}; top:${TABLET_PHRASE_FLOAT_POSITIONS[index].top}; opacity:${matched ? '0' : '1'}; pointer-events:${matched ? 'none' : 'all'};">
+                  <div class="float-card small phrase-meteor clickable ${state.selectedWordId === item.id ? 'selected-meteor' : ''} ${falling ? 'fall-out' : ''}"
+                       draggable="${!matched}"
+                       ondragstart="onDragStart(event, '${item.id}')"
+                       onclick="tapSelectWord('${item.id}')">${item.word}</div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTabletReleasedSentenceScene() {
+  return `
+    <div class="tablet-scene-shell">
+      <div class="tablet-scene scene-earth">
+        <div class="tablet-scene-zone">
+          <div class="constellation" style="position:absolute;left:0;right:0;top:0;bottom:92px;min-height:0;">
+            ${ITEMS.map((item, index) => {
+              const matched = !!state.sentenceMatches[item.id];
+              const selected = state.selectedSentenceMeteor === item.id;
+              const falling = state.fallingSentenceMeteor === item.id;
+              const impactPos = falling && state.activeImpactPoint ? state.activeImpactPoint : null;
+              return `
+                <div class="teacher-card phrase-float"
+                     style="left:${impactPos ? impactPos.left : TABLET_SENTENCE_METEOR_POSITIONS[index].left}; top:${impactPos ? impactPos.top : TABLET_SENTENCE_METEOR_POSITIONS[index].top}; opacity:${matched ? '0' : '1'}; pointer-events:${matched ? 'none' : 'all'}; transition:left 0.7s cubic-bezier(.22,1,.36,1), top 0.7s cubic-bezier(.22,1,.36,1), opacity 0.45s ease;">
+                  <div class="float-card small phrase-meteor tablet-sentence-meteor clickable ${selected ? 'selected-meteor' : ''} ${falling ? 'sentence-impact-fall' : ''}"
+                       draggable="${!matched}"
+                       ondragstart="onDragStart(event, '${item.id}')"
+                       onclick="selectSentenceMeteor('${item.id}')">${item.phrase}</div>
+                </div>
+              `;
+            }).join("")}
+            ${state.activeImpactPoint ? `
+              <div class="ground-impact" style="left:${state.activeImpactPoint.left}; top:${state.activeImpactPoint.top};">
+                <div class="crater-burst"></div>
+              </div>
+            ` : ''}
+            ${state.craterMarks.map((mark) => `
+              <div class="ground-impact" style="left:${mark.left}; top:${mark.top};">
+                <div class="crater-burst persistent"></div>
+              </div>
+            `).join("")}
+          </div>
+          <div class="tablet-stage-bottom">
+            ${[0, 1].map(slot => {
+              const sentenceId = state.activeSentenceSlots[slot];
+              if (!sentenceId) return `<div style="flex:1;"></div>`;
+              const item = ITEMS.find(i => i.id === sentenceId);
+              const complete = !!state.sentenceMatches[sentenceId];
+              const wrong = state.wrongSentenceSlot === slot;
+              const showComplete = state.showCompleteSlot === slot;
+              const isTarget = !!state.selectedSentenceMeteor && !complete;
+              return `
+                <div class="sentence-frame-card ${complete ? 'correct' : wrong ? 'wrong' : isTarget ? 'tap-ready' : ''}"
+                     style="flex:1 1 0;"
+                     ondragover="allowDrop(event)"
+                     ondrop="tabletDropSentenceSlot(event, ${slot})"
+                     onclick="targetSentenceSlot(${slot})">
+                  <div class="earth-frame">${showComplete || complete
+                    ? item.sentence
+                    : item.sentenceFrame + ' <span class="blank"></span>.'}</div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function logProfileError(stage, expectedId, receivedId) {
+  state.phonicsProfileLog.push({
+    stage,
+    expectedId,
+    receivedId,
+    timestamp: new Date().toISOString()
+  });
+}
+
+function onDragStart(event, payload) {
+  event.dataTransfer.setData("application/json", JSON.stringify({ id: payload, source: "tablet" }));
+  event.dataTransfer.setData("text/plain", payload);
+}
+
+function onBoardDragStart(event, payload) {
+  event.dataTransfer.setData("application/json", JSON.stringify({ id: payload, source: "board" }));
+  event.dataTransfer.setData("text/plain", payload);
+}
+
+function parseDropData(event) {
+  const raw = event.dataTransfer.getData("application/json");
+  if (raw) {
+    try {
+      return JSON.parse(raw);
+    } catch (error) {}
+  }
+  return { id: event.dataTransfer.getData("text/plain"), source: "tablet" };
+}
+
+function boardDropWordModel(event) {
+  if (state.transitioning) return;
+  event.preventDefault();
+  const payload = parseDropData(event);
+  if (!payload.id) return;
+  boardModelWord(payload.id);
+}
+
+function allowDrop(event) {
+  if (state.transitioning) return;
+  event.preventDefault();
+}
+
+function dropWordOnPhrase(event, slotId) {
+  if (state.transitioning) return;
+  event.preventDefault();
+  const payload = parseDropData(event);
+  const wordId = payload.id;
+  const item = ITEMS.find((entry) => entry.id === wordId);
+  if (!item) return;
+  if (slotId === wordId) {
+    // Animate meteor fall if on board
+    const meteorWrap = document.querySelector(`[data-meteor-id="${wordId}"]`);
+    if (meteorWrap) {
+      meteorWrap.style.transition = "none";
+      meteorWrap.classList.add("fall-out");
+    }
+    setTimeout(() => {
+      state.boardPhraseMatches[wordId] = slotId;
+      state.boardWrongPhrase = null;
+      speak(item.phrase);
+      render();
+    }, 500);
+  } else {
+    state.boardWrongPhrase = slotId;
+    setTimeout(() => {
+      state.boardWrongPhrase = null;
+      render();
+    }, 550);
+    render();
+  }
+}
+
+function dropPhraseOnSentence(event, slotId) {
+  if (state.transitioning) return;
+  event.preventDefault();
+  const payload = parseDropData(event);
+  const phraseId = payload.id;
+  const item = ITEMS.find((entry) => entry.id === phraseId);
+  if (!item) return;
+  if (slotId === phraseId) {
+    state.sentenceMatches[phraseId] = slotId;
+    state.boardSentenceCounts[phraseId] = payload.source === "board"
+      ? CLASS_SIZE
+      : Math.min(CLASS_SIZE, state.boardSentenceCounts[phraseId] + 1);
+    state.wrongSentence = null;
+    speak(item.sentence);
+  } else {
+    logProfileError("sentence", slotId, phraseId);
+    state.wrongSentence = slotId;
+    setTimeout(() => {
+      state.wrongSentence = null;
+      render();
+    }, 550);
+  }
+  render();
+}
+
+function availableWords() {
+  return ITEMS.filter((item) => !state.phraseMatches[item.id]);
+}
+
+function availablePhrases() {
+  return ITEMS.filter((item) => !state.sentenceMatches[item.id]);
+}
+
+function updateStageChrome() {
+  document.getElementById("pill-word").className = "pill" + (state.stage === "word" ? " active" : stageDone("word") ? " done" : "");
+  document.getElementById("pill-phrase").className = "pill" + (state.stage === "phrase" ? " active" : stageDone("phrase") ? " done" : "");
+  document.getElementById("pill-sentence").className = "pill" + (state.stage === "sentence" ? " active" : stageDone("sentence") ? " done" : "");
+  if (nextStageBtn) { nextStageBtn.disabled = !stageComplete() || state.stage === "sentence" || state.transitioning; }
+}
+
+function stageDone(stage) {
+  if (stage === "word") return ITEMS.every((item) => state.boardWordSolved[item.id]);
+  if (stage === "phrase") return ITEMS.every((item) => state.boardPhraseMatches[item.id] === item.id);
+  return ITEMS.every((item) => !!state.boardSentenceMatches[item.id]);
+}
+
+function renderBoard() {
+  if (state.stage === "word") {
+    boardStage.className = "board-stage scene-space";
+    renderAltitude("Word Space");
+    sceneCaption.textContent = "Teacher models the target words first.";
+    boardNote.textContent = "Stage 1: model, decode together, and let students practice each word on their own tablets.";
+    boardZone.innerHTML = `
+      ${boardControlsHtml()}
+      <div class="constellation word-cloud">
+        ${ITEMS.map((item, index) => `
+          <div class="teacher-card word-float" style="left:${WORD_FLOAT_POSITIONS[index].left}; top:${WORD_FLOAT_POSITIONS[index].top};">
+            <div class="float-card meteor-chip word-meteor clickable ${transitionClass(index)} ${state.boardWordSolved[item.id] ? "done" : ""}"
+                 draggable="true"
+                 ondragstart="onBoardDragStart(event, '${item.id}')"
+                 onclick="boardModelWord('${item.id}')"
+                 style="animation-delay:${index * 70}ms">${item.word}</div>
+            <div class="teacher-count word-count">${completionText(state.boardWordCounts[item.id])}</div>
+          </div>
+        `).join("")}
+      </div>
+      <div class="board-help">Teacher can drag a word into the read zone or click it to model the word with sound.</div>
+      <div class="cloud-band">
+        <div class="model-zone" ondragover="allowDrop(event)" ondrop="boardDropWordModel(event)">Drop a word here to model it</div>
+      </div>
+      <div class="ground-band"></div>
+    `;
+    return;
+  }
+
+  if (state.stage === "phrase") {
+    boardStage.className = "board-stage scene-sky";
+    renderAltitude("Phrase Sky");
+    sceneCaption.textContent = "The words fall into phrases.";
+    boardNote.textContent = "Stage 2: students match each word into the right phrase frame, then read the completed phrases aloud.";
+    boardZone.innerHTML = `
+      ${boardControlsHtml()}
+      <div class="board-help" style="display:none;"></div>
+      <div class="cloud-band" style="align-content:flex-start; flex:1; min-height:0;">
+        <div class="phrase-cloud-field">
+          ${ITEMS.map((item) => {
+            const correct = state.boardPhraseMatches[item.id] === item.id;
+            const wrong = state.boardWrongPhrase === item.id;
+            return `
+              <div class="match-slot phrase-cloud-slot phrase-cloud ${transitionClass()} ${correct ? "correct" : wrong ? "wrong" : ""}"
+                   style="left:${PHRASE_CLOUD_POSITIONS[ITEMS.indexOf(item)].left}; top:${PHRASE_CLOUD_POSITIONS[ITEMS.indexOf(item)].top};"
+                   ondragover="allowDrop(event)"
+                   ondrop="dropWordOnPhrase(event, '${item.id}')">
+                <span class="slot-text">${item.phraseLead} ${correct ? item.word : '<span class="blank"></span>'}</span>
+                <div class="teacher-count phrase-count" style="position:absolute; bottom:10%; right:8%; top:auto; left:auto; transform:none; z-index:2;">${completionText(state.boardPhraseCounts[item.id])}</div>
+              </div>
+            `;
+          }).join("")}
+        </div>
+      </div>
+      <div class="ground-band"></div>
+      <div style="position:absolute;inset:0;pointer-events:none;z-index:30;">
+        ${ITEMS.map((item, index) => {
+          const matched = state.boardPhraseMatches[item.id] === item.id;
+          return `
+          <div class="teacher-card phrase-float"
+               data-meteor-id="${item.id}"
+               style="left:${PHRASE_FLOAT_POSITIONS[index].left}; top:${PHRASE_FLOAT_POSITIONS[index].top}; pointer-events:${matched ? 'none' : 'all'}; transition: opacity 0.5s ease; opacity:${matched ? '0' : '1'};">
+            <div class="float-card small phrase-meteor clickable ${transitionClass(index)}"
+                 draggable="${!matched}"
+                 ondragstart="onBoardDragStart(event, '${item.id}')"
+                 onclick="boardPlacePhrase('${item.id}')"
+                 style="animation-delay:${index * 70}ms">${item.word}</div>
+
+          </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+    return;
+  }
+
+  boardStage.className = "board-stage scene-earth";
+  renderAltitude("Sentence Earth");
+  sceneCaption.textContent = "The phrases land in full sentences.";
+  boardNote.textContent = "";
+  boardZone.innerHTML = `
+    ${boardControlsHtml()}
+    <div class="constellation" style="flex:1;min-height:0;position:relative;">
+      ${ITEMS.map((item, index) => {
+        const matched = !!state.boardSentenceMatches[item.id];
+        const selected = state.boardSelectedSentenceMeteor === item.id;
+        const falling = state.boardFallingSentenceMeteor === item.id;
+        const impactPos = falling && state.boardActiveImpactPoint ? state.boardActiveImpactPoint : null;
+        return `
+        <div class="teacher-card phrase-float"
+             data-sentence-meteor="${item.id}"
+             style="left:${impactPos ? impactPos.left : SENTENCE_METEOR_POSITIONS[index].left}; top:${impactPos ? impactPos.top : SENTENCE_METEOR_POSITIONS[index].top};
+                    pointer-events:${matched ? 'none' : 'all'};
+                    opacity:${matched ? '0' : '1'};
+                    transition: left 0.7s cubic-bezier(.22,1,.36,1), top 0.7s cubic-bezier(.22,1,.36,1), opacity 0.45s ease;
+                     z-index:${selected ? '20' : '10'};">
+            <div class="float-card small phrase-meteor clickable ${selected ? 'selected-meteor' : ''} ${transitionClass(index)} ${falling ? 'sentence-impact-fall' : ''}"
+                 onclick="selectBoardSentenceMeteor('${item.id}')"
+                 style="animation-delay:${index * 70}ms;">${item.phrase}</div>
+          </div>`;
+      }).join("")}
+      ${state.boardActiveImpactPoint ? `
+        <div class="ground-impact" style="left:${state.boardActiveImpactPoint.left}; top:${state.boardActiveImpactPoint.top};">
+          <div class="crater-burst"></div>
+        </div>
+      ` : ''}
+      ${state.boardCraterMarks.map((mark) => `
+        <div class="ground-impact" style="left:${mark.left}; top:${mark.top};">
+          <div class="crater-burst persistent"></div>
+        </div>
+      `).join("")}
+    </div>
+    <div style="position:absolute;left:16px;right:16px;bottom:12px;display:flex;gap:12px;align-items:flex-end;flex-shrink:0;min-height:auto;">
+      ${[0, 1].map(slot => {
+        const sentenceId = state.boardActiveSentenceSlots[slot];
+        if (!sentenceId) return `<div style="flex:1;"></div>`;
+        const item = ITEMS.find(i => i.id === sentenceId);
+        const complete = !!state.boardSentenceMatches[sentenceId];
+        const wrong = state.boardWrongSentenceSlot === slot;
+        const showComplete = state.boardShowCompleteSlot === slot;
+        const isTarget = !!state.boardSelectedSentenceMeteor && !complete;
+        return `
+        <div class="sentence-frame-card ${complete ? 'correct' : wrong ? 'wrong' : isTarget ? 'tap-ready' : ''}"
+             style="flex:1 1 0; align-self:flex-end;"
+             onclick="targetBoardSentenceSlot(${slot})">
+          <div class="earth-frame">${showComplete || complete
+            ? item.sentence
+            : item.sentenceFrame + ' <span class="blank"></span>.'}</div>
+        </div>`;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderTablet() {
+  if (state.tabletReleasedStage !== state.stage) {
+    tabletStageLabel.textContent = "";
+    tabletProgress.textContent = "";
+    tabletHint.textContent = "";
+    tabletReadBtn.style.visibility = "hidden";
+    tabletArea.innerHTML = `
+      <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+        <div style="font-size:30px;font-weight:900;color:var(--navy);letter-spacing:1px;text-align:center;">LOOK AT YOUR TEACHER</div>
+      </div>
+    `;
+    return;
+  }
+
+  tabletReadBtn.style.visibility = "visible";
+
+  if (state.stage === "word") {
+    const doneCount = ITEMS.filter((item) => state.practiced[item.id]).length;
+    tabletStageLabel.textContent = "Word Reading";
+    tabletProgress.textContent = `${doneCount} / ${ITEMS.length} practiced`;
+    tabletHint.textContent = "Listen, Read, and repeat.";
+    tabletArea.innerHTML = renderTabletReleasedWordScene();
+    return;
+  }
+
+  if (state.stage === "phrase") {
+    const doneCount = ITEMS.filter((item) => state.phraseMatches[item.id] === item.id).length;
+    tabletStageLabel.textContent = "Phrase Building";
+    tabletProgress.textContent = `${doneCount} / ${ITEMS.length} matched`;
+    tabletHint.textContent = "Tap or drag the same meteor words into the clouds.";
+    tabletArea.innerHTML = renderTabletReleasedPhraseScene();
+    return;
+  }
+
+  const doneCount = ITEMS.filter(item => !!state.sentenceMatches[item.id]).length;
+  tabletStageLabel.textContent = "Sentence Reading";
+  tabletProgress.textContent = `${doneCount} / ${ITEMS.length} matched`;
+  tabletHint.textContent = "Use the same falling phrase scene to complete the sentences.";
+  tabletArea.innerHTML = renderTabletReleasedSentenceScene();
+}
+
+function render() {
+  updateWordStageScale();
+  updateStageChrome();
+  renderBoard();
+  renderTablet();
+  window.render_game_to_text = renderGameToText;
+  window.advanceTime = advanceTime;
+}
+
+function renderGameToText() {
+  const payload = {
+    stage: state.stage,
+    practiced: { ...state.practiced },
+    phraseMatches: { ...state.phraseMatches },
+    sentenceMatches: { ...state.sentenceMatches },
+    boardWordCounts: { ...state.boardWordCounts },
+    boardPhraseCounts: { ...state.boardPhraseCounts },
+    boardSentenceCounts: { ...state.boardSentenceCounts },
+    phonicsProfileLog: state.phonicsProfileLog
+  };
+  return JSON.stringify(payload);
+}
+
+function advanceTime() {
+  render();
+}
+
+if (nextStageBtn) nextStageBtn.addEventListener("click", goNextStage);
+if (resetBtn) resetBtn.addEventListener("click", resetStage);
+if (readAllBtn) readAllBtn.addEventListener("click", readStage);
+if (tabletReadBtn) tabletReadBtn.addEventListener("click", readStage);
+window.addEventListener("resize", render);
+
+render();
+</script>
+</body>
+</html>

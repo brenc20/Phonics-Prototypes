@@ -1,0 +1,144 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phonics Prototypes</title>
+  <style>
+    :root {
+      --bg: #eef5fb;
+      --panel: #ffffff;
+      --line: #d6e1ec;
+      --navy: #12395a;
+      --blue: #2f80ed;
+      --gold: #ffdb68;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, #eef5fb 0%, #d8edf8 100%);
+      color: var(--navy);
+      min-height: 100vh;
+      padding: 32px 20px;
+    }
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .hero {
+      background: rgba(255,255,255,0.86);
+      border: 2px solid var(--line);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 18px 30px rgba(22,53,84,0.10);
+      margin-bottom: 22px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.1;
+    }
+    p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 14px 24px rgba(22,53,84,0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tag {
+      align-self: flex-start;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(47,128,237,0.14);
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+    .card p {
+      font-size: 14px;
+      color: #4f6982;
+      flex: 1;
+    }
+    .launch {
+      text-decoration: none;
+      text-align: center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--gold);
+      color: #17324f;
+      font-weight: 900;
+      border: 1px solid rgba(23,50,79,0.12);
+    }
+    .note {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      color: #4f6982;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>POLY Phonics Prototypes</h1>
+      <p>GitHub-ready launcher for the four main classroom and home-use proof-of-concept activities. Keep this page, the HTML files, the <code>assets</code> folder, and the <code>data</code> folder together in the same repo structure.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="tag">Classroom Tool</div>
+        <h2>Elkonin Boxes</h2>
+        <p>Teacher-led sound segmentation and guided new-word instruction prototype.</p>
+        <a class="launch" href="Elkonin_Classroom_Activity.html">Open Prototype</a>
+      </div>
+
+      <div class="card">
+        <div class="tag">Blending</div>
+        <h2>Continuous Blending Slider</h2>
+        <p>Picture-first blending and home practice concept with class and home views.</p>
+        <a class="launch" href="foundational_continuous_blending_slider.html">Open Prototype</a>
+      </div>
+
+      <div class="card">
+        <div class="tag">Reading Transfer</div>
+        <h2>Word -> Phrase -> Sentence Fall</h2>
+        <p>ECP6 reading transfer activity with board/tablet interaction and staged progression.</p>
+        <a class="launch" href="ecp6_reading_transfer_fall.html">Open Prototype</a>
+      </div>
+
+      <div class="card">
+        <div class="tag">Spelling Transfer</div>
+        <h2>Short A Train</h2>
+        <p>ECP6 sound-to-spelling train game with station building and final sentence transfer.</p>
+        <a class="launch" href="ecp6_spelling_transfer_train.html">Open Prototype</a>
+      </div>
+    </div>
+
+    <div class="note">
+      For GitHub Pages later: publish the <code>prototypes</code> folder contents together so the relative paths like <code>assets/...</code> and <code>data/...</code> stay intact.
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,811 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>POLY Elkonin Boxes</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --poly:#1F4E79;--accent:#2E75B6;--light:#DEEAF1;
+  --bg:#EEF2F7;--surface:#fff;--muted:#6c7a89;
+  --success:#27AE60;--warn:#E67E22;
+  --s0:#E74C3C;--s1:#2E75B6;--s2:#27AE60;--s3:#F39C12;--s4:#8E44AD;
+}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);
+  height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ?? HEADER ?? */
+.header{background:var(--poly);color:#fff;padding:10px 20px;
+  display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.brand{font-size:20px;font-weight:900;letter-spacing:3px;}
+.header-title{font-size:13px;opacity:.75;flex:1;}
+.word-pips{display:flex;gap:6px;align-items:center;}
+.pip{width:10px;height:10px;border-radius:50%;
+  background:rgba(255,255,255,.25);cursor:pointer;transition:all .2s;}
+.pip.active{background:#fff;transform:scale(1.3);}
+.pip.done{background:var(--accent);}
+
+/* ?? WORKSPACE ?? */
+.workspace{flex:1;display:flex;overflow:hidden;}
+.panel{flex:1;display:flex;flex-direction:column;min-width:0;}
+.panel-board{border-right:3px solid #cbd8e8;}
+.panel-header{padding:12px 20px;display:flex;align-items:center;gap:10px;
+  font-size:15px;font-weight:900;letter-spacing:2px;flex-shrink:0;}
+.board-hdr{background:var(--poly);color:#fff;}
+.tablet-hdr{background:#37474F;color:#fff;}
+.panel-content{flex:1;display:flex;align-items:center;
+  justify-content:center;padding:12px;overflow:hidden;}
+.panel-board .panel-content{background:#fff;}
+.panel-tablet .panel-content{background:var(--bg);}
+.teacher-note{background:#FFF8E1;border-top:2px solid #FFE082;
+  padding:7px 14px;font-size:11px;color:#7D6200;flex-shrink:0;
+  display:flex;gap:6px;align-items:flex-start;}
+
+/* ?? TABLET FRAME ??LANDSCAPE ?? */
+.tablet-wrap{
+  width:100%;max-width:520px;
+  height:340px;
+  background:#fff;border-radius:18px;border:4px solid #37474F;
+  display:flex;flex-direction:row;align-items:stretch;
+  position:relative;overflow:hidden;
+  box-shadow:0 8px 28px rgba(0,0,0,.18);}
+/* Side camera bump */
+.tablet-wrap::before{content:'';position:absolute;right:-1px;top:50%;
+  transform:translateY(-50%);width:5px;height:40px;
+  background:#37474F;border-radius:3px 0 0 3px;}
+.tablet-inner{flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:14px 20px;overflow:hidden;}
+
+/* ?? FOOTER ?? */
+.footer{background:#fff;border-top:2px solid #dce8f0;padding:10px 20px;
+  display:flex;align-items:center;gap:16px;flex-shrink:0;}
+.step-dots{display:flex;gap:5px;}
+.sdot{width:26px;height:5px;border-radius:3px;background:#dce8f0;transition:all .2s;}
+.sdot.active{background:var(--accent);}
+.sdot.done{background:var(--light);}
+.step-label{flex:1;text-align:center;}
+.step-name-txt{font-size:13px;font-weight:800;color:var(--poly);}
+.step-num-txt{font-size:11px;color:var(--muted);}
+.nav-btns{display:flex;gap:8px;}
+.nbtn{padding:8px 22px;border-radius:8px;border:none;font-size:13px;
+  font-weight:700;cursor:pointer;transition:all .15s;}
+.nbtn-p{background:var(--accent);color:#fff;}
+.nbtn-p:hover{background:var(--poly);}
+.nbtn-g{background:transparent;color:var(--muted);border:1.5px solid #dce8f0;}
+.nbtn-g:hover{background:var(--bg);}
+.nbtn:disabled{opacity:.3;pointer-events:none;}
+
+/* ?? SHAPES ?? */
+.shape-token{border-radius:50%;flex-shrink:0;transition:transform .15s;}
+.shape-token.lg{width:64px;height:64px;}
+.shape-token.sm{width:40px;height:40px;}
+.shape-token.xs{width:20px;height:20px;}
+
+/* ?? BOARD BOXES ?? */
+.boxes-row{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;}
+
+.bbox{width:120px;height:120px;border:3px solid var(--accent);border-radius:16px;
+  background:#fff;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;cursor:default;
+  opacity:0;transform:scale(0.6);
+  transition:opacity .3s,transform .35s cubic-bezier(0.34,1.4,0.64,1),box-shadow .15s;}
+.bbox.vis{opacity:1;transform:scale(1);}
+.bbox.clickable{cursor:pointer;}
+.bbox.clickable:hover{box-shadow:0 0 0 4px rgba(46,117,182,.2);transform:scale(1.06);}
+.bbox.lit-ring{box-shadow:0 0 0 5px rgba(46,117,182,.4);}
+.bbox.pulse-it{animation:bpulse .4s ease-out;}
+@keyframes bpulse{0%{transform:scale(1);}50%{transform:scale(1.1);}100%{transform:scale(1);}}
+
+/* Letter reveal inside board box */
+.lrev{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;background:#fff;
+  transform:scale(0);transition:transform .35s cubic-bezier(0.34,1.4,0.64,1);}
+.lrev.show{transform:scale(1);}
+.lglyph{font-size:32px;font-weight:900;color:var(--poly);}
+.lglyph.sm{font-size:16px;}
+.lsub{font-size:11px;color:var(--muted);}
+
+/* ?? TABLET BOXES (landscape-friendly, smaller) ?? */
+.tbox{width:72px;height:72px;border:2.5px solid var(--accent);border-radius:12px;
+  background:#fff;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;overflow:hidden;transition:all .15s;}
+.tbox:hover:not(.tfilled){background:#f0f7ff;
+  box-shadow:0 0 0 3px rgba(46,117,182,.15);}
+.tbox.tnext{animation:tnxt 1.3s ease-in-out infinite;}
+@keyframes tnxt{0%,100%{box-shadow:0 0 0 2px rgba(46,117,182,.2);}
+  50%{box-shadow:0 0 0 5px rgba(46,117,182,.35);}}
+.tbox.tfilled{cursor:default;}
+.drop-token{position:absolute;inset:0;top:-72px;
+  display:flex;align-items:center;justify-content:center;
+  transition:top .28s cubic-bezier(0.34,1.56,0.64,1);}
+.tbox.tfilled .drop-token{top:0;}
+
+/* ?? BOARD VIEWS ?? */
+.bview{display:flex;flex-direction:column;align-items:center;
+  gap:16px;width:100%;max-width:560px;}
+
+.word-mask{font-size:80px;color:#dce8f0;font-weight:900;letter-spacing:12px;}
+
+.play-btn{width:110px;height:110px;border-radius:50%;background:var(--accent);
+  border:none;font-size:48px;cursor:pointer;color:#fff;
+  box-shadow:0 4px 20px rgba(46,117,182,.4);transition:all .15s;}
+.play-btn:hover{background:var(--poly);transform:scale(1.05);}
+.play-btn.playing{animation:pp .7s ease-in-out infinite;}
+@keyframes pp{0%,100%{box-shadow:0 4px 20px rgba(46,117,182,.4);}
+  50%{box-shadow:0 4px 36px rgba(46,117,182,.7);transform:scale(1.07);}}
+.play-btn.sm-btn{width:48px;height:48px;font-size:22px;
+  box-shadow:0 2px 10px rgba(46,117,182,.3);}
+
+/* Results */
+.rchart{width:100%;max-width:480px;display:flex;flex-direction:column;gap:9px;}
+.rtitle{font-size:18px;font-weight:800;color:var(--poly);text-align:center;}
+.rsub{font-size:11px;color:var(--muted);text-align:center;margin-top:-4px;}
+.brow{display:flex;align-items:center;gap:8px;}
+.blbl{font-size:14px;font-weight:700;color:var(--poly);width:72px;
+  text-align:right;flex-shrink:0;}
+.btrack{flex:1;height:40px;background:#f0f4f8;border-radius:8px;overflow:hidden;}
+.bfill{height:100%;border-radius:8px;display:flex;align-items:center;
+  padding-left:8px;color:#fff;font-size:12px;font-weight:700;
+  transition:width .7s cubic-bezier(0.34,1.2,0.64,1);}
+.bfill.correct{background:var(--success);}
+.bfill.blue{background:var(--accent);}
+.bfill.zero{width:0!important;}
+.bcnt{font-size:11px;color:var(--muted);width:24px;}
+.rhint{font-size:11px;color:var(--warn);font-weight:700;
+  background:#FFF3E0;padding:8px 12px;border-radius:8px;border:1px solid #FFE082;}
+
+.practice-hint{font-size:12px;color:var(--accent);font-weight:600;
+  background:var(--light);padding:6px 14px;border-radius:20px;}
+
+.blend-arrow{font-size:26px;letter-spacing:4px;color:var(--accent);
+  opacity:0;transition:opacity .4s;}
+.blend-arrow.show{opacity:1;}
+.blend-full{font-size:72px;font-weight:900;color:var(--success);
+  opacity:0;transition:opacity .5s;}
+.blend-full.show{opacity:1;}
+
+/* ?? TABLET VIEWS ?? */
+.tview{display:flex;flex-direction:row;align-items:center;
+  justify-content:center;gap:16px;height:100%;width:100%;}
+.tview.col{flex-direction:column;gap:10px;}
+
+.look-icon{font-size:56px;animation:lb 1.8s ease-in-out infinite;}
+@keyframes lb{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+.listen-icon{font-size:56px;animation:lp 2s ease-in-out infinite;}
+@keyframes lp{0%,100%{transform:scale(1);}50%{transform:scale(1.1);}}
+
+.tap-big{width:76px;height:76px;border-radius:50%;background:var(--accent);
+  border:none;color:#fff;font-size:32px;cursor:pointer;
+  box-shadow:0 4px 14px rgba(46,117,182,.35);transition:all .1s;flex-shrink:0;}
+.tap-big:active{transform:scale(.9);}
+.undo-lnk{font-size:10px;color:var(--muted);background:none;border:none;
+  cursor:pointer;text-decoration:underline;}
+.count-dots{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;
+  max-width:100px;}
+.cdot{width:11px;height:11px;border-radius:50%;background:var(--accent);
+  animation:dp .2s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes dp{from{transform:scale(0);}to{transform:scale(1);}}
+
+.swipe-btn{padding:9px 20px;background:var(--accent);color:#fff;
+  border:none;border-radius:9px;font-size:13px;font-weight:700;
+  cursor:pointer;transition:background .15s;}
+.swipe-btn:hover{background:var(--poly);}
+.swipe-btn:disabled{opacity:.4;pointer-events:none;}
+.t-blend-word{font-size:26px;font-weight:900;color:var(--success);
+  opacity:0;transition:opacity .4s;}
+.t-blend-word.show{opacity:1;}
+
+/* ?? BLEND SLIDER ?? */
+.blend-stage{display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;max-width:600px;}
+.blend-boxes-row{display:flex;gap:18px;justify-content:center;}
+.blend-box{width:110px;height:110px;border:3px solid var(--accent);border-radius:16px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#fff;transition:background .15s,border-color .15s,box-shadow .15s;}
+.blend-box.lit{background:#e8f4e8;border-color:var(--success);
+  box-shadow:0 0 0 5px rgba(39,174,96,.2);}
+.slider-wrap{width:100%;max-width:500px;position:relative;
+  height:56px;display:flex;align-items:center;cursor:pointer;user-select:none;}
+.slider-bg{width:100%;height:10px;background:#dce8f0;border-radius:5px;position:relative;}
+.slider-progress{height:100%;background:var(--accent);border-radius:5px;
+  width:0%;pointer-events:none;}
+.slider-thumb{width:40px;height:40px;border-radius:50%;background:var(--accent);
+  position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);
+  box-shadow:0 3px 14px rgba(46,117,182,.5);cursor:grab;z-index:10;
+  transition:transform .1s,box-shadow .1s;}
+.slider-thumb:active,.slider-thumb.dragging{transform:translate(-50%,-50%) scale(1.18);
+  cursor:grabbing;box-shadow:0 4px 20px rgba(46,117,182,.6);}
+.blend-word-big{font-size:72px;font-weight:900;color:var(--success);
+  opacity:0;transform:translateY(8px);
+  transition:opacity .4s,transform .4s;}
+.blend-word-big.show{opacity:1;transform:translateY(0);}
+.blend-hint{font-size:13px;color:var(--muted);font-style:italic;}
+
+/* Tablet blend */
+.t-blend-stage{display:flex;flex-direction:column;align-items:center;
+  gap:10px;width:100%;height:100%;}
+.t-blend-boxes{display:flex;gap:10px;justify-content:center;}
+.t-blend-box{width:64px;height:64px;border:2.5px solid var(--accent);border-radius:11px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:#fff;transition:background .15s,border-color .15s,box-shadow .15s;}
+.t-blend-box.lit{background:#e8f4e8;border-color:var(--success);
+  box-shadow:0 0 0 3px rgba(39,174,96,.25);}
+.t-slider-wrap{width:90%;position:relative;height:44px;
+  display:flex;align-items:center;cursor:pointer;user-select:none;}
+.t-slider-bg{width:100%;height:8px;background:#dce8f0;border-radius:4px;}
+.t-slider-progress{height:100%;background:var(--accent);border-radius:4px;width:0%;}
+.t-slider-thumb{width:32px;height:32px;border-radius:50%;background:var(--accent);
+  position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);
+  box-shadow:0 2px 10px rgba(46,117,182,.45);cursor:grab;z-index:10;}
+.t-blend-word{font-size:28px;font-weight:900;color:var(--success);
+  opacity:0;transition:opacity .4s;}
+.t-blend-word.show{opacity:1;}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">POLY</div>
+  <div class="header-title">Elkonin Boxes Classroom Activity</div>
+  <div class="word-pips" id="wordPips"></div>
+</div>
+
+<div class="workspace">
+  <div class="panel panel-board">
+    <div class="panel-header board-hdr">TEACHER BOARD</div>
+    <div class="panel-content" id="boardContent"></div>
+    <div class="teacher-note" id="teacherNote">Teacher guidance</div>
+  </div>
+  <div class="panel panel-tablet">
+    <div class="panel-header tablet-hdr">STUDENT TABLET</div>
+    <div class="panel-content">
+      <div class="tablet-wrap">
+        <div class="tablet-inner" id="tabletContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="step-dots" id="stepDots"></div>
+  <div class="step-label">
+    <div class="step-name-txt" id="stepName"></div>
+    <div class="step-num-txt" id="stepNum"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nbtn nbtn-g" id="prevBtn">Back</button>
+    <button class="nbtn nbtn-p" id="nextBtn">Next</button>
+  </div>
+</div>
+
+<script>
+// ?? PHONEME MAP ???????????????????????????????????????????????????????????????
+// Designed for Web Speech API ??avoids letter names, uses phonetically
+// guided strings. Fricatives extended, stops get brief schwa.
+const PHON={
+  // Stops ??short vowel after to make audible without drawling
+  "k":"k","t":"t","b":"buh","p":"puh","g":"guh","d":"duh",
+  // Fricatives ??sustain but don't over-extend
+  "s":"ss","f":"ff","v":"vv","z":"zz","h":"huh",
+  // Digraphs ??TTS handles these naturally
+  "sh":"sh","ch":"ch","th":"th","wh":"wh",
+  // Nasals / liquids
+  "m":"mm","n":"nn","ng":"ng","l":"ll","r":"rr","w":"wuh","y":"yuh",
+  // Short vowels ??clean double letter, no trailing h
+  "a":"aa","e":"eh","i":"ih","o":"oh","u":"uh",
+  // Long / vowel teams
+  "휆":"ee","훮":"ay","ai":"ay","ea":"ee","oa":"oh","oo":"oo","oi":"oy",
+};
+
+// ?? DATA ??????????????????????????????????????????????????????????????????????
+const SC=["#E74C3C","#2E75B6","#27AE60","#F39C12","#8E44AD"];
+const TOTAL=12;
+
+const WORDS=[
+  {word:"cat",  sounds:["k","a","t"],  letters:["c","a","t"],
+   cat:"CVC", mock:{2:0,3:11,4:1}},
+  {word:"ship", sounds:["sh","i","p"], letters:["sh","i","p"],
+   cat:"Digraph", mock:{2:0,3:6,4:6}},
+];
+
+const STEPS=[
+  {name:"Teacher Plays Word",    note:"Press the speaker to play the word. Students listen with no boxes or letters yet."},
+  {name:"Students Count Sounds", note:"Replay anytime with the small speaker. Wait for students to tap their count."},
+  {name:"Class Results",         note:"Review the class split. If results are mixed, replay the word before revealing boxes."},
+  {name:"Replay and Update",     note:"Play the word again. Students can update their count before you reveal."},
+  {name:"Reveal Boxes",          note:"Boxes animate one by one with each sound. Students watch shapes only."},
+  {name:"Students Produce",      note:"Click each box on the board to practice. Students tap along on their tablets."},
+  {name:"Connect to Print",      note:"Click each box to reveal letters. Discuss any digraphs or vowel teams."},
+  {name:"Blend the Word",        note:"Students drag the slider to blend all sounds into the full word."},
+];
+
+// ?? STATE ?????????????????????????????????????????????????????????????????????
+const S={
+  step:0, word:0, taps:0, revealDone:false,
+  boxesFilled:0, lettersRevealed:new Set(),
+  blendDone:false, boardLit:new Set()
+};
+
+// ?? REFS ??????????????????????????????????????????????????????????????????????
+const BC =document.getElementById("boardContent");
+const TC =document.getElementById("tabletContent");
+const TN =document.getElementById("teacherNote");
+const SN =document.getElementById("stepName");
+const SNu=document.getElementById("stepNum");
+const SD =document.getElementById("stepDots");
+const WP =document.getElementById("wordPips");
+const prevBtn=document.getElementById("prevBtn");
+const nextBtn=document.getElementById("nextBtn");
+
+// ?? SPEECH ????????????????????????????????????????????????????????????????????
+function speak(text, phoneme, cb){
+  if(phoneme){
+    // Use pre-recorded audio files for phonemes
+    const audio = new Audio("sounds/" + text + ".m4a");
+    audio.onerror = () => {
+      // Fallback to TTS if file not found
+      const u = new SpeechSynthesisUtterance(PHON[text]||text);
+      u.lang="en-US"; u.rate=0.72; u.pitch=1.0;
+      if(cb) u.onend=cb;
+      if(window.speechSynthesis) speechSynthesis.speak(u);
+      else cb&&cb();
+    };
+    if(cb) audio.onended = cb;
+    audio.play().catch(()=>{});
+  } else {
+    // Full words ??TTS works fine
+    if(!window.speechSynthesis){cb&&cb();return;}
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang="en-US"; u.rate=0.82; u.pitch=1.05;
+    if(cb) u.onend=cb;
+    speechSynthesis.speak(u);
+  }
+}
+
+function shape(i, cls="lg"){
+  return `<div class="shape-token ${cls}" style="background:${SC[i]}"></div>`;
+}
+
+// ?? RENDER ????????????????????????????????????????????????????????????????????
+function render(){
+  const w = WORDS[S.word];
+
+  WP.innerHTML = WORDS.map((_,i)=>
+    `<div class="pip ${i<S.word?'done':i===S.word?'active':''}"
+     onclick="goWord(${i})" title="${WORDS[i].word}"></div>`).join('');
+
+  SD.innerHTML = STEPS.map((_,i)=>
+    `<div class="sdot ${i<S.step?'done':i===S.step?'active':''}"></div>`).join('');
+
+  SN.textContent  = STEPS[S.step].name;
+  SNu.textContent = `Step ${S.step+1}/${STEPS.length} | "${w.word}" (${w.cat})`;
+  TN.innerHTML    = `<span>${STEPS[S.step].note}</span>`;
+
+  prevBtn.disabled = S.step===0 && S.word===0;
+  nextBtn.disabled = S.step===STEPS.length-1 && S.word===WORDS.length-1;
+  nextBtn.textContent = S.step===STEPS.length-1
+    ? (S.word<WORDS.length-1 ? "Next Word" : "Done") : "Next";
+
+  rBoard(w);
+  rTablet(w);
+}
+
+// ?? BOARD ?????????????????????????????????????????????????????????????????????
+function playWord(){
+  const btn=document.getElementById("pbtn");
+  if(btn){ btn.classList.add("playing");
+    speak(WORDS[S.word].word, false, ()=>btn.classList.remove("playing")); }
+  else speak(WORDS[S.word].word, false);
+}
+
+function rBoard(w){
+  switch(S.step){
+    case 0:
+      BC.innerHTML=`<div class="bview">
+        <div class="word-mask">${"• ".repeat(w.word.length)}</div>
+        <button class="play-btn" id="pbtn" onclick="playWord()">▶</button>
+        <div style="font-size:13px;color:var(--muted);font-style:italic">
+          Play the word for your class</div>
+      </div>`; break;
+
+    case 1:
+      BC.innerHTML=`<div class="bview" style="gap:14px">
+        <div style="font-size:13px;color:var(--muted)">Students are counting on their tablets</div>
+        <div style="font-size:52px;font-weight:900;color:var(--accent)">${TOTAL}</div>
+        <div style="font-size:12px;color:var(--muted)">students in class</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+          <button class="play-btn sm-btn" id="pbtn" onclick="playWord()">▶</button>
+          <span style="font-size:12px;color:var(--muted)">Replay the word if needed</span>
+        </div>
+      </div>`; break;
+
+    case 2: rResults(w); break;
+
+    case 3:
+      BC.innerHTML=`<div class="bview">
+        <div class="word-mask">${"• ".repeat(w.word.length)}</div>
+        <button class="play-btn" id="pbtn" onclick="playWord()">▶</button>
+        <div style="font-size:13px;color:var(--muted);font-style:italic">
+          Play again. Students update their count.</div>
+      </div>`; break;
+
+    case 4: rRevealBoard(w); break;
+    case 5: rPracticeBoard(w); break;
+    case 6: rPrintBoard(w); break;
+    case 7: rBlendBoard(w); break;
+  }
+}
+
+function rResults(w){
+  const correct=w.sounds.length;
+  const total=Object.values(w.mock).reduce((a,b)=>a+b,0);
+  const nums=[2,3,4,5,6].filter(n=>w.mock[n]);
+  const rows=nums.map(n=>{
+    const cnt=w.mock[n]||0;
+    const pct=cnt/total*100;
+    return`<div class="brow">
+      <div class="blbl">${n} sound${n!==1?"s":""}</div>
+      <div class="btrack">
+        <div class="bfill ${n===correct?"correct":"blue"} ${cnt===0?"zero":""}"
+          style="width:${pct}%">${cnt>0?cnt+" students":""}</div>
+      </div>
+      <div class="bcnt">${cnt}</div>
+    </div>`;}).join('');
+  const wrong=total-(w.mock[correct]||0);
+  const hint=w.word==="ship"
+    ?`Class split 6/6. Half counted letters, not sounds. "sh" is one sound. Replay before revealing.`
+    :wrong>=6?`${wrong} students may need to hear the word again before the reveal.`:"";
+  BC.innerHTML=`<div class="rchart">
+    <div class="rtitle">How many sounds did you hear?</div>
+    <div class="rsub">Correct: ${correct} sounds | Word still hidden</div>
+    ${rows}
+    ${hint?`<div class="rhint">${hint}</div>`:""}
+  </div>`;
+}
+
+function rRevealBoard(w){
+  BC.innerHTML=`<div class="bview">
+    <div class="boxes-row" id="bboxRow">
+      ${w.sounds.map((s,i)=>`<div class="bbox clickable" id="bb${i}" onclick="speak('${s}',true)">
+        ${shape(i)}</div>`).join('')}
+    </div>
+    <div style="font-size:12px;color:var(--muted);font-style:italic">
+      Shapes only. No letters yet.</div>
+  </div>`;
+  if(!S.revealDone) animReveal(w);
+}
+
+function rPracticeBoard(w){
+  const boxes=w.sounds.map((_,i)=>{
+    const lit=S.boardLit.has(i);
+    return`<div class="bbox vis clickable ${lit?"lit-ring":""}" id="bb${i}"
+      onclick="clickBoardBox(${i},false)">${shape(i)}</div>`;}).join('');
+  BC.innerHTML=`<div class="bview">
+    <div class="practice-hint">Click each box to practice with the class</div>
+    <div class="boxes-row">${boxes}</div>
+  </div>`;
+}
+
+function rPrintBoard(w){
+  // Box-by-box reveal ??teacher clicks each one
+  const allDone = S.lettersRevealed.size===w.sounds.length;
+  const boxes=w.sounds.map((s,i)=>{
+    const revealed=S.lettersRevealed.has(i);
+    const lit=S.boardLit.has(i);
+    return`<div class="bbox vis clickable ${lit?"lit-ring":""}" id="bb${i}"
+      onclick="clickBoardBox(${i},true)">
+      ${shape(i)}
+      <div class="lrev ${revealed?"show":""}" id="lr${i}">
+        <div class="lglyph">${w.letters[i]}</div>
+        <div class="lsub">/${s}/</div>
+      </div>
+    </div>`;}).join('');
+  BC.innerHTML=`<div class="bview">
+    <div class="practice-hint">Click each box to reveal its letter</div>
+    <div class="boxes-row">${boxes}</div>
+    ${allDone
+      ? `<div style="font-size:13px;color:var(--success);font-weight:700">
+          ${w.word==="ship"
+            ? '"sh" = 2 letters, 1 sound.'
+            : w.word==="beat"
+            ? '"ea" = 1 vowel sound.'
+            : "All letters revealed."}</div>`
+      : `<div style="font-size:12px;color:var(--muted)">${S.lettersRevealed.size}/${w.sounds.length} revealed</div>`}
+  </div>`;
+}
+
+function rBlendBoard(w){
+  const prog = S.blendProgressBoard||0;
+  const N = w.sounds.length;
+  const boxes = w.sounds.map((s,i)=>{
+    const lit = prog >= (i+0.5)/N;
+    return `<div class="blend-box ${lit?'lit':''}" id="bblend${i}">
+      <div class="lglyph" style="font-size:28px">${w.letters[i]}</div>
+      <div class="lsub" style="font-size:12px">/${s}/</div>
+    </div>`;}).join('');
+  BC.innerHTML=`<div class="bview">
+    <div class="blend-stage">
+      <div class="blend-word-big ${S.blendDoneBoard?'show':''}">${w.word}</div>
+      <div class="blend-boxes-row">${boxes}</div>
+      <div class="slider-wrap" id="bSliderWrap">
+        <div class="slider-bg">
+          <div class="slider-progress" id="bSliderProg" style="width:${prog*100}%"></div>
+        </div>
+        <div class="slider-thumb ${S.blendDone?'':'dragging'}" id="bSliderThumb"
+          style="left:${prog*100}%"></div>
+      </div>
+      <div class="blend-hint">${S.blendDoneBoard?'Blended!':'Drag the slider across'}</div>
+    </div>
+  </div>`;
+  if(!S.blendDoneBoard) setupBlendDrag('bSliderWrap','bSliderProg','bSliderThumb','board',w);
+}
+
+// ?? TABLET ????????????????????????????????????????????????????????????????????
+function rTablet(w){
+  switch(S.step){
+    case 0:
+      TC.innerHTML=`<div class="tview">
+        <div class="listen-icon">👂</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--poly)">Listen carefully</div>
+          <div style="font-size:11px;color:var(--muted)">Your teacher will play the word</div>
+        </div>
+      </div>`; break;
+
+    case 1: case 3: rCountTablet(S.step===3); break;
+
+    case 2:
+      TC.innerHTML=`<div class="tview">
+        <div class="look-icon">👀</div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--poly)">Look at the board</div>
+          <div style="font-size:11px;color:var(--muted)">See how the class answered</div>
+        </div>
+      </div>`; break;
+
+    case 4:
+      TC.innerHTML=`<div class="tview">
+        <div class="look-icon">👀</div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--poly)">Look at your teacher</div>
+          <div style="font-size:11px;color:var(--muted)">Watch the board</div>
+        </div>
+      </div>`; break;
+
+    case 5: rProduceTablet(w); break;
+    case 6: rPrintTablet(w); break;
+    case 7: rBlendTablet(w); break;
+  }
+}
+
+function rCountTablet(canUpdate){
+  TC.innerHTML=`<div class="tview">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <div style="font-size:10px;color:var(--muted);text-align:center">
+        Tap once per sound</div>
+      <div class="count-dots">
+        ${Array(S.taps).fill('<div class="cdot"></div>').join('')}</div>
+      <div style="font-size:28px;font-weight:900;color:var(--poly)">${S.taps}</div>
+      <div style="font-size:10px;color:var(--muted)">sound${S.taps!==1?"s":""}</div>
+      ${S.taps>0?`<button class="undo-lnk" onclick="undoTap()">undo</button>`:""}
+      ${canUpdate?`<div style="font-size:9px;color:var(--warn);text-align:center">
+        Update if needed</div>`:""}
+    </div>
+    <button class="tap-big" onclick="addTap()">+</button>
+  </div>`;
+}
+
+function rProduceTablet(w){
+  const boxes=w.sounds.map((_,i)=>`
+    <div class="tbox ${i<S.boxesFilled?"tfilled":i===S.boxesFilled?"tnext":""}"
+      onclick="tapTBox(${i})"
+      style="${i<S.boxesFilled?`border-color:${SC[i]};background:${SC[i]}18;`:""}">
+      <div class="drop-token">${shape(i,"sm")}</div>
+    </div>`).join('');
+  TC.innerHTML=`<div class="tview col">
+    <div style="font-size:11px;color:var(--muted);text-align:center">
+      Tap each box while saying the sound aloud.</div>
+    <div class="boxes-row" style="gap:8px">${boxes}</div>
+    ${S.boxesFilled===w.sounds.length
+      ?`<div style="font-size:12px;color:var(--success);font-weight:800">All sounds!</div>`:""}
+  </div>`;
+}
+
+function rPrintTablet(w){
+  // Mirror what teacher has revealed on the board
+  const boxes=w.sounds.map((s,i)=>`
+    <div class="tbox tfilled"
+      style="height:56px;flex-direction:column;
+        border-color:${SC[i]};background:${SC[i]}15;
+        position:relative;overflow:hidden;">
+      ${S.lettersRevealed.has(i)
+        ?`<div style="display:flex;flex-direction:column;align-items:center;">
+            <div class="lglyph sm">${w.letters[i]}</div>
+            <div style="font-size:9px;color:var(--muted)">/${s}/</div>
+          </div>`
+        :`<div class="drop-token" style="top:0">${shape(i,"sm")}</div>`}
+    </div>`).join('');
+  const allDone=S.lettersRevealed.size===w.sounds.length;
+  TC.innerHTML=`<div class="tview col" style="gap:8px">
+    <div style="font-size:10px;color:var(--muted)">
+      ${allDone?"All letters revealed.":"Watch the board."}</div>
+    <div class="boxes-row" style="gap:7px">${boxes}</div>
+    ${allDone&&w.word==="ship"
+      ?`<div style="font-size:10px;color:var(--accent);font-weight:700">"sh" = 1 sound, 2 letters!</div>`
+      :allDone&&w.word==="beat"
+      ?`<div style="font-size:10px;color:var(--accent);font-weight:700">"ea" = 1 vowel sound!</div>`:""}
+  </div>`;
+}
+
+function rBlendTablet(w){
+  const prog = S.blendProgressTablet||0;
+  const N = w.sounds.length;
+  const boxes = w.sounds.map((s,i)=>{
+    const lit = prog >= (i+0.5)/N;
+    return `<div class="t-blend-box ${lit?'lit':''}" id="tblend${i}">
+      <div style="font-size:15px;font-weight:900;color:var(--poly)">${w.letters[i]}</div>
+      <div style="font-size:9px;color:var(--muted)">/${s}/</div>
+    </div>`;}).join('');
+  TC.innerHTML=`<div class="t-blend-stage">
+    <div style="font-size:11px;color:var(--muted)">Drag the slider to blend.</div>
+    <div class="t-blend-boxes">${boxes}</div>
+    <div class="t-slider-wrap" id="tSliderWrap">
+      <div class="t-slider-bg">
+        <div class="t-slider-progress" id="tSliderProg" style="width:${prog*100}%"></div>
+      </div>
+      <div class="t-slider-thumb" id="tSliderThumb" style="left:${prog*100}%"></div>
+    </div>
+    <div class="t-blend-word ${S.blendDoneTablet?'show':''}">${w.word}</div>
+  </div>`;
+  if(!S.blendDoneTablet) setupBlendDrag('tSliderWrap','tSliderProg','tSliderThumb','tablet',w);
+}
+
+// ?? INTERACTIONS ??????????????????????????????????????????????????????????????
+function addTap(){ if(S.taps<8){ S.taps++; rTablet(WORDS[S.word]); }}
+function undoTap(){ if(S.taps>0){ S.taps--; rTablet(WORDS[S.word]); }}
+
+function tapTBox(i){
+  const w=WORDS[S.word];
+  speak(w.sounds[i], true);
+  if(i===S.boxesFilled) S.boxesFilled++;
+  rProduceTablet(w);
+}
+
+// Board box click ??step 5 (practice) or step 6 (print reveal)
+function clickBoardBox(i, isLetterStep){
+  const w=WORDS[S.word];
+  speak(w.sounds[i], true);
+  S.boardLit.add(i);
+
+  if(isLetterStep){
+    // Reveal this specific box's letter
+    S.lettersRevealed.add(i);
+    // Animate the letter reveal on the existing DOM element
+    const lr=document.getElementById(`lr${i}`);
+    if(lr) lr.classList.add("show");
+    const bb=document.getElementById(`bb${i}`);
+    if(bb){ bb.classList.add("lit-ring","pulse-it");
+      setTimeout(()=>bb.classList.remove("pulse-it"),450); }
+    // Update the tablet to mirror
+    rPrintTablet(w);
+    rPrintBoard(w);
+  } else {
+    const bb=document.getElementById(`bb${i}`);
+    if(bb){ bb.classList.add("lit-ring","pulse-it");
+      setTimeout(()=>bb.classList.remove("pulse-it"),450); }
+  }
+}
+
+function animReveal(w){
+  S.revealDone=false;
+  w.sounds.forEach((s,i)=>{
+    setTimeout(()=>{
+      const b=document.getElementById(`bb${i}`);
+      if(b) b.classList.add("vis");
+      speak(s, true);
+      if(i===w.sounds.length-1)
+        setTimeout(()=>{ S.revealDone=true; }, 600);
+    }, i*800);
+  });
+}
+
+// ?? BLEND DRAG ??independent per side ?????????????????????????????????????
+const _drag = { board:false, tablet:false };
+const _cleanup = { board:[], tablet:[] };
+
+function setupBlendDrag(wrapId, progId, thumbId, side, w){
+  const wrap  = document.getElementById(wrapId);
+  const prog  = document.getElementById(progId);
+  const thumb = document.getElementById(thumbId);
+  if(!wrap||!prog||!thumb) return;
+
+  // Clean up previous listeners for this side only
+  _cleanup[side].forEach(fn=>fn());
+  _cleanup[side]=[];
+
+  const doneKey  = side==='board' ? 'blendDoneBoard'  : 'blendDoneTablet';
+  const progKey  = side==='board' ? 'blendProgressBoard' : 'blendProgressTablet';
+  const boxPfx   = side==='board' ? 'bblend' : 'tblend';
+
+  function getVal(e){
+    const rect = wrap.getBoundingClientRect();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    return Math.min(1, Math.max(0, (cx - rect.left) / rect.width));
+  }
+
+  function update(val){
+    S[progKey] = val;
+    prog.style.width = (val*100) + '%';
+    thumb.style.left  = (val*100) + '%';
+    const N = w.sounds.length;
+    w.sounds.forEach((_,i)=>{
+      const lit = val >= (i+0.5)/N;
+      const el = document.getElementById(boxPfx+i);
+      if(el) el.classList.toggle('lit', lit);
+    });
+    if(val >= 0.98 && !S[doneKey]){
+      S[doneKey] = true; S[progKey] = 1;
+      speak(w.word, false);
+      setTimeout(()=>{ side==='board' ? rBlendBoard(w) : rBlendTablet(w); }, 500);
+    }
+  }
+
+  const onDown = e => { _drag[side]=true; thumb.classList.add('dragging'); update(getVal(e)); };
+  const onMove = e => { if(!_drag[side])return; e.preventDefault(); update(getVal(e)); };
+  const onUp   = () => { _drag[side]=false; thumb.classList.remove('dragging'); };
+
+  wrap.addEventListener('mousedown',  onDown);
+  wrap.addEventListener('touchstart', onDown, {passive:false});
+  document.addEventListener('mousemove',  onMove);
+  document.addEventListener('touchmove',  onMove, {passive:false});
+  document.addEventListener('mouseup',    onUp);
+  document.addEventListener('touchend',   onUp);
+
+  _cleanup[side] = [
+    ()=>wrap.removeEventListener('mousedown',  onDown),
+    ()=>wrap.removeEventListener('touchstart', onDown),
+    ()=>document.removeEventListener('mousemove',  onMove),
+    ()=>document.removeEventListener('touchmove',  onMove),
+    ()=>document.removeEventListener('mouseup',    onUp),
+    ()=>document.removeEventListener('touchend',   onUp),
+  ];
+}
+
+function goWord(i){ S.word=i; S.step=0; reset(); render(); }
+
+function reset(){
+  S.taps=0; S.revealDone=false; S.boxesFilled=0;
+  S.lettersRevealed=new Set(); S.blendDoneBoard=false; S.blendDoneTablet=false;
+  S.blendProgressBoard=0; S.blendProgressTablet=0; S.boardLit=new Set();
+}
+
+// ?? NAV ???????????????????????????????????????????????????????????????????????
+nextBtn.addEventListener("click",()=>{
+  if(S.step<STEPS.length-1){
+    S.step++;
+    if(S.step===4){ S.revealDone=false; S.boardLit=new Set(); }
+    if(S.step===5){ S.boardLit=new Set(); }
+    if(S.step===6){ S.lettersRevealed=new Set(); S.boardLit=new Set(); }
+  } else if(S.word<WORDS.length-1){ S.word++; S.step=0; reset(); }
+  render();
+});
+prevBtn.addEventListener("click",()=>{
+  if(S.step>0) S.step--;
+  else if(S.word>0){ S.word--; S.step=STEPS.length-1; reset(); }
+  render();
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight") nextBtn.click();
+  if(e.key==="ArrowLeft")  prevBtn.click();
+  if(e.key===" "){ e.preventDefault(); playWord(); }
+});
+
+render();
+</script>
+</body>
+</html>
+
+

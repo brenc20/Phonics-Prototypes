@@ -1,0 +1,1145 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>POLY Slider Flow Prototype</title>
+  <style>
+    :root {
+      --ink: #17325c;
+      --muted: #5d7595;
+      --panel: rgba(255, 255, 255, 0.86);
+      --panel-soft: rgba(255, 255, 255, 0.62);
+      --line: rgba(23, 50, 92, 0.12);
+      --shadow: 0 24px 60px rgba(23, 50, 92, 0.16);
+      --accent: #ff8a5b;
+      --accent-2: #2f80ed;
+      --ok: #35a86b;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% 18%, rgba(255, 255, 255, 0.82), transparent 24%),
+        radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.58), transparent 18%),
+        radial-gradient(circle at 30% 82%, rgba(255, 196, 152, 0.34), transparent 24%),
+        radial-gradient(circle at 88% 74%, rgba(99, 181, 255, 0.26), transparent 22%),
+        linear-gradient(180deg, #d7ecff 0%, #ffe5c7 100%);
+      overflow: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      border-radius: 999px;
+      pointer-events: none;
+      opacity: 0.45;
+    }
+
+    body::before {
+      width: 320px;
+      height: 320px;
+      top: -60px;
+      right: -60px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0));
+    }
+
+    body::after {
+      width: 260px;
+      height: 260px;
+      bottom: -40px;
+      left: -30px;
+      background: radial-gradient(circle, rgba(255, 214, 178, 0.64), rgba(255, 214, 178, 0));
+    }
+
+    .app {
+      width: min(1360px, calc(100vw - 14px));
+      height: 100vh;
+      margin: 0 auto;
+      display: grid;
+      gap: 10px;
+      padding: 10px 10px 12px;
+    }
+
+    .topbar,
+    .bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mode-switch,
+    .mini-actions,
+    .stars,
+    .level-switch {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .mode-btn,
+    .icon-btn,
+    .word-btn,
+    .pill,
+    .step-btn,
+    .tag,
+    .level-select {
+      border: 0;
+      border-radius: 999px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .mode-btn,
+    .step-btn,
+    .word-btn,
+    .icon-btn {
+      cursor: pointer;
+      transition: transform 140ms ease, background 140ms ease, box-shadow 140ms ease;
+    }
+
+    .mode-btn:hover,
+    .step-btn:hover,
+    .word-btn:hover,
+    .icon-btn:hover {
+      transform: translateY(-1px) scale(1.01);
+    }
+
+    .mode-btn {
+      padding: 11px 15px;
+      font-size: 0.92rem;
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(47, 128, 237, 0.16), rgba(255, 138, 91, 0.22));
+    }
+
+    .icon-btn {
+      width: 48px;
+      height: 48px;
+      font-size: 1.15rem;
+    }
+
+    .level-switch {
+      gap: 6px;
+    }
+
+    .level-label {
+      font-size: 0.7rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .level-select {
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-weight: 900;
+      cursor: pointer;
+      appearance: none;
+      min-width: 150px;
+    }
+
+    .pill,
+    .tag {
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      letter-spacing: 0.03em;
+    }
+
+    .tag.ok {
+      background: rgba(53, 168, 107, 0.14);
+      color: #1d7e4b;
+      box-shadow: none;
+    }
+
+    .star {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      font-size: 1.05rem;
+      opacity: 0.36;
+      transform: scale(0.94);
+      transition: opacity 140ms ease, transform 140ms ease;
+    }
+
+    .star.on {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 156px minmax(0, 1fr) 272px;
+      gap: 10px;
+      align-items: stretch;
+      min-height: 0;
+    }
+
+    .panel {
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.44);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: 12px;
+      min-height: 0;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .left-panel {
+      display: grid;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .word-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .word-btn {
+      display: grid;
+      grid-template-columns: 1fr;
+      justify-items: center;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .word-btn.active {
+      background: linear-gradient(135deg, rgba(47, 128, 237, 0.14), rgba(255, 138, 91, 0.18));
+    }
+
+    .word-emoji {
+      font-size: 1.85rem;
+      line-height: 1;
+    }
+
+    .word-name {
+      display: none;
+      font-size: 0.72rem;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .show-print-buttons .word-name {
+      display: block;
+    }
+
+    .center-panel {
+      display: grid;
+      gap: 10px;
+      padding: 12px 12px 14px;
+    }
+
+    .picture-shell {
+      position: relative;
+      min-height: min(52vh, 470px);
+      border-radius: 28px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.56);
+      background: linear-gradient(135deg, var(--bgA), var(--bgB));
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 18px 48px rgba(23, 50, 92, 0.14);
+    }
+
+    .picture,
+    .picture-bright,
+    .shine,
+    .word-wrap {
+      position: absolute;
+      inset: 0;
+    }
+
+    .picture,
+    .picture-bright {
+      display: grid;
+      place-items: center;
+    }
+
+    .countdown {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.96);
+      text-shadow: 0 10px 26px rgba(0, 0, 0, 0.28);
+      background: rgba(16, 26, 44, 0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 140ms ease;
+    }
+
+    .countdown.show {
+      opacity: 1;
+    }
+
+    .picture {
+      background: linear-gradient(180deg, rgba(18, 27, 46, 0.66), rgba(20, 25, 34, 0.88));
+      filter: grayscale(1) saturate(0.16);
+    }
+
+    .picture-bright {
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path 90ms linear;
+    }
+
+    .shine {
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 28% 28%, rgba(255, 255, 255, 0.34), transparent 22%),
+        radial-gradient(circle at 72% 78%, rgba(255, 255, 255, 0.18), transparent 18%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 42%);
+    }
+
+    .emoji {
+      font-size: clamp(7rem, 20vw, 12rem);
+      text-shadow: 0 18px 34px rgba(0, 0, 0, 0.16);
+    }
+
+    .word-wrap {
+      display: grid;
+      place-items: end center;
+      padding: 14px 14px 18px;
+      pointer-events: none;
+    }
+
+    .print-chip {
+      display: none;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(23, 50, 92, 0.08);
+      box-shadow: 0 10px 20px rgba(23, 50, 92, 0.08);
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .print-chip.show {
+      display: inline-flex;
+    }
+
+    .track-wrap {
+      display: grid;
+      gap: 8px;
+    }
+
+    .track {
+      padding: 12px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .dots {
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+    }
+
+    .dot {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(23, 50, 92, 0.14);
+      transition: background 120ms ease, transform 120ms ease;
+    }
+
+    .dot.on {
+      background: linear-gradient(135deg, #ff9b63, #ff7061);
+      transform: scaleY(1.08);
+    }
+
+    .target-banner {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.64);
+      border: 1px solid rgba(23, 50, 92, 0.08);
+    }
+
+    .target-copy {
+      display: grid;
+      gap: 2px;
+    }
+
+    .target-label {
+      font-size: 0.66rem;
+      color: var(--muted);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .target-value {
+      font-size: 0.92rem;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+    }
+
+    .record-card,
+    .progress-card,
+    .controls-card {
+      border-radius: 20px;
+      background: var(--panel-soft);
+      padding: 12px;
+      border: 1px solid var(--line);
+      display: grid;
+      gap: 8px;
+    }
+
+    .record-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .record-btn {
+      flex: 1;
+      min-width: 90px;
+      padding: 11px 12px;
+      border-radius: 16px;
+      border: 0;
+      cursor: pointer;
+      background: white;
+      color: var(--ink);
+      font-weight: 900;
+      box-shadow: 0 12px 28px rgba(23, 50, 92, 0.08);
+    }
+
+    .record-btn.primary {
+      background: linear-gradient(135deg, #ff9b63, #ff7061);
+      color: white;
+    }
+
+    .record-btn.active {
+      background: linear-gradient(135deg, rgba(47, 128, 237, 0.14), rgba(255, 138, 91, 0.18));
+      color: var(--ink);
+    }
+
+    .record-btn:disabled {
+      cursor: default;
+      opacity: 0.5;
+    }
+
+    .progress-metric {
+      display: grid;
+      gap: 8px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 900;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(23, 50, 92, 0.12);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ff9b63, #ff7061);
+      transition: width 180ms ease;
+    }
+
+    .recorded-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .recorded-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.72);
+      font-size: 0.82rem;
+      align-items: center;
+    }
+
+    .recorded-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .submit-btn {
+      padding: 13px 14px;
+      border-radius: 16px;
+      border: 0;
+      font-weight: 900;
+      background: linear-gradient(135deg, #ff9b63, #ff7061);
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(23, 50, 92, 0.08);
+    }
+
+    .submit-btn:disabled {
+      cursor: default;
+      opacity: 0.45;
+    }
+
+    audio {
+      width: 100%;
+    }
+
+    @media (max-width: 1080px) {
+      body {
+        height: auto;
+        overflow: auto;
+      }
+
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .left-panel {
+        order: 1;
+      }
+
+      .center-panel {
+        order: 2;
+      }
+
+      .word-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        height: auto;
+        width: calc(100vw - 10px);
+        padding: 10px;
+      }
+
+      .word-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar">
+      <div class="mode-switch">
+        <button class="mode-btn active" data-mode="class">In Class</button>
+        <button class="mode-btn" data-mode="home">At Home</button>
+        <div class="level-switch">
+          <span class="level-label">Level</span>
+          <select class="level-select" id="levelSelect" aria-label="Select level">
+            <option value="ecp5">ECP5 / ECP6m</option>
+            <option value="ecp6">ECP6</option>
+            <option value="ecp7">ECP7</option>
+          </select>
+        </div>
+      </div>
+      <div class="mini-actions">
+        <div class="pill" id="modeSummary">Teacher-led board view</div>
+        <button class="icon-btn" id="resetBtn" aria-label="Reset slider">&#8634;</button>
+      </div>
+    </div>
+
+    <section class="shell">
+      <aside class="panel left-panel">
+        <h2 class="section-title">Target Words</h2>
+        <div class="word-grid" id="wordGrid"></div>
+      </aside>
+
+      <section class="panel center-panel">
+        <div class="target-banner">
+          <div class="target-copy">
+            <span class="target-label">Target Sound</span>
+            <span class="target-value" id="targetValue">Initial /b/ words</span>
+          </div>
+          <div class="tag ok" id="levelTag">ECP5 / ECP6m</div>
+        </div>
+
+        <div class="stars" aria-label="progress">
+          <div class="star">&#11088;</div>
+          <div class="star">&#11088;</div>
+          <div class="star">&#11088;</div>
+        </div>
+
+        <div class="picture-shell" id="pictureShell">
+          <div class="picture">
+            <div class="emoji" id="emojiDim">&#128049;</div>
+          </div>
+        <div class="picture-bright" id="pictureBright">
+          <div class="emoji" id="emojiBright">&#128049;</div>
+        </div>
+        <div class="shine"></div>
+        <div class="countdown" id="countdown"></div>
+        <div class="word-wrap">
+          <div class="print-chip" id="printChip">BAG</div>
+        </div>
+      </div>
+
+        <div class="track-wrap">
+          <div class="track">
+            <input id="slider" type="range" min="0" max="100" step="1" value="0" aria-label="Slide to reveal the picture">
+          </div>
+          <div class="dots" id="soundBars" aria-hidden="true"></div>
+        </div>
+
+        <div class="controls-card hidden" id="homeControls">
+          <div class="record-actions">
+            <button class="record-btn" id="listenSampleBtn">Listen</button>
+            <button class="record-btn" id="practiceWordBtn">Practice</button>
+            <button class="record-btn primary" id="recordBtn">Start Recording</button>
+          </div>
+          <div class="tag" id="recordingStatus">No recording yet</div>
+          <audio id="playback" controls hidden></audio>
+        </div>
+      </section>
+
+      <aside class="panel hidden" id="homePanel">
+        <div class="progress-card">
+          <h2 class="section-title">Words Recorded</h2>
+          <div class="progress-metric">
+            <div class="progress-top">
+              <span id="progressCount">0 / 6</span>
+              <span class="tag" id="progressState">Keep going</span>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+          <div class="recorded-list" id="recordedList"></div>
+          <div>
+            <button class="submit-btn" id="submitBtn" disabled>Submit Recordings</button>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <div class="bottom">
+      <button class="icon-btn" id="nextBtn" aria-label="Next word">&#10140;</button>
+    </div>
+  </main>
+
+  <script src="./data/ecp6_visual_words.js"></script>
+  <script>
+    const words = (window.ECP6_VISUAL_WORDS || []).filter((item) =>
+      ["bag", "ball", "barn", "bat", "bean", "bear"].includes(item.word)
+    );
+    const levelConfigs = {
+      ecp5: {
+        label: "ECP5 / ECP6m",
+        target: "Initial /b/ words",
+        showButtonWords: false,
+        pillMode: "emoji",
+        printMode: "none",
+        printRevealAt: 101
+      },
+      ecp6: {
+        label: "ECP6",
+        target: "Initial /b/ words + delayed print",
+        showButtonWords: false,
+        pillMode: "emoji",
+        printMode: "delayed",
+        printRevealAt: 68
+      },
+      ecp7: {
+        label: "ECP7",
+        target: "Initial /b/ words + print support",
+        showButtonWords: true,
+        pillMode: "word",
+        printMode: "always",
+        printRevealAt: 0
+      }
+    };
+
+    const state = {
+      mode: "class",
+      level: "ecp5",
+      index: Math.max(0, words.findIndex((item) => item.word === "bag")),
+      progress: 0,
+      round: 1,
+      revealWordAt: 45,
+      homeStep: "listen",
+      recording: false,
+      attempts: 0,
+      latestDuration: 0,
+      mediaRecorder: null,
+      audioChunks: [],
+      stream: null,
+      recordedWords: {},
+      countdownValue: null,
+      autoSlideFrame: null,
+      listenCueIndex: -1
+    };
+
+    const modeButtons = Array.from(document.querySelectorAll(".mode-btn"));
+    const stars = Array.from(document.querySelectorAll(".star"));
+    const levelSelect = document.getElementById("levelSelect");
+    const wordGrid = document.getElementById("wordGrid");
+    const pictureShell = document.getElementById("pictureShell");
+    const pictureBright = document.getElementById("pictureBright");
+    const emojiDim = document.getElementById("emojiDim");
+    const emojiBright = document.getElementById("emojiBright");
+    const countdown = document.getElementById("countdown");
+    const targetValue = document.getElementById("targetValue");
+    const levelTag = document.getElementById("levelTag");
+    const printChip = document.getElementById("printChip");
+    const modeSummary = document.getElementById("modeSummary");
+    const slider = document.getElementById("slider");
+    const soundBars = document.getElementById("soundBars");
+    const homePanel = document.getElementById("homePanel");
+    const homeControls = document.getElementById("homeControls");
+    const listenSampleBtn = document.getElementById("listenSampleBtn");
+    const practiceWordBtn = document.getElementById("practiceWordBtn");
+    const recordBtn = document.getElementById("recordBtn");
+    const recordingStatus = document.getElementById("recordingStatus");
+    const playback = document.getElementById("playback");
+    const progressCount = document.getElementById("progressCount");
+    const progressState = document.getElementById("progressState");
+    const progressFill = document.getElementById("progressFill");
+    const recordedList = document.getElementById("recordedList");
+    const submitBtn = document.getElementById("submitBtn");
+
+    function currentWord() {
+      return words[state.index] || {
+        word: "bag",
+        emoji: "\uD83D\uDC5C",
+        colorA: "#6b8cff",
+        colorB: "#d6e4ff"
+      };
+    }
+
+    function currentLevel() {
+      return levelConfigs[state.level] || levelConfigs.ecp5;
+    }
+
+    function randomNextIndex() {
+      if (words.length <= 1) return 0;
+      let next = state.index;
+      while (next === state.index) {
+        next = Math.floor(Math.random() * words.length);
+      }
+      return next;
+    }
+
+    function updateProgressLights(progress) {
+      stars.forEach((star, index) => {
+        star.classList.toggle("on", progress >= (index + 1) * 30);
+      });
+    }
+
+    function renderSoundBars(progress) {
+      const item = currentWord();
+      const soundCount = Math.max(1, item.cues?.length || 1);
+      const activeBars = Math.min(soundCount, Math.max(0, Math.ceil((progress / 100) * soundCount)));
+
+      soundBars.innerHTML = "";
+      for (let index = 0; index < soundCount; index += 1) {
+        const bar = document.createElement("div");
+        bar.className = "dot" + (index < activeBars ? " on" : "");
+        soundBars.appendChild(bar);
+      }
+    }
+
+    function speakModel(rate = 0.72) {
+      if (!("speechSynthesis" in window)) return;
+      const item = currentWord();
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(item.word);
+      utter.lang = "en-US";
+      utter.rate = rate;
+      utter.pitch = 1.02;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function getListenRate() {
+      if (state.level === "ecp7") return 0.78;
+      if (state.level === "ecp6") return 0.68;
+      return 0.56;
+    }
+
+    function updateListenCue(progress) {
+      if (state.mode !== "home" || state.homeStep !== "listen") return;
+      if (progress >= 5 && state.listenCueIndex < 0) {
+        state.listenCueIndex = 0;
+        speakModel(getListenRate());
+      }
+
+      if (progress < 3) {
+        state.listenCueIndex = -1;
+      }
+    }
+
+    function updateTeacherCue(progress) {
+      if (state.mode !== "class") return;
+      if (progress >= 5 && state.listenCueIndex < 0) {
+        state.listenCueIndex = 0;
+        speakModel(0.68);
+      }
+
+      if (progress < 3) {
+        state.listenCueIndex = -1;
+      }
+    }
+
+    function stopAutoSlide() {
+      if (state.autoSlideFrame) {
+        cancelAnimationFrame(state.autoSlideFrame);
+        state.autoSlideFrame = null;
+      }
+    }
+
+    function runAutoSlide(duration = 3600, options = {}) {
+      stopAutoSlide();
+      state.progress = 0;
+      state.listenCueIndex = -1;
+      const startedAt = performance.now();
+
+      function animate(now) {
+        const elapsed = now - startedAt;
+        const nextProgress = Math.min(100, (elapsed / duration) * 100);
+        state.progress = nextProgress;
+        if (options.withListenCues) {
+          updateListenCue(nextProgress);
+        }
+        render();
+
+        const shouldContinue = nextProgress < 100 && (state.recording || options.allowWithoutRecording);
+        if (shouldContinue) {
+          state.autoSlideFrame = requestAnimationFrame(animate);
+        } else {
+          state.autoSlideFrame = null;
+          if (options.stopRecordingAtEnd && state.recording && nextProgress >= 100 && state.mediaRecorder) {
+            stopRecording();
+          }
+        }
+      }
+
+      state.autoSlideFrame = requestAnimationFrame(animate);
+    }
+
+    function runListenDemo() {
+      updateHomeStatus("listen");
+      recordingStatus.textContent = "Playing model...";
+      speakModel(getListenRate());
+      state.listenCueIndex = 0;
+      runAutoSlide(3600, {
+        allowWithoutRecording: true,
+        withListenCues: false,
+        stopRecordingAtEnd: false
+      });
+    }
+
+    async function runCountdown() {
+      for (const value of [3, 2, 1]) {
+        state.countdownValue = value;
+        render();
+        await new Promise((resolve) => setTimeout(resolve, 700));
+      }
+
+      state.countdownValue = null;
+      render();
+    }
+
+    function renderWordButtons() {
+      wordGrid.innerHTML = "";
+      wordGrid.classList.toggle("show-print-buttons", currentLevel().showButtonWords);
+
+      words.forEach((item, index) => {
+        const button = document.createElement("button");
+        button.className = "word-btn" + (index === state.index ? " active" : "");
+        button.innerHTML = `
+          <span class="word-emoji">${item.emoji}</span>
+          <span class="word-name">${item.word}</span>
+        `;
+        button.addEventListener("click", () => {
+          state.index = index;
+          state.progress = 0;
+          state.round += 1;
+          updateHomeStatus("listen");
+          render();
+        });
+        wordGrid.appendChild(button);
+      });
+    }
+
+    function updateHomeStatus(step) {
+      stopAutoSlide();
+      state.progress = 0;
+      state.listenCueIndex = -1;
+      state.homeStep = step;
+      listenSampleBtn.classList.toggle("active", step === "listen");
+      practiceWordBtn.classList.toggle("active", step === "practice");
+      recordBtn.classList.toggle("active", step === "record" && !state.recording);
+      render();
+    }
+
+    function renderRecordedList() {
+      const recordedCount = words.filter((item) => state.recordedWords[item.word]).length;
+      const totalCount = words.length;
+      const percent = totalCount ? (recordedCount / totalCount) * 100 : 0;
+
+      progressCount.textContent = `${recordedCount} / ${totalCount}`;
+      progressFill.style.width = `${percent}%`;
+      progressState.textContent = recordedCount === totalCount ? "Ready to submit" : "Keep going";
+      progressState.classList.toggle("ok", recordedCount === totalCount);
+      submitBtn.disabled = recordedCount !== totalCount;
+
+      recordedList.innerHTML = "";
+      words.forEach((item) => {
+        const isRecorded = Boolean(state.recordedWords[item.word]);
+        const row = document.createElement("div");
+        row.className = "recorded-item";
+        row.innerHTML = `
+          <div class="recorded-left">
+            <span class="word-emoji">${item.emoji}</span>
+            <strong>${isRecorded ? "Recorded" : ""}</strong>
+          </div>
+          <span>${isRecorded ? "&#10003;" : ""}</span>
+        `;
+        recordedList.appendChild(row);
+      });
+    }
+
+    function render() {
+      const item = currentWord();
+      const level = currentLevel();
+
+      pictureShell.style.setProperty("--bgA", item.colorA);
+      pictureShell.style.setProperty("--bgB", item.colorB);
+      emojiDim.textContent = item.emoji;
+      emojiBright.textContent = item.emoji;
+      targetValue.textContent = level.target;
+      levelTag.textContent = level.label;
+      printChip.textContent = item.word.toUpperCase();
+      pictureBright.style.clipPath = `inset(0 ${100 - state.progress}% 0 0)`;
+      countdown.textContent = state.countdownValue ?? "";
+      countdown.classList.toggle("show", state.countdownValue !== null);
+      const showPrint =
+        level.printMode === "always" ||
+        (level.printMode === "delayed" && state.progress >= level.printRevealAt);
+      printChip.classList.toggle("show", showPrint);
+      slider.value = state.progress;
+      updateProgressLights(state.progress);
+      renderSoundBars(state.progress);
+      renderWordButtons();
+      renderRecordedList();
+
+      const inHomeMode = state.mode === "home";
+      homePanel.classList.toggle("hidden", !inHomeMode);
+      homeControls.classList.toggle("hidden", !inHomeMode);
+      modeSummary.textContent = inHomeMode ? "Listen, practice, record loop" : "Teacher-led board view";
+      modeButtons.forEach((button) => {
+        button.classList.toggle("active", button.dataset.mode === state.mode);
+      });
+    }
+
+    async function startRecording() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === "undefined") {
+        recordingStatus.textContent = "Recording not supported in this browser";
+        return;
+      }
+
+      try {
+        state.progress = 0;
+        recordingStatus.textContent = "Get ready...";
+        await runCountdown();
+        state.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        state.audioChunks = [];
+        state.mediaRecorder = new MediaRecorder(state.stream);
+        const startedAt = Date.now();
+
+        state.mediaRecorder.addEventListener("dataavailable", (event) => {
+          if (event.data.size > 0) {
+            state.audioChunks.push(event.data);
+          }
+        });
+
+        state.mediaRecorder.addEventListener("stop", () => {
+          const blob = new Blob(state.audioChunks, { type: state.mediaRecorder.mimeType || "audio/webm" });
+          const url = URL.createObjectURL(blob);
+          playback.src = url;
+          playback.hidden = false;
+          state.latestDuration = (Date.now() - startedAt) / 1000;
+          state.attempts += 1;
+          state.recordedWords[currentWord().word] = true;
+          recordingStatus.textContent = "Sample captured and queued for AI profile";
+          if (state.stream) {
+            state.stream.getTracks().forEach((track) => track.stop());
+          }
+          state.stream = null;
+          state.recording = false;
+          recordBtn.textContent = "Start Recording";
+          recordBtn.classList.add("primary");
+          recordBtn.classList.remove("active");
+          stopAutoSlide();
+          updateHomeStatus("record");
+          renderRecordedList();
+          render();
+        });
+
+        state.mediaRecorder.start();
+        state.recording = true;
+        recordBtn.textContent = "Stop Recording";
+        recordBtn.classList.remove("primary");
+        recordBtn.classList.add("active");
+        recordingStatus.textContent = "Recording sample...";
+        updateHomeStatus("record");
+        runAutoSlide(3600, {
+          allowWithoutRecording: true,
+          withListenCues: false,
+          stopRecordingAtEnd: true
+        });
+      } catch (error) {
+        state.countdownValue = null;
+        recordingStatus.textContent = "Microphone permission was blocked";
+        render();
+      }
+    }
+
+    function stopRecording() {
+      if (state.mediaRecorder && state.recording) {
+        state.mediaRecorder.stop();
+      }
+      stopAutoSlide();
+    }
+
+    slider.addEventListener("input", (event) => {
+      state.progress = Number(event.target.value);
+      if (state.mode === "home" && state.homeStep === "listen") {
+        updateListenCue(state.progress);
+      } else if (state.mode === "class") {
+        updateTeacherCue(state.progress);
+      }
+      render();
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      state.progress = 0;
+      render();
+    });
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      state.index = randomNextIndex();
+      state.progress = 0;
+      state.round += 1;
+      updateHomeStatus("listen");
+      render();
+    });
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        state.mode = button.dataset.mode;
+        state.progress = 0;
+        updateHomeStatus("listen");
+        render();
+      });
+    });
+
+    levelSelect.addEventListener("change", (event) => {
+      state.level = event.target.value;
+      state.progress = 0;
+      render();
+    });
+
+    listenSampleBtn.addEventListener("click", () => {
+      runListenDemo();
+    });
+
+    practiceWordBtn.addEventListener("click", () => {
+      updateHomeStatus("practice");
+      recordingStatus.textContent = "Practice mode ready";
+    });
+
+    recordBtn.addEventListener("click", async () => {
+      if (state.recording) {
+        stopRecording();
+      } else {
+        await startRecording();
+      }
+    });
+
+    submitBtn.addEventListener("click", () => {
+      if (submitBtn.disabled) return;
+      recordingStatus.textContent = "All recordings submitted";
+    });
+
+    window.render_game_to_text = () => JSON.stringify({
+      mode: state.mode,
+      word: currentWord().word,
+      progress: state.progress,
+      home_step: state.homeStep,
+      attempts: state.attempts,
+      latest_duration: state.latestDuration,
+      recorded_count: words.filter((item) => state.recordedWords[item.word]).length
+    });
+
+    window.advanceTime = () => {};
+
+    updateHomeStatus("listen");
+    levelSelect.value = state.level;
+    render();
+  </script>
+</body>
+</html>
+
