@@ -343,7 +343,7 @@ const nextBtn=document.getElementById("nextBtn");
 function speak(text, phoneme, cb){
   if(phoneme){
     // Use pre-recorded audio files for phonemes
-    const audio = new Audio("sounds/" + text + ".m4a");
+    const audio = new Audio("assets/audio/elkonin/" + text + ".m4a");
     audio.onerror = () => {
       // Fallback to TTS if file not found
       const u = new SpeechSynthesisUtterance(PHON[text]||text);
@@ -807,5 +807,6 @@ render();
 </script>
 </body>
 </html>
+
 
 
