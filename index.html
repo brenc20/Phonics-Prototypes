@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -6,142 +6,107 @@
   <title>Phonics Prototypes</title>
   <style>
     :root {
-      --bg: #eef5fb;
-      --panel: #ffffff;
+      --bg1: #eef5fb;
+      --bg2: #d8edf8;
+      --panel: rgba(255,255,255,0.95);
       --line: #d6e1ec;
       --navy: #12395a;
-      --blue: #2f80ed;
+      --muted: #557089;
       --gold: #ffdb68;
+      --mint: #dff4e8;
+      --blue: #dfeeff;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      background: linear-gradient(180deg, #eef5fb 0%, #d8edf8 100%);
-      color: var(--navy);
       min-height: 100vh;
-      padding: 32px 20px;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
     }
     .wrap {
-      max-width: 960px;
-      margin: 0 auto;
+      width: min(1120px, 100%);
     }
     .hero {
-      background: rgba(255,255,255,0.86);
+      background: var(--panel);
       border: 2px solid var(--line);
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 18px 30px rgba(22,53,84,0.10);
-      margin-bottom: 18px;
+      border-radius: 28px;
+      padding: 30px 32px;
+      box-shadow: 0 20px 36px rgba(22,53,84,0.12);
+      margin-bottom: 22px;
+      text-align: center;
     }
     h1 {
-      margin: 0 0 8px;
-      font-size: 34px;
-      line-height: 1.1;
+      margin: 0 0 10px;
+      font-size: 40px;
+      line-height: 1.05;
     }
-    p {
+    .hero p {
       margin: 0;
-      font-size: 16px;
+      font-size: 17px;
       line-height: 1.5;
-    }
-    .top-nav {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 22px;
-    }
-    .top-btn {
-      text-decoration: none;
-      text-align: center;
-      padding: 16px 18px;
-      border-radius: 18px;
-      background: #fff;
-      border: 2px solid var(--line);
-      color: var(--navy);
-      font-weight: 900;
-      box-shadow: 0 12px 22px rgba(22,53,84,0.08);
-    }
-    .section {
-      margin-bottom: 26px;
-    }
-    .section-head {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-    .section-head h2 {
-      margin: 0;
-      font-size: 28px;
-      color: var(--navy);
-    }
-    .section-head p {
-      font-size: 14px;
-      color: #4f6982;
-      max-width: 560px;
+      color: var(--muted);
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
     }
-    .card {
-      background: var(--panel);
-      border: 2px solid var(--line);
-      border-radius: 22px;
-      padding: 20px;
-      box-shadow: 0 14px 24px rgba(22,53,84,0.08);
+    .tile {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
+      min-height: 280px;
+      padding: 26px 24px;
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 26px;
+      box-shadow: 0 18px 28px rgba(22,53,84,0.10);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.14s ease, box-shadow 0.14s ease;
     }
-    .tag {
+    .tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 34px rgba(22,53,84,0.14);
+    }
+    .pill {
       align-self: flex-start;
-      padding: 6px 10px;
+      padding: 7px 11px;
       border-radius: 999px;
-      background: rgba(47,128,237,0.14);
-      color: var(--navy);
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: .3px;
+      text-transform: uppercase;
     }
-    .card h2 {
+    .pill.blue { background: var(--blue); }
+    .pill.mint { background: var(--mint); }
+    .pill.gold { background: rgba(255,219,104,0.42); }
+    .tile h2 {
       margin: 0;
-      font-size: 22px;
+      font-size: 28px;
+      line-height: 1.1;
     }
-    .card p {
-      font-size: 14px;
-      color: #4f6982;
+    .tile p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
       flex: 1;
     }
-    .launch {
-      text-decoration: none;
-      text-align: center;
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: var(--gold);
-      color: #17324f;
+    .cta {
       font-weight: 900;
-      border: 1px solid rgba(23,50,79,0.12);
+      font-size: 14px;
+      color: var(--navy);
     }
-    .note {
-      margin-top: 18px;
-      padding: 14px 16px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.72);
-      border: 1px solid var(--line);
-      font-size: 13px;
-      color: #4f6982;
-    }
-    @media (max-width: 780px) {
-      .top-nav {
-        grid-template-columns: 1fr;
-      }
-      .section-head {
-        flex-direction: column;
-        align-items: flex-start;
-      }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .tile { min-height: 0; }
+      h1 { font-size: 32px; }
     }
   </style>
 </head>
@@ -149,99 +114,28 @@
   <div class="wrap">
     <div class="hero">
       <h1>POLY Phonics Prototypes</h1>
-      <p>Open each prototype in a new tab or return to this page using your back button on your browser to come back to this menu.</p>
+      <p>Select the section you want to open. Instructional and diagnostic activities each open to their own menu page. Dashboard opens directly.</p>
     </div>
-
-    <div class="top-nav">
-      <a class="top-btn" href="#instructional">Instructional Prototypes</a>
-      <a class="top-btn" href="#diagnostic">Diagnostic and Practice Activity</a>
-      <a class="top-btn" href="#dashboard">Dashboard</a>
-    </div>
-
-    <section class="section" id="instructional">
-      <div class="section-head">
-        <h2>Instructional Prototypes</h2>
-        <p>Teacher-led or classroom-use prototype activities focused on modeling, guided support, and lesson delivery.</p>
-      </div>
-      <div class="grid">
-        <div class="card">
-          <div class="tag">Classroom Tool</div>
-          <h2>Elkonin Boxes</h2>
-          <p>Teacher-led sound segmentation and guided new-word instruction prototype.</p>
-          <a class="launch" href="Elkonin_Classroom_Activity.html">Open Prototype</a>
-        </div>
-
-        <div class="card">
-          <div class="tag">Blending</div>
-          <h2>Continuous Blending Slider</h2>
-          <p>Picture-first blending and home practice concept with class and home views.</p>
-          <a class="launch" href="foundational_continuous_blending_slider.html">Open Prototype</a>
-        </div>
-
-        <div class="card">
-          <div class="tag">Reading Transfer</div>
-          <h2>Fall Instructional</h2>
-          <p>Board and tablet reading-transfer activity moving from words into phrases and sentences.</p>
-          <a class="launch" href="ecp6_reading_transfer_fall.html">Open Prototype</a>
-        </div>
-
-        <div class="card">
-          <div class="tag">Spelling Transfer</div>
-          <h2>Train Instructional</h2>
-          <p>Instructional train game with guided spelling transfer and classroom-use lesson flow.</p>
-          <a class="launch" href="ecp6_spelling_transfer_train_instructional.html">Open Prototype</a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="diagnostic">
-      <div class="section-head">
-        <h2>Diagnostic and Practice Activity</h2>
-        <p>Student-facing diagnostic and practice games that feed the shared phonics dashboard and error reporting layer.</p>
-      </div>
-      <div class="grid">
-        <div class="card">
-          <div class="tag">Runner</div>
-          <h2>Crystal Planet Runner</h2>
-          <p>Runner-style diagnostic activity with listening-based phonics questions and shared dashboard logging.</p>
-          <a class="launch" href="crystal_planet_phonics_runner.html">Open Activity</a>
-        </div>
-
-        <div class="card">
-          <div class="tag">Spelling Diagnostic</div>
-          <h2>Train Diagnostic</h2>
-          <p>Diagnostic/practice version of the spelling train with error flagging and reporting support.</p>
-          <a class="launch" href="ecp6_spelling_transfer_train_diagnostic.html">Open Activity</a>
-        </div>
-
-        <div class="card">
-          <div class="tag">Reading Diagnostic</div>
-          <h2>Fall Diagnostic</h2>
-          <p>Reading diagnostic version of the fall game with free/diagnostic logic and dashboard export.</p>
-          <a class="launch" href="ecp_reading_transfer_diagnostic.html">Open Activity</a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="dashboard">
-      <div class="section-head">
+    <div class="grid">
+      <a class="tile" href="instructional.html">
+        <div class="pill blue">Teacher-Led</div>
+        <h2>Instructional</h2>
+        <p>Open the classroom modeling and lesson-delivery prototypes, including Elkonin, blending, reading transfer, and spelling transfer.</p>
+        <div class="cta">Open Instructional Menu -></div>
+      </a>
+      <a class="tile" href="diagnostic_practice.html">
+        <div class="pill mint">Student-Facing</div>
+        <h2>Diagnostic / Practice</h2>
+        <p>Open the game-based diagnostic and practice activities, including Runner, Fall, and Train.</p>
+        <div class="cta">Open Diagnostic Menu -></div>
+      </a>
+      <a class="tile" href="diagnostic_dashboard.html">
+        <div class="pill gold">Reporting</div>
         <h2>Dashboard</h2>
-        <p>Teacher-facing reporting view for student activity results, error tags, review recordings, and class summaries.</p>
-      </div>
-      <div class="grid">
-        <div class="card">
-          <div class="tag">Reporting</div>
-          <h2>Diagnostic Dashboard</h2>
-          <p>Shared dashboard showing student reports, activity feedback, AI review areas, and phonics error summaries.</p>
-          <a class="launch" href="diagnostic_dashboard.html">Open Dashboard</a>
-        </div>
-      </div>
-    </section>
-
-    <div class="note">
-      Use the top buttons to jump between prototype groups quickly during demos or meetings.
+        <p>Go straight to the reporting dashboard for class summaries, student reports, voice review, and flagged phonics skills.</p>
+        <div class="cta">Open Dashboard -></div>
+      </a>
     </div>
   </div>
 </body>
 </html>
-

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnostic / Practice Activities</title>
+  <style>
+    :root {
+      --bg1: #eef5fb;
+      --bg2: #d8edf8;
+      --panel: rgba(255,255,255,0.95);
+      --line: #d6e1ec;
+      --navy: #12395a;
+      --muted: #557089;
+      --gold: #ffdb68;
+      --blue: #dfeeff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+      color: var(--navy);
+      padding: 28px;
+    }
+    .wrap {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+    }
+    .hero {
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 28px;
+      padding: 28px 30px;
+      box-shadow: 0 20px 36px rgba(22,53,84,0.12);
+      margin-bottom: 22px;
+    }
+    .back {
+      display: inline-flex;
+      margin-bottom: 14px;
+      text-decoration: none;
+      color: var(--navy);
+      font-weight: 900;
+      font-size: 14px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.08;
+    }
+    .hero p {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.5;
+      color: var(--muted);
+      max-width: 760px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 24px;
+      padding: 22px 20px;
+      box-shadow: 0 16px 26px rgba(22,53,84,0.10);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tag {
+      align-self: flex-start;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+    .card h2 {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.15;
+    }
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+      flex: 1;
+    }
+    .launch {
+      text-decoration: none;
+      text-align: center;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--gold);
+      color: #17324f;
+      font-weight: 900;
+      border: 1px solid rgba(23,50,79,0.12);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <a class="back" href="index.html"><- Back to Main Menu</a>
+      <h1>Diagnostic / Practice Activities</h1>
+      <p>Student-facing phonics games designed for practice, silent diagnostic capture, and shared dashboard reporting.</p>
+    </div>
+    <div class="grid">
+      
+      <div class="card">
+        <div class="tag">Runner</div>
+        <h2>Crystal Planet Runner</h2>
+        <p>Listening-based phonics runner tied into the shared diagnostic dashboard.</p>
+        <a class="launch" href="crystal_planet_phonics_runner.html">Open</a>
+      </div>
+    
+
+      <div class="card">
+        <div class="tag">Spelling Diagnostic</div>
+        <h2>Train Diagnostic</h2>
+        <p>Diagnostic and practice train activity with captured spelling responses.</p>
+        <a class="launch" href="ecp6_spelling_transfer_train_diagnostic.html">Open</a>
+      </div>
+    
+
+      <div class="card">
+        <div class="tag">Reading Diagnostic</div>
+        <h2>Fall Diagnostic</h2>
+        <p>Diagnostic and practice reading transfer game with dashboard logging.</p>
+        <a class="launch" href="ecp_reading_transfer_diagnostic.html">Open</a>
+      </div>
+    
+    </div>
+  </div>
+</body>
+</html>
