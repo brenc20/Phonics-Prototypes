@@ -369,6 +369,12 @@
       font-size:11px;
       line-height:1.35;
       color:#694f0a;
+      transition:background .16s ease, border-color .16s ease, color .16s ease;
+    }
+    .ai-box.confirmed{
+      background:#dff4e8;
+      border-color:#8dc5a0;
+      color:#1f6d41;
     }
     .ai-box strong{
       color:#5b4208;
@@ -1020,7 +1026,7 @@
             </div>
             <button class="play-btn" onclick="playRecordingDemo('${row.word}', '${row.audioSrc || ""}')">Play Recording</button>
           </div>
-          <div class="ai-box">
+          <div class="ai-box" id="${row.id}-aibox">
             <strong>AI Evaluation:</strong>
             ${row.aiLabel === "okay"
               ? `Okay`
@@ -1477,6 +1483,10 @@
 
     function confirmAiEvaluation(rowId, aiLabel) {
       const status = document.getElementById(`${rowId}-status`);
+      const aiBox = document.getElementById(`${rowId}-aibox`);
+      if (aiBox) {
+        aiBox.classList.add("confirmed");
+      }
       if (status) {
         status.textContent = `AI evaluation confirmed as: ${aiLabel}.`;
       }
