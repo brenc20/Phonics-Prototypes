@@ -1,0 +1,1527 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poly Phonics Class Dashboard</title>
+  <style>
+    :root{
+      --ink:#17324a;
+      --muted:#61798e;
+      --line:#c7d5e2;
+      --paper:#fffdf8;
+      --sky:#dbe8f3;
+      --panel:#ffffff;
+      --gold:#f2cf72;
+      --gold-deep:#b88728;
+      --mint:#dff4e8;
+      --rose:#fde8e7;
+      --blue:#2d6fae;
+      --navy:#102f4a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Segoe UI", Arial, sans-serif;
+      background:linear-gradient(180deg,#dce8f2 0%,#c9d9e7 100%);
+      color:var(--ink);
+      min-height:100vh;
+      padding:20px 16px 28px;
+    }
+    .wrap{
+      max-width:1280px;
+      margin:0 auto;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+    .hero,.panel{
+      background:rgba(255,255,255,.97);
+      border:1px solid var(--line);
+      border-radius:16px;
+      box-shadow:0 10px 22px rgba(19,55,85,.08);
+    }
+    .hero{
+      padding:18px 20px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:18px;
+    }
+    h1{
+      margin:0 0 6px;
+      font-size:30px;
+      line-height:1.04;
+      color:var(--navy);
+    }
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.55;
+      max-width:760px;
+    }
+    .hero-actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:flex-end;
+    }
+    .action, button{
+      border:none;
+      border-radius:10px;
+      padding:10px 14px;
+      font-weight:800;
+      font-size:12px;
+      cursor:pointer;
+      text-decoration:none;
+    }
+    .action{
+      background:#ffffff;
+      color:var(--navy);
+      border:1px solid rgba(19,55,85,.10);
+    }
+    .action.primary{
+      background:var(--gold);
+      color:#6a4b00;
+    }
+    .panel{
+      padding:14px 16px 16px;
+    }
+    .report-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(13,31,49,.52);
+      backdrop-filter:blur(6px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      z-index:1000;
+    }
+    .report-modal.show{
+      display:flex;
+    }
+    .report-modal-card{
+      width:min(1120px,96vw);
+      max-height:92vh;
+      overflow:auto;
+      background:#f9fbfd;
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow:0 22px 48px rgba(19,55,85,.16);
+      padding:14px 16px 18px;
+      position:relative;
+    }
+    .report-modal-close{
+      position:absolute;
+      top:14px;
+      right:14px;
+      width:42px;
+      height:42px;
+      border-radius:999px;
+      border:none;
+      background:#eef3f8;
+      color:var(--navy);
+      font-size:22px;
+      font-weight:900;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      line-height:1;
+    }
+    .panel h2{
+      margin:0 0 10px;
+      color:var(--navy);
+      font-size:18px;
+    }
+    .toolbar{
+      display:grid;
+      grid-template-columns:1fr 1fr auto;
+      gap:10px;
+      align-items:end;
+    }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .field label{
+      font-size:12px;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:900;
+    }
+    select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:#ffffff;
+      color:var(--ink);
+      font:inherit;
+      font-weight:700;
+    }
+    .meta-row{
+      margin-top:14px;
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 11px;
+      border-radius:999px;
+      background:#f4f8fb;
+      border:1px solid var(--line);
+      color:var(--navy);
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.3px;
+      text-transform:uppercase;
+    }
+    .student-table{
+      width:100%;
+      border-collapse:collapse;
+      overflow:hidden;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#ffffff;
+    }
+    .student-table th,
+    .student-table td{
+      padding:10px 10px;
+      border-bottom:1px solid #e8eef4;
+      text-align:left;
+      vertical-align:top;
+      font-size:13px;
+    }
+    .student-table th{
+      background:#edf4fa;
+      color:var(--navy);
+      font-size:11px;
+      letter-spacing:.5px;
+      text-transform:uppercase;
+    }
+    .student-name{
+      font-weight:900;
+      color:var(--navy);
+      font-size:14px;
+    }
+    .tiny{
+      display:block;
+      margin-top:4px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:5px 9px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      margin-bottom:4px;
+    }
+    .status.done{
+      background:var(--mint);
+      color:#1f7a4a;
+    }
+    .status.pending{
+      background:#eef3f8;
+      color:#65798b;
+    }
+    .status.flagged{
+      background:var(--rose);
+      color:#a53d47;
+    }
+    .mini-note{
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+    .report-shell{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .report-header{
+      padding:10px 12px;
+      border-radius:12px;
+      background:#eef4f9;
+      border:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .report-header h3{
+      margin:0 0 4px;
+      color:var(--navy);
+      font-size:19px;
+    }
+    .report-header p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .summary-badges{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .summary-box{
+      min-width:auto;
+      padding:6px 10px;
+      border-radius:999px;
+      background:#ffffff;
+      border:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .summary-box .label{
+      font-size:10px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.35px;
+      color:var(--muted);
+      margin-bottom:0;
+    }
+    .summary-box .value{
+      font-size:13px;
+      font-weight:800;
+      color:var(--navy);
+    }
+    .activity-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+    }
+    .recording-panel{
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#ffffff;
+      padding:10px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .recording-panel h4{
+      margin:0;
+      color:var(--navy);
+      font-size:16px;
+    }
+    .recording-list{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+      gap:10px;
+    }
+    .recording-card{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:10px;
+      background:#f5f9fc;
+      padding:8px 9px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .recording-top{
+      display:flex;
+      justify-content:space-between;
+      gap:8px;
+      align-items:center;
+    }
+    .recording-title{
+      font-weight:900;
+      color:var(--navy);
+      font-size:14px;
+      line-height:1.2;
+    }
+    .recording-sub{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.3;
+      margin-top:2px;
+    }
+    .play-btn{
+      border:none;
+      border-radius:999px;
+      padding:7px 12px;
+      background:var(--gold);
+      color:#694d06;
+      font-weight:800;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+        .ai-box{
+      border-radius:9px;
+      padding:7px 8px;
+      background:#fff9eb;
+      border:1px solid rgba(242,207,114,.40);
+      font-size:11px;
+      line-height:1.35;
+      color:#694f0a;
+    }
+    .ai-box strong{
+      color:#5b4208;
+    }
+        .override-row{
+      display:grid;
+      grid-template-columns:1fr auto auto;
+      gap:6px;
+      align-items:center;
+    }
+    .override-row select{
+      min-width:0;
+      padding:7px 9px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:#ffffff;
+      color:var(--ink);
+      font:inherit;
+      font-weight:700;
+    }
+    .override-btn{
+      border:none;
+      border-radius:10px;
+      padding:7px 9px;
+      font-weight:800;
+      cursor:pointer;
+      background:#edf3f8;
+      color:var(--navy);
+    }
+    .override-btn.primary{
+      background:var(--gold);
+      color:#694d06;
+    }
+        .override-state{
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.3;
+    }
+    .activity-card{
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#ffffff;
+      padding:10px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      min-height:0;
+    }
+    .activity-card h4{
+      margin:0;
+      color:var(--navy);
+      font-size:16px;
+    }
+    .activity-sub{
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.45;
+    }
+    .kpi-row{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+    }
+    .kpi{
+      border-radius:10px;
+      background:#f5f9fc;
+      border:1px solid #e3ebf2;
+      padding:7px 9px;
+    }
+    .kpi .label{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.4px;
+      color:var(--muted);
+      font-weight:900;
+      margin-bottom:6px;
+    }
+    .kpi .value{
+      font-size:17px;
+      color:var(--navy);
+      font-weight:900;
+    }
+    .feedback-block{
+      padding:9px 10px;
+      border-radius:10px;
+      background:#fff9eb;
+      border:1px solid rgba(242,207,114,.40);
+      color:#694f0a;
+      font-size:12px;
+      line-height:1.55;
+    }
+    .feedback-block strong{
+      color:#5b4208;
+    }
+    .bullets{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .attempt-list{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .attempt-card{
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:10px;
+      background:#f5f9fc;
+      padding:7px 9px;
+      font-size:12px;
+      line-height:1.5;
+      color:var(--ink);
+    }
+    .attempt-card strong{
+      color:var(--navy);
+    }
+    .bullet{
+      padding:7px 9px;
+      border-radius:10px;
+      background:#f5f9fc;
+      border:1px solid #e3ebf2;
+      font-size:12px;
+      line-height:1.5;
+      color:var(--ink);
+    }
+    .bullet strong{
+      color:var(--navy);
+    }
+    .empty{
+      padding:20px 14px;
+      border-radius:10px;
+      border:1px dashed #c7d5e2;
+      background:rgba(255,255,255,.72);
+      color:var(--muted);
+      text-align:center;
+      line-height:1.6;
+    }
+    .report-btn{
+      background:var(--gold);
+      color:#694d06;
+      border:none;
+      border-radius:10px;
+      padding:7px 9px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .row-actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .row-action-btn,
+    .section-action-btn{
+      border:none;
+      border-radius:10px;
+      padding:7px 10px;
+      font-size:11px;
+      font-weight:800;
+      cursor:pointer;
+      background:#edf3f8;
+      color:var(--navy);
+    }
+    .section-actions{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+    .action-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(13,31,49,.42);
+      backdrop-filter:blur(4px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:1100;
+    }
+    .action-modal.show{
+      display:flex;
+    }
+    .action-modal-card{
+      width:min(560px,94vw);
+      background:#f9fbfd;
+      color:var(--ink);
+      border:1px solid var(--line);
+      border-radius:16px;
+      box-shadow:0 16px 34px rgba(19,55,85,.16);
+      padding:14px;
+    }
+    .action-modal-head{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+      margin-bottom:10px;
+    }
+    .action-modal-head h4{
+      margin:0 0 4px;
+      color:var(--navy);
+      font-size:18px;
+    }
+    .action-modal-head p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+    .action-list{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      margin:10px 0 14px;
+    }
+    .action-list-item{
+      padding:7px 9px;
+      border-radius:10px;
+      background:#eef4f9;
+      border:1px solid #dbe5ee;
+      font-size:12px;
+      line-height:1.45;
+      color:var(--ink);
+    }
+    .action-list-item.selectable{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      cursor:pointer;
+      background:#f7fafc;
+    }
+    .action-list-item.selectable input{
+      width:16px;
+      height:16px;
+      accent-color:#2d6fa3;
+      margin:0;
+      flex:0 0 auto;
+    }
+    .action-list-item.selectable span{
+      display:block;
+      flex:1;
+    }
+    .action-modal-actions{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+    }
+    @media (max-width: 1020px){
+      .toolbar{grid-template-columns:1fr}
+      .activity-grid{grid-template-columns:1fr}
+      .hero{flex-direction:column}
+      .hero-actions{justify-content:flex-start}
+      .override-row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <h1>Poly Phonics Class Dashboard</h1>
+        <p>Select a level and class, generate a small student list, and then open a teacher-style report that pulls feedback from the shared Train, Runner, and Fall diagnostic games.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="action" href="index.html">Back to Menu</a>
+        <a class="action" href="ecp6_spelling_transfer_train_diagnostic.html">Train</a>
+        <a class="action" href="crystal_planet_phonics_runner.html">Runner</a>
+        <a class="action" href="ecp_reading_transfer_diagnostic.html">Fall</a>
+        <button class="action primary" id="clearDataBtn">Clear Data</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Class Setup</h2>
+      <div class="toolbar">
+        <div class="field">
+          <label for="levelSelect">Level</label>
+          <select id="levelSelect">
+            <option value="ECP5" disabled>ECP5 (Unavailable)</option>
+            <option value="ECP6" selected>ECP6</option>
+            <option value="ECP6M" disabled>ECP6M (Unavailable)</option>
+            <option value="ECP7">ECP7</option>
+            <option value="ECP7I" disabled>ECP7i (Unavailable)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="classSelect">Class</label>
+          <select id="classSelect"></select>
+        </div>
+        <button id="generateStudentsBtn" class="action primary">Generate Student List</button>
+      </div>
+      <div class="meta-row">
+        <div class="chip" id="availabilityChip">Available games will be pulled from the shared diagnostic store.</div>
+        <div class="chip" id="sessionChip">0 stored sessions found</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Lesson 1 Activity Grid</h2>
+      <div id="studentGrid"></div>
+    </div>
+
+  </div>
+
+  <div class="report-modal" id="reportModal" aria-hidden="true">
+    <div class="report-modal-card">
+      <button class="report-modal-close" id="reportModalClose" aria-label="Close report">×</button>
+      <div id="reportArea"></div>
+    </div>
+  </div>
+
+  <div class="action-modal" id="actionModal" aria-hidden="true">
+    <div class="action-modal-card">
+      <div class="action-modal-head">
+        <div>
+          <h4 id="actionModalTitle">Action</h4>
+          <p id="actionModalText"></p>
+        </div>
+      </div>
+      <div class="action-list" id="actionModalList"></div>
+      <div class="action-modal-actions">
+        <button class="row-action-btn" id="actionModalCancel">Cancel</button>
+        <button class="report-btn" id="actionModalConfirm">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORE_KEY = "polyPhonicsDiagnosticStoreV1";
+    const WORKSHEET_URL = "file:///C:/Users/USER/OneDrive/Desktop/HQ%20Projects/Phonics/Short%20Vowel%20Aa%20Worksheet.pdf";
+    const CLASS_BY_LEVEL = {
+      ECP6: ["Cedar"],
+      ECP7: ["Willow"]
+    };
+    const STUDENT_POOLS = {
+      ECP6: ["Minji","Jiwon","Seojun","Yuna","Hajun","Jiyeon","Dohyun","Somin"],
+      ECP7: ["Ethan","Sora","Jisoo","Theo","Mina","Ian","Nari","Leo"]
+    };
+    const ACTIVITY_DEFS = [
+      {
+        id: "train",
+        label: "Lesson 1 - Train",
+        gameIds: ["ecp6_spelling_transfer_train"],
+        fallback: "Spelling transfer / encoding"
+      },
+      {
+        id: "runner",
+        label: "Lesson 1 - Runner",
+        gameIds: ["crystal-planet-phonics-runner"],
+        fallback: "Listening and word recognition"
+      },
+      {
+        id: "fall",
+        label: "Lesson 1 - Fall",
+        gameIds: ["ecp-reading-diagnostic"],
+        fallback: "Reading transfer and context"
+      }
+    ];
+    const DEMO_ACTIVITY_CONFIG = {
+      ECP6: {
+        train: { words: ["bag","bat","map","jam","cap"], pattern: "Short a spelling transfer", taskType: "spelling" },
+        runner: { words: ["bag","cap","jam","bat","map"], pattern: "Short vowels and CVC recognition", taskType: "reading" },
+        fall: { words: ["bag","pin","hop","fed","cut"], pattern: "Short Vowel CVC", taskType: "reading" }
+      },
+      ECP7: {
+        train: { words: ["cake","pine","bone","bike","cute"], pattern: "Silent-e spelling transfer", taskType: "spelling" },
+        runner: { words: ["cake","pine","bone","bike","cute"], pattern: "Silent-e recognition", taskType: "reading" },
+        fall: { words: ["cake","pine","bone","bike","cute"], pattern: "Silent-e CVCe", taskType: "reading" }
+      }
+    };
+    const DEMO_ERROR_LIBRARY = {
+      ECP6: {
+        bag: { response: "beg", errorType: "short vowel confusion", chairman_label: "short vowel confusion", error_code: "SHORT_VOWEL_SHIFT", confidence: 0.87, task_type: "reading", dashboard_group: "vowel_errors" },
+        bat: { response: "ba", errorType: "final sound missing", chairman_label: "final sound missing", error_code: "FINAL_CONSONANT_DELETION", confidence: 0.84, task_type: "spelling", dashboard_group: "coda_errors" },
+        map: { response: "mab", errorType: "similar consonant-pair confusion", chairman_label: "similar consonant-pair confusion", error_code: "SIMILAR_CONSONANT_SHIFT", confidence: 0.79, task_type: "reading", dashboard_group: "consonant_errors" },
+        jam: { response: "jem", errorType: "short vowel confusion", chairman_label: "short vowel confusion", error_code: "SHORT_VOWEL_SHIFT", confidence: 0.82, task_type: "reading", dashboard_group: "vowel_errors" },
+        cap: { response: "ca", errorType: "final sound missing", chairman_label: "final sound missing", error_code: "FINAL_CONSONANT_DELETION", confidence: 0.8, task_type: "spelling", dashboard_group: "coda_errors" },
+        pin: { response: "pen", errorType: "short vowel confusion", chairman_label: "short vowel confusion", error_code: "SHORT_VOWEL_SHIFT", confidence: 0.85, task_type: "reading", dashboard_group: "vowel_errors" },
+        hop: { response: "ho", errorType: "final sound missing", chairman_label: "final sound missing", error_code: "FINAL_CONSONANT_DELETION", confidence: 0.83, task_type: "reading", dashboard_group: "coda_errors" },
+        fed: { response: "fad", errorType: "short vowel confusion", chairman_label: "short vowel confusion", error_code: "SHORT_VOWEL_SHIFT", confidence: 0.81, task_type: "reading", dashboard_group: "vowel_errors" },
+        cut: { response: "cat", errorType: "short vowel confusion", chairman_label: "short vowel confusion", error_code: "SHORT_VOWEL_SHIFT", confidence: 0.8, task_type: "reading", dashboard_group: "vowel_errors" }
+      },
+      ECP7: {
+        cake: { response: "cak", errorType: "CVCe / final-e error", chairman_label: "CVCe / final-e error", error_code: "FINAL_E_RULE_NOT_REALIZED", confidence: 0.9, task_type: "reading", dashboard_group: "pattern_errors" },
+        pine: { response: "pin", errorType: "CVCe / final-e error", chairman_label: "CVCe / final-e error", error_code: "FINAL_E_RULE_NOT_REALIZED", confidence: 0.9, task_type: "reading", dashboard_group: "pattern_errors" },
+        bone: { response: "bon", errorType: "CVCe / final-e error", chairman_label: "CVCe / final-e error", error_code: "FINAL_E_RULE_NOT_REALIZED", confidence: 0.89, task_type: "spelling", dashboard_group: "pattern_errors" },
+        bike: { response: "bik", errorType: "CVCe / final-e error", chairman_label: "CVCe / final-e error", error_code: "FINAL_E_RULE_NOT_REALIZED", confidence: 0.88, task_type: "reading", dashboard_group: "pattern_errors" },
+        cute: { response: "cut", errorType: "CVCe / final-e error", chairman_label: "CVCe / final-e error", error_code: "FINAL_E_RULE_NOT_REALIZED", confidence: 0.9, task_type: "spelling", dashboard_group: "pattern_errors" }
+      }
+    };
+
+    let generatedStudents = [];
+    let pendingAction = null;
+
+    function loadStore() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (!raw) return { sessions: [], lastSessionId: null };
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed.sessions) ? parsed : { sessions: [], lastSessionId: null };
+      } catch (error) {
+        return { sessions: [], lastSessionId: null };
+      }
+    }
+
+    function shuffleArray(items) {
+      const arr = items.slice();
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function updateClassOptions() {
+      const level = document.getElementById("levelSelect").value;
+      const classes = CLASS_BY_LEVEL[level] || [];
+      const classSelect = document.getElementById("classSelect");
+      classSelect.innerHTML = classes.map((name) => `<option value="${name}">${name}</option>`).join("");
+      updateMeta();
+    }
+
+    function levelMatchesSession(session, level) {
+      return String(session.level || "").toUpperCase() === String(level || "").toUpperCase();
+    }
+
+    function getSessionsForActivity(level, activityId) {
+      const store = loadStore();
+      const def = ACTIVITY_DEFS.find((item) => item.id === activityId);
+      if (!def) return [];
+      return (store.sessions || []).filter((session) => {
+        return def.gameIds.includes(session.gameId) && levelMatchesSession(session, level);
+      });
+    }
+
+    function cloneSession(session) {
+      return session ? JSON.parse(JSON.stringify(session)) : null;
+    }
+
+    function summarizeFlags(session) {
+      const counts = {};
+      (session.attempts || []).forEach((attempt) => {
+        (attempt.flags || []).forEach((flag) => {
+          counts[flag.errorType] = (counts[flag.errorType] || 0) + 1;
+        });
+      });
+      return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    }
+
+    function uniqueWords(session) {
+      return [...new Set((session.attempts || []).map((attempt) => attempt.targetWord).filter(Boolean))];
+    }
+
+    function buildFeedbackText(session, activityLabel) {
+      if (!session) {
+        return `No ${activityLabel} data has been recorded for this level yet.`;
+      }
+      const topFlags = summarizeFlags(session);
+      const words = uniqueWords(session).slice(0, 4);
+      if (!topFlags.length) {
+        return `This student moved through ${activityLabel.toLowerCase()} cleanly. Covered words included ${words.join(", ") || "the lesson set"}.`;
+      }
+      const [topLabel, topCount] = topFlags[0];
+      return `Most notable issue was ${topLabel} (${topCount}). Words touched in this activity included ${words.join(", ") || "the current lesson set"}.`;
+    }
+
+    function buildCoachNote(session, activityLabel) {
+      if (!session) {
+        return `Use ${activityLabel.toLowerCase()} next to collect first-pass evidence for this student.`;
+      }
+      const topFlags = summarizeFlags(session).slice(0, 2);
+      if (!topFlags.length) {
+        return `No flagged errors were captured here. This activity looked stable for this student.`;
+      }
+      return `Teacher focus: revisit ${topFlags.map(([label]) => label).join(" and ")} during follow-up support.`;
+    }
+
+    function formatAttemptTime(iso) {
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return iso || "-";
+      return date.toLocaleString("en-US", { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+    }
+
+    function buildAttemptDetailList(session) {
+      if (!session) return `<div class="empty">No attempt details yet for this activity.</div>`;
+      const attempts = (session.attempts || []).filter((attempt) => attempt.flags && attempt.flags.length).slice(-2).reverse();
+      if (!attempts.length) {
+        return `<div class="empty">No flagged attempts were captured in this activity.</div>`;
+      }
+      return `
+        <div class="attempt-list">
+          ${attempts.map((attempt) => {
+            const flag = (attempt.flags || [])[0] || {};
+            return `
+              <div class="attempt-card">
+                <strong>${attempt.targetWord}</strong> -> ${attempt.attemptedWord || "-"}<br>
+                Detected error: ${flag.errorType || "None"}<br>
+                Chairman label: ${flag.chairman_label || flag.errorType || "None"}<br>
+                Error code: ${flag.error_code || "-"}<br>
+                Detection type: Rule-based text match<br>
+                Task type: ${flag.task_type || "-"}<br>
+                Time: ${formatAttemptTime(attempt.timestamp)}
+              </div>
+            `;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function collectSessionSkills(session) {
+      if (!session) return [];
+      const labels = [];
+      (session.attempts || []).forEach((attempt) => {
+        (attempt.flags || []).forEach((flag) => {
+          const label = flag.chairman_label || flag.errorType;
+          if (label) labels.push(label);
+        });
+      });
+      return [...new Set(labels)];
+    }
+
+    function collectStudentSkills(student) {
+      const labels = [];
+      Object.values(student.activityData || {}).forEach((session) => {
+        labels.push(...collectSessionSkills(session));
+      });
+      return [...new Set(labels)];
+    }
+
+    function ensureStudentQueues(student) {
+      if (!student) return;
+      if (!Array.isArray(student.sendQueue)) student.sendQueue = [];
+      if (!Array.isArray(student.worksheetQueue)) student.worksheetQueue = [];
+    }
+
+    function dedupeLabels(items) {
+      return [...new Set((items || []).map((item) => String(item || '').trim()).filter(Boolean))];
+    }
+
+    function queueItemsForStudent(student, queueKey, items) {
+      if (!student) return;
+      ensureStudentQueues(student);
+      student[queueKey] = dedupeLabels([...(student[queueKey] || []), ...dedupeLabels(items)]);
+    }
+
+    function getQueuedItems(student, queueKey) {
+      if (!student) return [];
+      ensureStudentQueues(student);
+      return dedupeLabels(student[queueKey] || []);
+    }
+
+    function getSelectedActionItems() {
+      if (!pendingAction) return [];
+      if (!pendingAction.selectable) return dedupeLabels(pendingAction.items || []);
+      const checks = Array.from(document.querySelectorAll('#actionModalList .action-check:checked'));
+      return dedupeLabels(checks.map((input) => pendingAction.items[Number(input.value)]));
+    }
+
+    function refreshDashboardViews(studentId) {
+      renderStudentGrid();
+      const host = document.getElementById('reportArea');
+      if (host && host.dataset.studentId === studentId) {
+        showStudentReport(studentId);
+      }
+    }
+
+    function studentRecordingRows(student) {
+      const wordMap = new Map();
+      Object.entries(student.activityData).forEach(([activityId, session]) => {
+        if (!session) return;
+        (session.attempts || []).forEach((attempt) => {
+          if (!attempt.targetWord || wordMap.has(attempt.targetWord)) return;
+          wordMap.set(attempt.targetWord, { activityId, attempt });
+        });
+      });
+      return [...wordMap.entries()].slice(0, 3).map(([word, meta], index) => {
+        const flags = meta.attempt.flags || [];
+        const aiLabel = flags.length ? flags[0].errorType : "okay";
+        return {
+          id: `${student.id}-rec-${index + 1}`,
+          word,
+          activityId: meta.activityId,
+          aiLabel,
+          attempt: meta.attempt
+        };
+      });
+    }
+
+    function buildRecordingPanel(student) {
+      const rows = studentRecordingRows(student);
+      if (!rows.length) {
+        return `
+          <div class="recording-panel">
+            <h4>Student Voice Check</h4>
+            <div class="empty">No recording items are available yet. Once activity attempts are stored, this area can surface student audio samples for teacher review.</div>
+          </div>
+        `;
+      }
+
+      const options = [
+        "okay",
+        "short vowel confusion",
+        "final consonant confusion",
+        "initial consonant confusion",
+        "word family confusion",
+        "contextual guessing",
+        "finalSoundMissing",
+        "cvceError"
+      ];
+
+      const cards = rows.map((row) => `
+        <div class="recording-card">
+          <div class="recording-top">
+            <div>
+              <div class="recording-title">${row.word}</div>
+              <div class="recording-sub">Source: ${row.activityId}</div>
+            </div>
+            <button class="play-btn" onclick="playRecordingDemo('${row.word}')">Play Recording</button>
+          </div>
+          <div class="ai-box">
+            <strong>AI Evaluation:</strong>
+            ${row.aiLabel === "okay"
+              ? `Okay`
+              : `${row.aiLabel}.`}
+          </div>
+          <div class="override-row">
+            <select id="${row.id}-override">
+              ${options.map((option) => `<option value="${option}" ${option === row.aiLabel ? "selected" : ""}>${option}</option>`).join("")}
+            </select>
+            <button class="override-btn" onclick="confirmAiEvaluation('${row.id}','${row.aiLabel}')">Confirm AI</button>
+            <button class="override-btn primary" onclick="saveTeacherOverride('${row.id}')">Save Override</button>
+          </div>
+          <div class="override-state" id="${row.id}-status">Teacher can confirm the AI analysis or replace it with a new error label.</div>
+        </div>
+      `).join("");
+
+      return `
+        <div class="recording-panel">
+          <h4>Student Voice Check</h4>
+          <div class="activity-sub">This area is for teacher listening review. AI can mark a sample as okay or flag a possible phonics mistake, and the teacher can confirm or override that label.</div>
+          <div class="section-actions">
+            <button class="section-action-btn" onclick="openSendActivityModal('voice', '${student.id}')">Send Activity to e-POLY</button>
+            <button class="section-action-btn" onclick="openWorksheetModal('voice', '${student.id}')">Create Worksheet</button>
+          </div>
+          <div class="recording-list">${cards}</div>
+        </div>
+      `;
+    }
+
+    function statusForSession(session) {
+      if (!session) {
+        return {
+          cls: "pending",
+          label: "No Data",
+          note: "No stored session yet for this level and activity."
+        };
+      }
+      const flagged = (session.attempts || []).filter((attempt) => attempt.flags && attempt.flags.length).length;
+      if (!flagged) {
+        return {
+          cls: "done",
+          label: "Completed",
+          note: `${session.totalQuestions || (session.attempts || []).length} attempts with no flagged errors.`
+        };
+      }
+      return {
+        cls: "flagged",
+        label: "Flagged",
+        note: `${flagged} flagged attempt${flagged === 1 ? "" : "s"} in this activity.`
+      };
+    }
+
+    function gameMetaForActivity(level, activityId) {
+      if (activityId === "train") {
+        return {
+          gameId: "ecp6_spelling_transfer_train",
+          gameTitle: level === "ECP7" ? "ECP7 Spelling Transfer Train" : "ECP6 Spelling Transfer Train"
+        };
+      }
+      if (activityId === "runner") {
+        return {
+          gameId: "crystal-planet-phonics-runner",
+          gameTitle: level === "ECP7" ? "Crystal Planet Runner (ECP7)" : "Crystal Planet Runner"
+        };
+      }
+      return {
+        gameId: "ecp-reading-diagnostic",
+        gameTitle: `Reading Diagnostic (${level})`
+      };
+    }
+
+    function buildDemoFlag(level, word, activityId) {
+      const template = (DEMO_ERROR_LIBRARY[level] && DEMO_ERROR_LIBRARY[level][word]) || {
+        response: word,
+        errorType: "needs review",
+        chairman_label: "needs review",
+        error_code: "NEEDS_REVIEW",
+        confidence: 0.6,
+        task_type: "reading",
+        dashboard_group: "needs_review"
+      };
+      return {
+        errorType: template.errorType,
+        chairman_label: template.chairman_label,
+        error_code: template.error_code,
+        confidence: template.confidence,
+        task_type: activityId === "train" ? "spelling" : "reading",
+        dashboard_group: template.dashboard_group,
+        abstract_detection_target: template.error_code,
+        position: activityId === "train" ? "whole word" : "phase-1"
+      };
+    }
+
+    function buildDemoSession(level, activityId, severity, studentName, seedOffset = 0) {
+      const config = (DEMO_ACTIVITY_CONFIG[level] || DEMO_ACTIVITY_CONFIG.ECP6)[activityId];
+      const meta = gameMetaForActivity(level, activityId);
+      const words = config.words.slice();
+      const now = Date.now() - seedOffset * 60000;
+      const flaggedCount = severity === "high" ? 4 : (severity === "medium" ? 2 : 0);
+      const attempts = words.map((word, idx) => {
+        const template = (DEMO_ERROR_LIBRARY[level] && DEMO_ERROR_LIBRARY[level][word]) || {};
+        const isFlagged = idx < flaggedCount;
+        const flag = isFlagged ? buildDemoFlag(level, word, activityId) : null;
+        return {
+          timestamp: new Date(now - idx * 45000).toISOString(),
+          side: activityId === "runner" ? "student-runner" : "student-tablet",
+          targetWord: word,
+          attemptedWord: isFlagged ? (template.response || word) : word,
+          status: isFlagged ? "flagged" : "correct",
+          flags: isFlagged ? [flag] : []
+        };
+      });
+      const totalErrors = attempts.filter((attempt) => attempt.flags && attempt.flags.length).length;
+      const errorSummary = {};
+      attempts.forEach((attempt) => {
+        (attempt.flags || []).forEach((flag) => {
+          errorSummary[flag.errorType] = (errorSummary[flag.errorType] || 0) + 1;
+        });
+      });
+      return {
+        sessionId: `demo-${level}-${activityId}-${severity}-${studentName.toLowerCase()}`,
+        gameId: meta.gameId,
+        gameTitle: meta.gameTitle,
+        mode: severity === "clean" ? "error_free" : "diagnostic",
+        level,
+        pattern: config.pattern,
+        wordSource: words.join(", "),
+        createdAt: new Date(now).toISOString(),
+        attempts,
+        totalQuestions: attempts.length,
+        totalErrors,
+        score: Math.max(0, 100 - totalErrors * 15),
+        errorSummary
+      };
+    }
+
+    function chooseActivitySession(level, activityId, studentIndex, seedOffset, studentName) {
+      const pool = getSessionsForActivity(level, activityId);
+      const realSession = pool.length ? cloneSession(pool[(seedOffset + studentIndex + pool.length) % pool.length]) : null;
+      if (studentIndex === 0) {
+        return realSession || buildDemoSession(level, activityId, "clean", studentName, seedOffset);
+      }
+      if (studentIndex === 1) {
+        return buildDemoSession(level, activityId, "medium", studentName, seedOffset);
+      }
+      return buildDemoSession(level, activityId, "high", studentName, seedOffset);
+    }
+
+    function createStudentRecord(level, className, index) {
+      const names = shuffleArray(STUDENT_POOLS[level] || []).slice(0, 3);
+      return names.map((name, idx) => {
+        const activityData = {};
+        ACTIVITY_DEFS.forEach((activity) => {
+          activityData[activity.id] = chooseActivitySession(level, activity.id, idx, index, name);
+        });
+        return {
+          id: `${level}-${className}-${idx + 1}`,
+          name,
+          homeroom: className,
+          level,
+          activityData,
+          sendQueue: [],
+          worksheetQueue: []
+        };
+      });
+    }
+
+    function renderStudentGrid() {
+      const host = document.getElementById("studentGrid");
+      if (!generatedStudents.length) {
+        host.innerHTML = `<div class="empty">Generate a class list first. The grid will show three demo students and their Lesson 1 activity status for Train, Runner, and Fall.</div>`;
+        return;
+      }
+
+      const rows = generatedStudents.map((student) => {
+        const cells = ACTIVITY_DEFS.map((activity) => {
+          const session = student.activityData[activity.id];
+          const status = statusForSession(session);
+          return `
+            <td>
+              <div class="status ${status.cls}">${status.label}</div>
+              <div class="mini-note">${status.note}</div>
+            </td>
+          `;
+        }).join("");
+        return `
+          <tr>
+            <td>
+              <div class="student-name">${student.name}</div>
+              <span class="tiny">${student.level} - ${student.homeroom}</span>
+            </td>
+            ${cells}
+            <td>
+              <div class="row-actions">
+                <button class="report-btn" onclick="showStudentReport('${student.id}')">Generate Report</button>
+                <button class="row-action-btn" onclick="openSendAllModal('${student.id}')">Send All Activities to e-POLY</button>
+                <button class="row-action-btn" onclick="openWorksheetModal('all', '${student.id}')">Generate Worksheet</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      host.innerHTML = `
+        <table class="student-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Lesson 1 - Train</th>
+              <th>Lesson 1 - Runner</th>
+              <th>Lesson 1 - Fall</th>
+              <th>Report</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function showStudentReport(studentId) {
+      const student = generatedStudents.find((item) => item.id === studentId);
+      const host = document.getElementById("reportArea");
+      const modal = document.getElementById("reportModal");
+      if (!student) {
+        host.innerHTML = `<div class="empty">Select a student report from the generated class list.</div>`;
+        return;
+      }
+      host.dataset.studentId = student.id;
+
+      const allSessions = Object.values(student.activityData).filter(Boolean);
+      const totalAttempts = allSessions.reduce((sum, session) => sum + ((session.attempts || []).length), 0);
+      const totalFlags = allSessions.reduce((sum, session) => {
+        return sum + (session.attempts || []).filter((attempt) => attempt.flags && attempt.flags.length).length;
+      }, 0);
+
+      const activityCards = ACTIVITY_DEFS.map((activity) => {
+        const session = student.activityData[activity.id];
+        const status = statusForSession(session);
+        const topFlags = session ? summarizeFlags(session).slice(0, 2) : [];
+        const words = session ? uniqueWords(session).slice(0, 5) : [];
+        return `
+          <div class="activity-card">
+            <div>
+              <div class="status ${status.cls}">${status.label}</div>
+              <h4>${activity.label}</h4>
+              <div class="activity-sub">${session ? `${session.gameTitle} - ${session.mode === "diagnostic" ? "Diagnostic Mode" : "Error-Free Mode"}` : activity.fallback}</div>
+              <div class="section-actions">
+                <button class="section-action-btn" onclick="openSendActivityModal('${activity.id}', '${student.id}')">Send Activity to e-POLY</button>
+                <button class="section-action-btn" onclick="openWorksheetModal('${activity.id}', '${student.id}')">Create Worksheet</button>
+              </div>
+            </div>
+            <div class="kpi-row">
+              <div class="kpi">
+                <div class="label">Responses Logged</div>
+                <div class="value">${session ? ((session.attempts || []).length) : "-"}</div>
+              </div>
+              <div class="kpi">
+                <div class="label">Flagged</div>
+                <div class="value">${session ? ((session.attempts || []).filter((attempt) => attempt.flags && attempt.flags.length).length) : "-"}</div>
+              </div>
+            </div>
+            <div class="feedback-block">
+              <strong>Activity Feedback:</strong> ${buildFeedbackText(session, activity.label)}
+            </div>
+            <div class="bullets">
+              <div class="bullet"><strong>Teacher Note:</strong> ${buildCoachNote(session, activity.label)}</div>
+              <div class="bullet"><strong>Words Covered:</strong> ${words.length ? words.join(", ") : "No words recorded yet."}</div>
+              <div class="bullet"><strong>Top Flags:</strong> ${topFlags.length ? topFlags.map(([label, count]) => `${label} (${count})`).join(", ") : "No flagged errors captured."}</div>
+            </div>
+            ${buildAttemptDetailList(session)}
+          </div>
+        `;
+      }).join("");
+
+      host.innerHTML = `
+        <div class="report-shell">
+          <div class="report-header">
+            <div>
+              <h3>${student.name} - Lesson 1 Report</h3>
+              <p>${student.level} - ${student.homeroom} class. This report blends stored diagnostic game data into a simple teacher-facing summary for the Train, Runner, and Fall activities.</p>
+            </div>
+            <div class="summary-badges">
+              <div class="summary-box">
+                <div class="label">Activities with Data</div>
+                <div class="value">${allSessions.length}</div>
+              </div>
+              <div class="summary-box">
+                <div class="label">Attempts Logged</div>
+                <div class="value">${totalAttempts}</div>
+              </div>
+              <div class="summary-box">
+                <div class="label">Flagged Attempts</div>
+                <div class="value">${totalFlags}</div>
+              </div>
+            </div>
+          </div>
+          <div class="activity-grid">${activityCards}</div>
+          ${buildRecordingPanel(student)}
+        </div>
+      `;
+      if (modal) {
+        modal.classList.add("show");
+        modal.setAttribute("aria-hidden", "false");
+      }
+    }
+
+    function closeReportModal() {
+      const modal = document.getElementById("reportModal");
+      if (!modal) return;
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function closeActionModal() {
+      const modal = document.getElementById("actionModal");
+      if (!modal) return;
+      modal.classList.remove("show");
+      modal.setAttribute("aria-hidden", "true");
+      pendingAction = null;
+    }
+
+    function openActionModal(config) {
+      pendingAction = config || null;
+      const modal = document.getElementById("actionModal");
+      const confirmBtn = document.getElementById("actionModalConfirm");
+      const items = config.items || [];
+      document.getElementById("actionModalTitle").textContent = config.title;
+      document.getElementById("actionModalText").textContent = config.text;
+      confirmBtn.textContent = config.confirmLabel;
+      confirmBtn.disabled = items.length === 0;
+      document.getElementById("actionModalList").innerHTML = items.length
+        ? (config.selectable
+          ? items.map((item, index) => `<label class="action-list-item selectable"><input class="action-check" type="checkbox" value="${index}" checked><span>${item}</span></label>`).join("")
+          : items.map((item) => `<div class="action-list-item">${item}</div>`).join(""))
+        : `<div class="action-list-item">No flagged skills were found for this selection.</div>`;
+      modal.classList.add("show");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function getStudentById(studentId) {
+      return generatedStudents.find((item) => item.id === studentId) || null;
+    }
+
+    function openSendActivityModal(activityId, studentId) {
+      const student = getStudentById(studentId);
+      if (!student) return;
+      const items = activityId === "voice"
+        ? studentRecordingRows(student).filter((row) => row.aiLabel !== "okay").map((row) => `${row.word}: ${row.aiLabel}`)
+        : collectSessionSkills(student.activityData[activityId]);
+      openActionModal({
+        type: "queue",
+        queueKey: "sendQueue",
+        studentId,
+        selectable: true,
+        title: "Select Skills to Send to e-POLY",
+        text: "Choose the skill bubbles to add to this student's e-POLY queue. Use the main-page button to send everything at once.",
+        confirmLabel: "Add to Queue",
+        items
+      });
+    }
+
+    function openSendAllModal(studentId) {
+      const student = getStudentById(studentId);
+      if (!student) return;
+      openActionModal({
+        type: "send-final",
+        studentId,
+        title: "Send All Activities to e-POLY",
+        text: `These queued skills will be sent for ${student.name}.`,
+        confirmLabel: "Send",
+        items: getQueuedItems(student, "sendQueue")
+      });
+    }
+
+    function openWorksheetModal(scope, studentId) {
+      const student = getStudentById(studentId);
+      if (!student) return;
+      if (scope === "all") {
+        openActionModal({
+          type: "worksheet-final",
+          studentId,
+          title: "Generate Worksheet",
+          text: "These queued skills will be used to generate the worksheet.",
+          confirmLabel: "Generate",
+          items: getQueuedItems(student, "worksheetQueue")
+        });
+        return;
+      }
+      const items = scope === "voice"
+        ? studentRecordingRows(student).filter((row) => row.aiLabel !== "okay").map((row) => `${row.word}: ${row.aiLabel}`)
+        : collectSessionSkills(student.activityData[scope]);
+      openActionModal({
+        type: "queue",
+        queueKey: "worksheetQueue",
+        studentId,
+        selectable: true,
+        title: "Select Skills for Worksheet",
+        text: "Choose the skill bubbles to add to this student's worksheet queue. Use the main-page button to generate everything at once.",
+        confirmLabel: "Add to Queue",
+        items
+      });
+    }
+
+    function confirmActionModal() {
+      if (!pendingAction) return;
+      const action = pendingAction;
+      const student = action.studentId ? getStudentById(action.studentId) : null;
+      const selectedItems = getSelectedActionItems();
+      closeActionModal();
+      if (action.type === "queue") {
+        if (student && action.queueKey) {
+          queueItemsForStudent(student, action.queueKey, selectedItems);
+          refreshDashboardViews(student.id);
+        }
+        return;
+      }
+      if (action.type === "send-final") {
+        if (student) {
+          ensureStudentQueues(student);
+          student.sendQueue = [];
+          refreshDashboardViews(student.id);
+        }
+        return;
+      }
+      if (action.type === "worksheet-final") {
+        window.open(WORKSHEET_URL, "_blank");
+        if (student) {
+          ensureStudentQueues(student);
+          student.worksheetQueue = [];
+          refreshDashboardViews(student.id);
+        }
+      }
+    }
+
+    function playRecordingDemo(word) {
+      try {
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.rate = 0.8;
+        utterance.pitch = 1;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+      } catch (error) {
+        console.warn("Recording playback demo unavailable.", error);
+      }
+    }
+
+    function confirmAiEvaluation(rowId, aiLabel) {
+      const status = document.getElementById(`${rowId}-status`);
+      if (status) {
+        status.textContent = `AI evaluation confirmed as: ${aiLabel}.`;
+      }
+    }
+
+    function saveTeacherOverride(rowId) {
+      const select = document.getElementById(`${rowId}-override`);
+      const status = document.getElementById(`${rowId}-status`);
+      if (!select || !status) return;
+      status.textContent = `Teacher override saved as: ${select.value}.`;
+    }
+
+    function updateMeta() {
+      const level = document.getElementById("levelSelect").value;
+      const className = document.getElementById("classSelect").value || (CLASS_BY_LEVEL[level] || [])[0] || "-";
+      const store = loadStore();
+      const matching = (store.sessions || []).filter((session) => levelMatchesSession(session, level));
+      document.getElementById("availabilityChip").textContent = `${level} - ${className} - Lesson 1 activities: Train, Runner, Fall`;
+      document.getElementById("sessionChip").textContent = `${matching.length} stored session${matching.length === 1 ? "" : "s"} found for ${level}`;
+    }
+
+    function generateStudents() {
+      const level = document.getElementById("levelSelect").value;
+      const className = document.getElementById("classSelect").value;
+      generatedStudents = createStudentRecord(level, className, Math.floor(Math.random() * 1000));
+      renderStudentGrid();
+      closeReportModal();
+      document.getElementById("reportArea").innerHTML = `<div class="empty">Select a student report from the generated class list.</div>`;
+    }
+
+    function clearData() {
+      localStorage.removeItem(STORE_KEY);
+      updateMeta();
+      generateStudents();
+    }
+
+    document.getElementById("levelSelect").addEventListener("change", () => {
+      updateClassOptions();
+      generateStudents();
+    });
+    document.getElementById("classSelect").addEventListener("change", generateStudents);
+    document.getElementById("generateStudentsBtn").addEventListener("click", generateStudents);
+    document.getElementById("clearDataBtn").addEventListener("click", clearData);
+    document.getElementById("reportModalClose").addEventListener("click", closeReportModal);
+    document.getElementById("actionModalCancel").addEventListener("click", closeActionModal);
+    document.getElementById("actionModalConfirm").addEventListener("click", confirmActionModal);
+    document.getElementById("reportModal").addEventListener("click", (event) => {
+      if (event.target.id === "reportModal") closeReportModal();
+    });
+    document.getElementById("actionModal").addEventListener("click", (event) => {
+      if (event.target.id === "actionModal") closeActionModal();
+    });
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeReportModal();
+        closeActionModal();
+      }
+    });
+    window.addEventListener("phonicsDiagnosticComplete", () => {
+      updateMeta();
+      if (generatedStudents.length) {
+        generatedStudents = createStudentRecord(
+          document.getElementById("levelSelect").value,
+          document.getElementById("classSelect").value,
+          Math.floor(Math.random() * 1000)
+        );
+        renderStudentGrid();
+      }
+    });
+
+    updateClassOptions();
+    generateStudents();
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

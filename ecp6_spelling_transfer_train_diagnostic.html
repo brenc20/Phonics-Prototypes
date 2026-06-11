@@ -1,0 +1,2312 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ECP6 Spelling Transfer Train Diagnostic</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root{
+    --navy:#17385a;
+    --blue:#2a6fb0;
+    --sky:#eef6fb;
+    --panel:#ffffff;
+    --line:#d7e3ee;
+    --gold:#ffd668;
+    --green:#2ea962;
+    --red:#d85c6b;
+    --ink:#1f2d3a;
+    --muted:#66788a;
+    --wood:#9d6734;
+    --rail:#546675;
+  }
+  body{
+    font-family:"Segoe UI", Arial, sans-serif;
+    background: linear-gradient(180deg, #eef5fb 0%, #dcebf7 100%);
+    color: var(--ink);
+    height: 100vh;
+    overflow: hidden;
+  }
+  .app{
+    height: 100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  .topbar{
+    flex-shrink:0;
+    background:var(--navy);
+    color:white;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:12px 18px;
+  }
+  .title-wrap{ min-width: 260px; }
+  .title{
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:0.3px;
+  }
+  .subtitle{
+    margin-top:2px;
+    font-size:10px;
+    opacity:0.82;
+  }
+  .stage-pills{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    gap:8px;
+  }
+  .pill{
+    padding:8px 14px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.22);
+    font-size:10px;
+    font-weight:800;
+    opacity:0.55;
+  }
+  .pill.active{
+    opacity:1;
+    background:rgba(255,255,255,0.18);
+  }
+  .toolbar{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .panel-head{
+    display:none;
+  }
+  .mode-toggle{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:4px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.16);
+  }
+  .mode-btn{
+    background:transparent;
+    color:rgba(255,255,255,0.82);
+    padding:8px 12px;
+    font-size:11px;
+    border-radius:999px;
+    font-weight:900;
+  }
+  .mode-btn.active{
+    background:#ffffff;
+    color:var(--navy);
+  }
+  button{
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:800;
+    font-size:13px;
+    transition:transform 0.12s ease, opacity 0.12s ease;
+  }
+  button:active{ transform:scale(0.98); }
+  button:disabled{ opacity:0.45; cursor:default; transform:none; }
+  .btn-light{
+    background:white;
+    color:var(--navy);
+    padding:10px 14px;
+  }
+  .btn-primary{
+    background:var(--gold);
+    color:#6a4b03;
+    padding:10px 16px;
+  }
+  .workspace{
+    flex:1;
+    min-height:0;
+    display:grid;
+    grid-template-columns:minmax(0, 920px);
+    justify-content:center;
+  }
+  .board-panel{
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+  }
+  .tablet-panel{
+    display:none !important;
+  }
+  .board-stage-wrap{
+    flex:1;
+    min-height:0;
+    padding:12px 18px 18px;
+  }
+  .scene{
+    position:relative;
+    height:100%;
+    border-radius:24px;
+    overflow:hidden;
+    border:3px solid #cfe1f0;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.55);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04)),
+      linear-gradient(180deg, #8cc6f0 0%, #d4eefb 42%, #e4d3a4 42%, #c48c4f 100%);
+  }
+  .scene.yard{
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)),
+      url('assets/final station background.png') center center / cover no-repeat;
+  }
+  .scene.station-bg{
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)),
+      url('assets/station background.png') center center / cover no-repeat;
+  }
+  .scene-caption{
+    position:absolute;
+    top:18px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(255,255,255,0.9);
+    color:var(--navy);
+    border-radius:999px;
+    padding:8px 16px;
+    font-size:13px;
+    font-weight:800;
+    z-index:50;
+  }
+  .board-note{ display:none; }
+  .board-controls{
+    position:absolute;
+    top:18px;
+    right:18px;
+    display:flex;
+    gap:8px;
+    z-index:60;
+  }
+  .scene-zone{
+    position:absolute;
+    inset:0;
+    padding:74px 28px 26px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-height:0;
+  }
+  .station-strip{
+    flex-shrink:0;
+    display:flex;
+    align-items:flex-end;
+    justify-content:flex-end;
+    gap:2px;
+    overflow-x:visible;
+    overflow-y:visible;
+    padding-bottom:2px;
+  }
+  .station-stage-shell{
+    position:relative;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+  }
+  .station-dock-wrap{
+    position:absolute;
+    inset:0;
+    z-index:16;
+  }
+  .station-train-wrap{
+    position:absolute;
+    left:1%;
+    right:1%;
+    bottom:4%;
+    z-index:18;
+    display:flex;
+    align-items:flex-end;
+    justify-content:flex-end;
+  }
+  .station-train-wrap .station-strip{
+    --station-train-scale:1.35;
+    transform:translateX(0) scale(var(--station-train-scale));
+    transform-origin:right bottom;
+  }
+  .diagnostic-scene-action{
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:26;
+    display:flex;
+    justify-content:center;
+  }
+  .cargo-scene-action{
+    bottom:16px;
+  }
+  .station-scene-action{
+    bottom:0px;
+  }
+  .train-front{
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+    flex-shrink:0;
+  }
+  .coal-car-overlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    z-index:2;
+    padding-bottom:16px;
+  }
+  .coal-letter{
+    font-size:38px;
+    font-weight:900;
+    color:#fff5c8;
+    text-shadow:0 1px 0 rgba(0,0,0,0.4);
+    line-height:1;
+  }
+  .coal-speaker{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    background:linear-gradient(180deg,#ffffff,#e7f2fb);
+    border:2px solid #d2dfec;
+    color:var(--navy);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:19px;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(17,40,74,0.12);
+  }
+  .station-strip.run-right{
+    animation: trainSlideRight 0.9s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes trainSlideRight{
+    0%{
+      opacity:0;
+      transform:translateX(-90px) scale(var(--station-train-scale, 1));
+    }
+    100%{
+      opacity:1;
+      transform:translateX(0) scale(var(--station-train-scale, 1));
+    }
+  }
+  .sound-wagon{
+    width:102px;
+    height:92px;
+    border-radius:18px 18px 12px 12px;
+    background:linear-gradient(180deg, #5d6570 0%, #2f353d 100%);
+    border:4px solid rgba(30,35,41,0.35);
+    box-shadow:0 16px 22px rgba(30,35,41,0.18);
+    padding:10px 8px 22px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+  }
+  .sound-wagon::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:-12px;
+    height:16px;
+    background:linear-gradient(180deg, #4e5f70, #2f3d4a);
+    border-radius:10px;
+  }
+  .sound-letter{
+    font-size:34px;
+    font-weight:900;
+    line-height:1;
+    color:#fff5c8;
+    text-shadow:0 1px 0 rgba(0,0,0,0.35);
+  }
+  .sound-speaker{
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:linear-gradient(180deg, #ffffff 0%, #e7f2fb 100%);
+    border:2px solid #d2dfec;
+    color:var(--navy);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    box-shadow:0 8px 16px rgba(17,40,74,0.08);
+  }
+  .train-head{
+    width:260px;
+    flex-shrink:0;
+    filter:drop-shadow(0 14px 18px rgba(44,30,12,0.18));
+    position:relative;
+  }
+  .train-head img{
+    width:100%;
+    height:auto;
+    display:block;
+    image-rendering:auto;
+  }
+  .coal-overlay{
+    position:absolute;
+    left:2%;
+    width:33%;
+    top:6%;
+    bottom:24%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    z-index:10;
+  }
+  .coal-letter{
+    font-size:22px;
+    font-weight:900;
+    color:#fff5c8;
+    text-shadow:0 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.5);
+    line-height:1;
+  }
+  .coal-speaker{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.9);
+    border:1.5px solid #d2dfec;
+    color:var(--navy);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    cursor:pointer;
+    box-shadow:0 2px 8px rgba(17,40,74,0.18);
+    padding:0;
+  }
+  .cars{
+    display:flex;
+    gap:14px;
+    align-items:flex-end;
+    flex:1;
+    min-width:0;
+  }
+  .car{
+    flex:0 0 auto;
+    width:130px;
+    height:144px;
+    border-radius:20px;
+    background:linear-gradient(180deg, #d7a157 0%, #a5662f 100%);
+    border:4px solid rgba(107,62,26,0.35);
+    position:relative;
+    box-shadow:0 18px 24px rgba(74,43,16,0.18);
+    padding:16px 12px 30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .car::after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:-12px;
+    height:16px;
+    background:linear-gradient(180deg, #4e5f70, #2f3d4a);
+    border-radius:10px;
+  }
+  .wheel{
+    position:absolute;
+    bottom:-18px;
+    width:26px;
+    height:26px;
+    border-radius:50%;
+    background:#293645;
+    border:4px solid #51667a;
+  }
+  .wheel.left{ left:18px; }
+  .wheel.right{ right:18px; }
+  .car.future{
+    opacity:0.38;
+    background:linear-gradient(180deg, #d9d9d9, #9a9a9a);
+  }
+  .car.done{
+    background:linear-gradient(180deg, #7bdc9c 0%, #2ea962 100%);
+  }
+  .car-label{
+    font-size:28px;
+    font-weight:900;
+    color:#fffdf3;
+    text-shadow:0 1px 0 rgba(0,0,0,0.35);
+  }
+  .slots{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    width:100%;
+  }
+  .slot{
+    width:48px;
+    height:52px;
+    border-radius:12px;
+    background:rgba(255,255,255,0.28);
+    border:2px dashed rgba(255,255,255,0.72);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    font-weight:900;
+    color:#1f3550;
+  }
+  .slot.filled{
+    background:rgba(255,255,255,0.88);
+    border-style:solid;
+  }
+  .slot.error{
+    background:#ffe0e4;
+    border-color:#ef8795;
+    color:var(--red);
+  }
+  .station-panel{
+    display:block;
+    min-height:0;
+    flex:1;
+  }
+  .dock-card,
+  .yard-card{
+    background:rgba(255,255,255,0.9);
+    border:2px solid var(--line);
+    border-radius:22px;
+    box-shadow:0 14px 24px rgba(25,49,76,0.08);
+  }
+  .dock-card{
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .dock-title{
+    font-size:12px;
+    font-weight:900;
+    letter-spacing:1px;
+    color:#6b8196;
+    text-transform:uppercase;
+  }
+  .letter-dock{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+  }
+  .letter-box{
+    min-height:56px;
+    border-radius:16px;
+    background:linear-gradient(180deg, #ffffff 0%, #edf4fb 100%);
+    border:2px solid #d3dfeb;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    font-weight:900;
+    color:var(--navy);
+    cursor:grab;
+    box-shadow:0 10px 18px rgba(20,50,77,0.08);
+  }
+  .letter-box.used{
+    opacity:0.24;
+    cursor:default;
+  }
+  .letter-box:active{ cursor:grabbing; }
+  .yard-shell{
+    position:relative;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    padding:10px 14px 14px;
+  }
+  .yard-train-lane{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:28px;
+    height:132px;
+    pointer-events:none;
+    z-index:22;
+    overflow:hidden;
+  }
+  .yard-arrival-train{
+    --yard-train-scale:1.02;
+    position:absolute;
+    left:0;
+    bottom:18px;
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+    transform-origin:left bottom;
+    animation:yardTrainArriveDepart 3.8s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  .yard-arrival-train .train-car-wrap{
+    margin-right:-22px;
+    z-index:1;
+  }
+  .yard-arrival-train .train-head{
+    z-index:4;
+    margin-left:-8px;
+  }
+  @keyframes yardTrainArriveDepart{
+    0%{
+      opacity:0;
+      transform:translateX(-78%) scale(var(--yard-train-scale, 1));
+    }
+    18%{
+      opacity:1;
+      transform:translateX(2%) scale(var(--yard-train-scale, 1));
+    }
+    58%{
+      opacity:1;
+      transform:translateX(2%) scale(var(--yard-train-scale, 1));
+    }
+    100%{
+      opacity:0;
+      transform:translateX(108%) scale(var(--yard-train-scale, 1));
+    }
+  }
+  .wagon-row{
+    position:absolute;
+    inset:0;
+    z-index:10;
+  }
+  .wagon-target{
+    position:relative;
+    position:absolute;
+    min-height:64px;
+  }
+  .wagon-body{
+    min-height:64px;
+    padding:0;
+    position:relative;
+    background:transparent;
+    border:none;
+    box-shadow:none;
+  }
+  .wagon-frame{
+    position:absolute;
+    inset:0;
+    min-height:64px;
+    border-radius:16px;
+    background:rgba(255,251,243,0.42);
+    border:2px dashed rgba(201,163,106,0.72);
+    box-shadow:0 8px 14px rgba(45,31,12,0.08);
+    padding:9px 10px 10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:17px;
+    font-weight:900;
+    color:var(--navy);
+    line-height:1.2;
+  }
+  .wagon-target:nth-child(1){
+    left:5%;
+    top:40%;
+    width:20%;
+  }
+  .wagon-target:nth-child(2){
+    left:30%;
+    top:33%;
+    width:17%;
+  }
+  .wagon-target:nth-child(3){
+    left:56%;
+    top:33%;
+    width:17%;
+  }
+  .wagon-target:nth-child(4){
+    left:77%;
+    top:46%;
+    width:18%;
+  }
+  .wagon-target:nth-child(5){
+    left:38%;
+    top:56%;
+    width:24%;
+  }
+  .wagon-target.correct .wagon-frame{
+    background:rgba(236,251,241,0.74);
+    border-color:#7fd69d;
+    color:#1f8d4e;
+  }
+  .wagon-target.error .wagon-frame{
+    background:rgba(255,228,232,0.78);
+    border-color:#ef8795;
+    color:var(--red);
+  }
+  .crate-combo-row{
+    position:absolute;
+    left:2%;
+    right:2%;
+    bottom:-18px;
+    height:180px;
+    z-index:18;
+  }
+  .word-crate-combo{
+    position:absolute;
+    display:flex;
+    align-items:flex-end;
+    gap:clamp(1px, 0.22vw, 3px);
+    cursor:grab;
+    transition:transform .18s ease, opacity .18s ease;
+  }
+  .word-crate-combo:active{
+    cursor:grabbing;
+  }
+  .word-crate-combo.matched{
+    opacity:0.2;
+    cursor:default;
+  }
+  .word-crate-combo.diagnostic-flagged{
+    filter:drop-shadow(0 0 10px rgba(216,92,107,0.28));
+  }
+  .word-crate-combo.diagnostic-flagged .combo-letter{
+    color:#fff1f3;
+    text-shadow:0 1px 0 rgba(0,0,0,0.4), 0 0 6px rgba(140,23,37,0.35);
+  }
+  .crate-combo-row .word-crate-combo:nth-child(1){
+    left:6%;
+    top:12px;
+  }
+  .crate-combo-row .word-crate-combo:nth-child(2){
+    left:31%;
+    top:8px;
+  }
+  .crate-combo-row .word-crate-combo:nth-child(3){
+    left:58%;
+    top:2px;
+  }
+  .crate-combo-row .word-crate-combo:nth-child(4){
+    left:19%;
+    bottom:26px;
+  }
+  .crate-combo-row .word-crate-combo:nth-child(5){
+    left:46%;
+    bottom:18px;
+  }
+  .combo-crate{
+    position:relative;
+    width:clamp(46px, 4.3vw, 58px);
+    height:clamp(41px, 3.9vw, 52px);
+    flex:0 0 auto;
+  }
+  .combo-crate img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:block;
+  }
+  .combo-letter{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:clamp(20px, 1.9vw, 26px);
+    font-weight:900;
+    color:#FFF8DC;
+    text-shadow:0 1px 0 rgba(0,0,0,0.28);
+    transform:translateY(2px);
+  }
+  .yard-shell.intro-playing .word-crate-combo{
+    opacity:0;
+    pointer-events:none;
+    animation:yardCargoDrop 1.4s cubic-bezier(.18,.88,.24,1) forwards;
+    animation-delay:calc(.8s + var(--combo-index, 0) * 0.14s);
+  }
+  @keyframes yardCargoDrop{
+    0%{
+      opacity:0;
+      transform:translate(var(--intro-x, 0px), -112px) scale(0.9);
+    }
+    35%{
+      opacity:1;
+    }
+    100%{
+      opacity:1;
+      transform:translate(0, 0) scale(1);
+    }
+  }
+  .blank{
+    display:inline-block;
+    min-width:88px;
+    height:28px;
+    border-bottom:3px solid #97b0c6;
+    vertical-align:middle;
+    margin-left:6px;
+  }
+  .success-banner{
+    position:absolute;
+    left:50%;
+    bottom:22px;
+    transform:translateX(-50%);
+    background:rgba(17,58,90,0.88);
+    color:#fffaf0;
+    padding:8px 14px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+    z-index:40;
+  }
+  .yard-summary{
+    position:absolute;
+    top:90px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:15;
+    width:min(620px, 84%);
+    background:rgba(255,252,244,0.9);
+    border:2px solid rgba(197,161,104,0.65);
+    border-radius:20px;
+    box-shadow:0 14px 24px rgba(45,31,12,0.12);
+    padding:14px 18px;
+    text-align:center;
+  }
+  .yard-summary h3{
+    font-size:18px;
+    color:var(--navy);
+    margin-bottom:4px;
+  }
+  .yard-summary p{
+    font-size:12px;
+    color:#5d7084;
+    line-height:1.4;
+  }
+  .yard-summary strong{
+    color:#7d5a1e;
+  }
+  .cargo-shell{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:26px;
+    padding:10px 22px 26px;
+  }
+  .cargo-train{
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    gap:4px;
+    width:100%;
+  }
+  .cargo-paper{
+    width:min(560px, 88%);
+    background:linear-gradient(180deg, #fffdf7 0%, #f6edd9 100%);
+    border:2px solid #d5c19a;
+    border-radius:18px;
+    box-shadow:0 16px 28px rgba(43,33,18,0.16);
+    padding:22px 26px 18px;
+    position:relative;
+  }
+  .cargo-paper::before{
+    content:"";
+    position:absolute;
+    inset:12px;
+    border:1px solid rgba(141,110,63,0.18);
+    border-radius:12px;
+    pointer-events:none;
+  }
+  .cargo-title{
+    text-align:center;
+    font-size:28px;
+    font-weight:900;
+    letter-spacing:0.4px;
+    color:#6f4f1d;
+    margin-bottom:14px;
+  }
+  .cargo-sub{
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    color:#7a6543;
+    margin-bottom:14px;
+  }
+  .cargo-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .cargo-row{
+    display:grid;
+    grid-template-columns: 1fr auto auto;
+    align-items:center;
+    gap:12px;
+    background:rgba(255,255,255,0.56);
+    border:1px solid rgba(140,114,72,0.16);
+    border-radius:12px;
+    padding:10px 14px;
+  }
+  .cargo-word{
+    font-size:24px;
+    font-weight:900;
+    color:var(--navy);
+    letter-spacing:0.4px;
+  }
+  .cargo-action{
+    min-width:74px;
+    padding:8px 12px;
+    border-radius:999px;
+    background:#fff;
+    color:var(--navy);
+    border:1px solid #d7e3ee;
+    font-size:12px;
+    font-weight:900;
+  }
+  .cargo-check{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:#e9eef3;
+    border:2px solid #cdd9e5;
+    color:#8ba0b4;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    font-weight:900;
+  }
+  .cargo-row.done .cargo-check{
+    background:#ebfbf1;
+    border-color:#67ca8a;
+    color:#1f8d4e;
+  }
+  .cargo-row.done .cargo-word{
+    color:#2d7b55;
+  }
+  .tablet-mini .cargo-shell{
+    gap:16px;
+    padding:4px 8px 12px;
+  }
+  .tablet-mini .cargo-paper{
+    width:100%;
+    padding:14px 14px 12px;
+    border-radius:14px;
+  }
+  .tablet-mini .cargo-title{
+    font-size:19px;
+    margin-bottom:8px;
+  }
+  .tablet-mini .cargo-sub{
+    font-size:10px;
+    margin-bottom:10px;
+  }
+  .tablet-mini .cargo-list{
+    gap:7px;
+  }
+  .tablet-mini .cargo-row{
+    gap:8px;
+    padding:8px 10px;
+    grid-template-columns: 1fr auto auto;
+  }
+  .tablet-mini .cargo-word{
+    font-size:18px;
+  }
+  .tablet-mini .cargo-action{
+    min-width:58px;
+    font-size:10px;
+    padding:6px 8px;
+  }
+  .tablet-mini .cargo-check{
+    width:28px;
+    height:28px;
+    font-size:14px;
+  }
+  .tablet-panel .tablet-mini .cargo-title,
+  .tablet-panel .tablet-mini .cargo-sub{
+    display:none;
+  }
+  .tablet-panel .tablet-mini .cargo-paper{
+    padding:12px 12px 10px;
+  }
+  .tablet-body{
+    flex:1;
+    padding:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:0;
+    background:#eef4f9;
+  }
+  .tablet-frame{
+    width:100%;
+    max-width:620px;
+    height:100%;
+    max-height:430px;
+    background:#fdfefe;
+    border:5px solid #425868;
+    border-radius:28px;
+    box-shadow:0 16px 28px rgba(24,50,76,0.16);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .tablet-screen{
+    flex:1;
+    padding:8px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    min-height:0;
+  }
+  .tablet-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+  }
+  .tablet-stage{
+    font-size:15px;
+    font-weight:900;
+    color:var(--navy);
+  }
+  .tablet-progress{
+    font-size:10px;
+    font-weight:800;
+    color:var(--muted);
+  }
+  .tablet-hint{
+    background:#edf6ff;
+    color:#35536f;
+    border-radius:14px;
+    padding:6px 9px;
+    font-size:10px;
+    line-height:1.3;
+  }
+  .tablet-area{
+    flex:1;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .tablet-actions{
+    display:none;
+  }
+  .tablet-actions .btn-light{
+    flex:1;
+  }
+  .footer-note{
+    padding:8px 16px 10px;
+    font-size:10px;
+    color:#607387;
+    background:#f6fafc;
+    border-top:1px solid #e0e9f2;
+  }
+  .tablet-panel .tablet-top,
+  .tablet-panel .tablet-hint,
+  .tablet-panel .footer-note{
+    display:none;
+  }
+  .hold-screen{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    font-weight:900;
+    color:var(--navy);
+    letter-spacing:1px;
+    text-align:center;
+  }
+  .tablet-mini .scene{
+    border-width:2px;
+    border-radius:20px;
+    height:100%;
+  }
+  .tablet-mini .scene-zone{
+    padding:58px 14px 16px;
+    gap:10px;
+  }
+  .tablet-mini .scene-caption,
+  .tablet-mini .board-note,
+  .tablet-mini .board-controls{
+    display:none;
+  }
+  .tablet-mini .train-front{
+    gap:8px;
+  }
+  .tablet-mini .sound-wagon{
+    width:74px;
+    height:68px;
+    padding:8px 6px 18px;
+  }
+  .tablet-mini .sound-letter{
+    font-size:26px;
+  }
+  .tablet-mini .sound-speaker{
+    width:28px;
+    height:28px;
+    font-size:14px;
+  }
+  .tablet-mini .train-head{
+    width:160px;
+  }
+  .tablet-mini .station-train-wrap{
+    left:2%;
+    right:2%;
+    bottom:6.5%;
+    justify-content:center;
+  }
+  .tablet-mini .station-train-wrap .station-strip{
+    --station-train-scale:1.08;
+    transform:translateX(0) scale(var(--station-train-scale));
+    transform-origin:right bottom;
+  }
+  .tablet-mini .crate-dock{
+    height:100%;
+  }
+  .tablet-mini .crate-box{
+    width:50px;
+    height:42px;
+  }
+  .tablet-mini .crate-dock .crate-box:nth-child(1) { left:5%;  top:67%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(2) { left:16%; top:59%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(3) { left:33%; top:62%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(4) { left:47%; top:57%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(5) { left:55%; top:65%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(6) { left:69%; top:59%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(7) { left:82%; top:62%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(8) { left:91%; top:68%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(9)  { left:24%; top:71%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(10) { left:44%; top:72%; }
+  .tablet-mini .crate-dock .crate-box:nth-child(11) { left:76%; top:70%; }
+  .tablet-mini .car{
+    min-width:86px;
+    height:92px;
+    padding:12px 8px 22px;
+  }
+  .tablet-mini .car-label{ font-size:20px; }
+  .tablet-mini .slot{
+    width:34px;
+    height:38px;
+    font-size:18px;
+  }
+  .tablet-mini .station-panel{
+    display:block;
+  }
+  .tablet-mini .dock-card,
+  .tablet-mini .yard-card{
+    padding:12px;
+    border-radius:18px;
+  }
+  .tablet-mini .letter-dock{
+    grid-template-columns:repeat(4, 1fr);
+    gap:8px;
+  }
+  .tablet-mini .letter-box{
+    min-height:44px;
+    font-size:22px;
+  }
+  .tablet-mini .yard-shell{
+    padding:6px 8px 10px;
+  }
+  .tablet-mini .yard-train-lane{
+    top:8px;
+    height:86px;
+  }
+  .tablet-mini .yard-arrival-train{
+    --yard-train-scale:0.72;
+    bottom:0;
+  }
+  .tablet-mini .wagon-row{
+    inset:0;
+  }
+  .tablet-mini .wagon-target{
+    min-height:42px;
+  }
+  .tablet-mini .wagon-body{
+    min-height:42px;
+  }
+  .tablet-mini .wagon-frame{
+    min-height:42px;
+    font-size:10px;
+    padding:6px 5px 7px;
+  }
+  .tablet-mini .wagon-target:nth-child(1){
+    left:4%;
+    top:42%;
+    width:25%;
+  }
+  .tablet-mini .wagon-target:nth-child(2){
+    left:31%;
+    top:34%;
+    width:20%;
+  }
+  .tablet-mini .wagon-target:nth-child(3){
+    left:55%;
+    top:34%;
+    width:20%;
+  }
+  .tablet-mini .wagon-target:nth-child(4){
+    left:72%;
+    top:48%;
+    width:24%;
+  }
+  .tablet-mini .wagon-target:nth-child(5){
+    left:37%;
+    top:58%;
+    width:26%;
+  }
+  .tablet-mini .crate-combo-row{
+    left:2%;
+    right:2%;
+    bottom:-10px;
+    height:122px;
+  }
+  .tablet-mini .word-crate-combo{
+    gap:2px;
+  }
+  .tablet-mini .crate-combo-row .word-crate-combo:nth-child(1){
+    left:4%;
+    top:8px;
+  }
+  .tablet-mini .crate-combo-row .word-crate-combo:nth-child(2){
+    left:33%;
+    top:4px;
+  }
+  .tablet-mini .crate-combo-row .word-crate-combo:nth-child(3){
+    left:61%;
+    top:0;
+  }
+  .tablet-mini .crate-combo-row .word-crate-combo:nth-child(4){
+    left:18%;
+    bottom:14px;
+  }
+  .tablet-mini .crate-combo-row .word-crate-combo:nth-child(5){
+    left:46%;
+    bottom:10px;
+  }
+  .tablet-mini .combo-crate{
+    width:38px;
+    height:34px;
+  }
+  .tablet-mini .combo-letter{
+    font-size:18px;
+  }
+  .tablet-mini .blank{
+    min-width:64px;
+    height:20px;
+  }
+  .error-pulse{
+    animation: pulseError 0.5s ease;
+  }
+  @keyframes pulseError{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.03); }
+  }
+  /* ?? CRATE DOCK (letter choices) ?? */
+  .crate-dock{
+    position:relative;
+    width:100%;
+    height:100%;
+  }
+  .crate-box{
+    position:relative;
+    width:64px;
+    height:54px;
+    cursor:grab;
+    user-select:none;
+    flex-shrink:0;
+    transition:transform .12s, opacity .15s;
+  }
+  .crate-dock .crate-box{
+    position:absolute;
+  }
+  /* spread across full ground zone ??fills the empty center + right areas */
+  .crate-dock .crate-box:nth-child(1) { left:5%;  top:67%; } /* speaker */
+  .crate-dock .crate-box:nth-child(2) { left:16%; top:59%; }
+  .crate-dock .crate-box:nth-child(3) { left:33%; top:62%; }
+  .crate-dock .crate-box:nth-child(4) { left:47%; top:57%; }
+  .crate-dock .crate-box:nth-child(5) { left:55%; top:65%; }
+  .crate-dock .crate-box:nth-child(6) { left:69%; top:59%; }
+  .crate-dock .crate-box:nth-child(7) { left:82%; top:62%; }
+  .crate-dock .crate-box:nth-child(8) { left:91%; top:68%; }
+  /* fillers ??lower ground zone */
+  .crate-dock .crate-box:nth-child(9)  { left:24%; top:71%; }
+  .crate-dock .crate-box:nth-child(10) { left:44%; top:72%; }
+  .crate-dock .crate-box:nth-child(11) { left:76%; top:70%; }
+  .crate-box:hover:not(.used){ transform:scale(1.08); }
+  .crate-box.used{ opacity:.28; cursor:default; transform:none !important; }
+  .crate-box.filler{ cursor:default; }
+  .crate-box.filler:hover{ transform:none !important; }
+  .crate-box img{ width:100%; height:100%; display:block; pointer-events:none; object-fit:cover; border-radius:6px; }
+  .crate-content{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    font-weight:900;
+    color:#FFF8DC;
+    text-shadow:none;
+    pointer-events:none;
+  }
+  .speaker-crate{ cursor:pointer; }
+  .speaker-crate .crate-content{ font-size:26px; }
+  /* ?? TRAIN CAR ?? */
+  .train-car-wrap{
+    position:relative;
+    width:260px;
+    flex-shrink:0;
+  }
+  .train-car-img{
+    width:100%;
+    height:auto;
+    display:block;
+    image-rendering:pixelated;
+  }
+  .car-slots-row{
+    position:absolute;
+    top:5px;
+    left:18px;
+    right:18px;
+    bottom:16px;
+    display:flex;
+    gap:6px;
+    align-items:center;
+  }
+  .car-slot{
+    flex:1;
+    height:100%;
+    border-radius:6px;
+    background:rgba(0,0,0,.18);
+    border:2px dashed rgba(30,50,70,.75);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background .15s;
+  }
+  .car-slot.filled{ background:transparent; border:none; }
+  .car-slot.slot-error{ background:rgba(216,92,107,.28); border-color:#ef8795; }
+  .car-done-label{
+    position:absolute;
+    inset:0;
+    bottom:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    font-weight:900;
+    color:#fff;
+    text-shadow:0 1px 3px rgba(0,0,0,.55), 0 0 6px rgba(0,0,0,.3);
+    pointer-events:none;
+  }
+  .car-done-label.flagged{
+    color:#fff1f3;
+    text-shadow:0 1px 3px rgba(0,0,0,.65), 0 0 8px rgba(140,23,37,.45);
+  }
+  .train-car-wrap.flagged .train-car-img{
+    filter:drop-shadow(0 0 8px rgba(216,92,107,0.28));
+  }
+  .tablet-mini .car-done-label{ font-size:17px; }
+  .slot-crate{
+    position:relative;
+    width:38px;
+    height:38px;
+  }
+  .slot-crate img{
+    width:100%;
+    height:100%;
+    display:block;
+    pointer-events:none;
+    object-fit:cover;
+    border-radius:6px;
+  }
+  .slot-letter{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:16px;
+    font-weight:900;
+    color:#FFF8DC;
+    text-shadow:0 1px 2px rgba(0,0,0,.55);
+    pointer-events:none;
+  }
+  /* ?? CUTSCENE ?? */
+  .scene.cutscene-bg{
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.02)),
+      url('./assets/cut scene background.png') center center / cover no-repeat;
+  }
+  .cutscene-train{
+    position:absolute;
+    --cutscene-train-scale:1.16;
+    bottom:34px;
+    left:0;
+    display:flex;
+    align-items:flex-end;
+    gap:2px;
+    animation:trainRoll 3s linear forwards;
+    z-index:12;
+    transform-origin:left bottom;
+  }
+  .cutscene-train .train-car-wrap{
+    margin-right:-22px;
+    z-index:1;
+  }
+  .cutscene-train .train-head{
+    z-index:4;
+    margin-left:-8px;
+  }
+  @keyframes trainRoll{
+    0%   { transform:translateX(-72%) scale(var(--cutscene-train-scale, 1)); }
+    100% { transform:translateX(118%) scale(var(--cutscene-train-scale, 1)); }
+  }
+  .tablet-mini .cutscene-train{
+    --cutscene-train-scale:1.04;
+    bottom:18px;
+    animation-duration:3s;
+  }
+  .cutscene-shell{
+    position:relative;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    border-radius:22px;
+  }
+  .cutscene-shell.tablet-mini{
+    border-radius:18px;
+  }
+
+  /* tablet-mini overrides for crate/car */
+  .tablet-mini .crate-dock{ gap:6px; padding:0 6px; }
+  .tablet-mini .crate-box{ width:50px; height:42px; }
+  .tablet-mini .crate-content{ font-size:18px; }
+  .tablet-mini .speaker-crate .crate-content{ font-size:15px; }
+  .tablet-mini .train-car-wrap{ width:178px; }
+  .tablet-mini .car-slots-row{ top:4px; left:12px; right:12px; bottom:12px; gap:4px; }
+  .tablet-mini .slot-crate{ width:28px; height:28px; }
+  .tablet-mini .slot-letter{ font-size:12px; }
+
+  @media (max-width: 1180px){
+    .workspace{ grid-template-columns:1fr; }
+    .board-panel{ border-right:none; border-bottom:2px solid #d6e1ec; }
+    body{ overflow:auto; height:auto; }
+    .app{ min-height:100vh; height:auto; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="title-wrap">
+      <div class="title">ECP6 Spelling Transfer Train</div>
+      <div class="subtitle">diagnostic/practice version | hear -> build -> flag</div>
+    </div>
+    <div class="stage-pills">
+      <div class="pill active" id="pill-cargo">0. Cargo List</div>
+      <div class="pill" id="pill-stations">1. Word Stations</div>
+      <div class="pill" id="pill-yard">2. Cargo Drop</div>
+    </div>
+    <div class="toolbar">
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="modeInstructionalBtn" onclick="setMode('instructional')">Error-Free</button>
+        <button class="mode-btn" id="modeDiagnosticBtn" onclick="setMode('diagnostic')">Diagnostic</button>
+      </div>
+      <button class="btn-light" id="dashboardBtn" onclick="openDashboard()">Dashboard</button>
+      <button class="btn-light" id="resetBtn">Reset Stage</button>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <section class="board-panel">
+      <div class="panel-head">TEACHER BOARD</div>
+      <div class="board-stage-wrap">
+        <div class="scene" id="boardScene">
+          <div class="scene-caption" id="boardCaption"></div>
+          <div class="board-controls" id="boardControls"></div>
+          <div class="scene-zone" id="boardZone"></div>
+          <div class="board-note" id="boardNote"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tablet-panel">
+      <div class="panel-head">STUDENT TABLET</div>
+      <div class="tablet-body">
+        <div class="tablet-frame">
+          <div class="tablet-screen">
+            <div class="tablet-top">
+              <div class="tablet-stage" id="tabletStageLabel"></div>
+              <div class="tablet-progress" id="tabletProgress"></div>
+            </div>
+            <div class="tablet-hint" id="tabletHint"></div>
+            <div class="tablet-area" id="tabletArea"></div>
+            <div class="tablet-actions">
+              <button class="btn-light" id="tabletReadBtn">Read Stage</button>
+            </div>
+          </div>
+          <div class="footer-note">Build the ECP6 short a words from sound. Diagnostic mode logs error types; error-free mode gives immediate correction.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script src="data/ecp6_error_tag_runtime.js"></script>
+<script src="data/phonics_error_runtime_helpers.js"></script>
+<script>
+const CLASS_SIZE = 12;
+const DIAGNOSTIC_STORE_KEY = "polyPhonicsDiagnosticStoreV1";
+const LEVEL_META = {
+  level: "ECP6",
+  wordSource: "ECP6 repo word list",
+  pattern: "short a"
+};
+const ERROR_TYPES = {
+  initial: "initial consonant confusion",
+  vowel: "short vowel confusion",
+  final: "final consonant confusion",
+  mapping: "weak sound-to-spelling mapping"
+};
+const WORDS = [
+  {
+    id: "bag",
+    word: "bag",
+    letters: ["b", "a", "g"],
+    choices: ["b", "a", "g", "d", "e", "p", "m"],
+    sentenceFrame: "I pack a",
+    sentence: "I pack a bag.",
+    carImg: "assets/carriage_v18_car3.png"
+  },
+  {
+    id: "bat",
+    word: "bat",
+    letters: ["b", "a", "t"],
+    choices: ["b", "a", "t", "d", "e", "p", "m"],
+    sentenceFrame: "I swing a",
+    sentence: "I swing a bat.",
+    carImg: "assets/carriage_v18_car4.png"
+  },
+  {
+    id: "cap",
+    word: "cap",
+    letters: ["c", "a", "p"],
+    choices: ["c", "a", "p", "b", "e", "t", "m"],
+    sentenceFrame: "I wear a",
+    sentence: "I wear a cap.",
+    carImg: "assets/carriage_v18_car7.png"
+  },
+  {
+    id: "jam",
+    word: "jam",
+    letters: ["j", "a", "m"],
+    choices: ["j", "a", "m", "n", "e", "g", "p"],
+    sentenceFrame: "I eat",
+    sentence: "I eat jam.",
+    carImg: "assets/carriage_v18_car8.png"
+  },
+  {
+    id: "map",
+    word: "map",
+    letters: ["m", "a", "p"],
+    choices: ["m", "a", "p", "b", "e", "t", "g"],
+    sentenceFrame: "I read a",
+    sentence: "I read a map.",
+    carImg: "assets/carriage_v18_car4.png"
+  }
+];
+
+function createSession(mode) {
+  return {
+    sessionId: `train-${Date.now()}`,
+    gameId: "ecp6_spelling_transfer_train",
+    gameTitle: "ECP6 Spelling Transfer Train",
+    level: LEVEL_META.level,
+    wordSource: LEVEL_META.wordSource,
+    pattern: LEVEL_META.pattern,
+    mode,
+    createdAt: new Date().toISOString(),
+    attempts: []
+  };
+}
+
+const state = {
+  phase: "cargo",
+  stationIndex: 0,
+  trainNeedsAnim: true,
+  mode: "instructional",
+  tabletReleasedKey: null,
+  drag: null,
+  cutsceneDestination: null,
+  cutsceneNextIndex: 0,
+  currentSession: createSession("instructional"),
+  board: makeSideState(),
+  tablet: makeSideState()
+};
+
+const yardTimers = {
+  board: null,
+  tablet: null
+};
+
+function makeSideState() {
+  return {
+    cargoPracticed: {},
+    builtWords: {},
+    wordResults: {},
+    stationSlots: {},
+    stationError: false,
+    yardReady: false
+  };
+}
+
+function currentWord() {
+  return WORDS[state.stationIndex];
+}
+
+function stageKey() {
+  return `${state.phase}-${state.stationIndex}`;
+}
+
+function sideState(side) {
+  return state[side];
+}
+
+function isDiagnosticSingleScreen() {
+  return state.mode === "diagnostic";
+}
+
+function boardReadyForNext() {
+  if (state.phase === "cargo") {
+    return true;
+  }
+  if (state.phase === "stations") {
+    return !!sideState("board").builtWords[currentWord().id];
+  }
+  return true;
+}
+
+function loadDiagnosticStore() {
+  try {
+    const raw = localStorage.getItem(DIAGNOSTIC_STORE_KEY);
+    if (!raw) return { sessions: [], lastSessionId: null };
+    const parsed = JSON.parse(raw);
+    if (!parsed.sessions || !Array.isArray(parsed.sessions)) {
+      return { sessions: [], lastSessionId: null };
+    }
+    return parsed;
+  } catch (error) {
+    return { sessions: [], lastSessionId: null };
+  }
+}
+
+function saveDiagnosticStore(store) {
+  localStorage.setItem(DIAGNOSTIC_STORE_KEY, JSON.stringify(store));
+}
+
+function persistCurrentSession() {
+  const store = loadDiagnosticStore();
+  const existingIndex = store.sessions.findIndex((session) => session.sessionId === state.currentSession.sessionId);
+  if (existingIndex >= 0) {
+    store.sessions[existingIndex] = state.currentSession;
+  } else {
+    store.sessions.push(state.currentSession);
+  }
+  store.lastSessionId = state.currentSession.sessionId;
+  saveDiagnosticStore(store);
+}
+
+function openDashboard() {
+  window.open("diagnostic_dashboard.html", "_blank");
+}
+
+function setMode(mode) {
+  if (state.mode === mode) return;
+  state.mode = mode;
+  startFreshSession(mode);
+}
+
+function startFreshSession(mode = state.mode) {
+  state.mode = mode;
+  state.phase = "cargo";
+  state.stationIndex = 0;
+  state.trainNeedsAnim = true;
+  state.tabletReleasedKey = null;
+  state.drag = null;
+  state.cutsceneDestination = null;
+  state.cutsceneNextIndex = 0;
+  state.currentSession = createSession(mode);
+  state.board = makeSideState();
+  state.tablet = makeSideState();
+  persistCurrentSession();
+  render();
+}
+
+function summarizeFlags(flags) {
+  return flags.map((flag) => flag.errorType).join(", ");
+}
+
+function analyzeStationAttempt(item, slots) {
+  const flags = [];
+  item.letters.forEach((expected, index) => {
+    const actual = slots[index] || "";
+    if (actual === expected) return;
+    const observedHint = index === 0
+      ? "initial consonant confusion"
+      : (index === 1 ? "short vowel confusion" : "final sound missing");
+    flags.push(
+      window.PolyPhonicsErrorRuntime?.chooseBestTag(item.word, {
+        taskType: "spelling",
+        observedHint,
+        response: actual || "(blank)",
+        position: index === 0 ? "initial sound" : (index === 1 ? "middle vowel" : "final sound"),
+        confidence: 0.82
+      }) || {
+        errorType: observedHint,
+        chairman_label: observedHint,
+        attemptedValue: actual || "(blank)",
+        position: index === 0 ? "initial sound" : (index === 1 ? "middle vowel" : "final sound")
+      }
+    );
+  });
+  if (flags.length > 1) {
+    flags.push(
+      window.PolyPhonicsErrorRuntime?.chooseBestTag(item.word, {
+        taskType: "dictation",
+        observedHint: "sound-to-spelling / dictation error",
+        response: slots.join(""),
+        position: "whole word",
+        confidence: 0.9
+      }) || {
+        errorType: ERROR_TYPES.mapping,
+        chairman_label: ERROR_TYPES.mapping,
+        attemptedValue: slots.join(""),
+        position: "whole word"
+      }
+    );
+  }
+  return flags;
+}
+
+function recordStationAttempt(side, item, slots, status, flags = []) {
+  state.currentSession.attempts.push({
+    id: `${item.id}-${side}-${Date.now()}`,
+    timestamp: new Date().toISOString(),
+    side,
+    phase: "stations",
+    mode: state.mode,
+    level: LEVEL_META.level,
+    pattern: LEVEL_META.pattern,
+    targetWord: item.word,
+    attemptedWord: slots.join(""),
+    status,
+    flags
+  });
+  persistCurrentSession();
+}
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  utterance.rate = 0.8;
+  utterance.pitch = 1.02;
+  speechSynthesis.speak(utterance);
+}
+
+function playTargetSound() {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance("ah");
+  utterance.lang = "en-US";
+  utterance.rate = 0.55;
+  utterance.pitch = 1.0;
+  speechSynthesis.speak(utterance);
+}
+
+function listenCurrentWord() {
+  const item = currentWord();
+  speak(item.word);
+}
+
+function readCurrentWord() {
+  const item = currentWord();
+  speak(item.word + ". " + item.word);
+}
+
+function readStage() {
+  if (state.phase === "cargo") {
+    speak(WORDS.map((word) => word.word).join(". "));
+  } else if (state.phase === "stations") {
+    speak(currentWord().word);
+  } else {
+    speak(WORDS.map((word) => word.word).join(". "));
+  }
+}
+
+function sendToTablets() {
+  if (isDiagnosticSingleScreen()) return;
+  state.tabletReleasedKey = stageKey();
+  if (state.phase === "yard") {
+    startYardSequence("tablet");
+    return;
+  }
+  render();
+}
+
+function nextStep() {
+  if (!boardReadyForNext()) return;
+  if (state.phase === "cutscene") return;
+  state.drag = null;
+  if (state.phase === "cargo") {
+    state.phase = "stations";
+    state.tabletReleasedKey = null;
+    render();
+    return;
+  }
+  if (state.phase === "stations") {
+    const isLast = state.stationIndex >= WORDS.length - 1;
+    state.cutsceneDestination = isLast ? "yard" : "stations";
+    state.cutsceneNextIndex   = isLast ? state.stationIndex : state.stationIndex + 1;
+    state.phase = "cutscene";
+    state.tabletReleasedKey = "cutscene"; // tablets show cutscene automatically
+    render();
+    setTimeout(() => {
+      state.phase = state.cutsceneDestination;
+      state.stationIndex = state.cutsceneNextIndex;
+      state.tabletReleasedKey = null;
+      state.trainNeedsAnim = true;
+      if (state.phase === "yard") {
+        startYardSequence("board");
+      } else {
+        render();
+      }
+    }, 3400);
+  }
+}
+
+function resetStage() {
+  state.tabletReleasedKey = null;
+  state.drag = null;
+  if (state.phase === "cargo") {
+    sideState("tablet").cargoPracticed = {};
+  } else if (state.phase === "stations") {
+    const wordId = currentWord().id;
+    sideState("board").stationSlots[wordId] = [];
+    sideState("tablet").stationSlots[wordId] = [];
+    sideState("board").builtWords[wordId] = false;
+    sideState("tablet").builtWords[wordId] = false;
+    delete sideState("board").wordResults[wordId];
+    delete sideState("tablet").wordResults[wordId];
+    sideState("board").stationError = false;
+    sideState("tablet").stationError = false;
+  } else {
+    sideState("board").yardReady = true;
+    sideState("tablet").yardReady = true;
+  }
+  render();
+}
+
+function startYardSequence(side) {
+  if (yardTimers[side]) {
+    clearTimeout(yardTimers[side]);
+  }
+  sideState(side).yardReady = false;
+  render();
+  yardTimers[side] = setTimeout(() => {
+    sideState(side).yardReady = true;
+    render();
+  }, 3900);
+}
+
+function markCargoPracticed(side, wordId) {
+  sideState(side).cargoPracticed[wordId] = true;
+  speak(WORDS.find((word) => word.id === wordId).word);
+  render();
+}
+
+function getSlots(side, wordId) {
+  const sideData = sideState(side);
+  if (!sideData.stationSlots[wordId]) {
+    sideData.stationSlots[wordId] = Array(WORDS.find((w) => w.id === wordId).letters.length).fill("");
+  }
+  return sideData.stationSlots[wordId];
+}
+
+function usedCount(slots, letter) {
+  return slots.filter((value) => value === letter).length;
+}
+
+function availableLetter(side, item, letter) {
+  const slots = getSlots(side, item.id);
+  const inWord = item.choices.filter((value) => value === letter).length;
+  return usedCount(slots, letter) < inWord;
+}
+
+function dragLetterStart(side, letter) {
+  state.drag = { side, letter, type: "letter" };
+}
+
+function dragWordStart(side, wordId) {
+  state.drag = { side, wordId, type: "wordcar" };
+}
+
+function allowDrop(event) {
+  event.preventDefault();
+}
+
+function dropLetter(side, slotIndex) {
+  if (!state.drag || state.drag.type !== "letter") return;
+  const item = currentWord();
+  const slots = getSlots(side, item.id);
+  if (sideState(side).builtWords[item.id]) return;
+  slots[slotIndex] = state.drag.letter;
+  state.drag = null;
+  checkWordBuild(side, item);
+  render();
+}
+
+function clearLetter(side, slotIndex) {
+  const item = currentWord();
+  const slots = getSlots(side, item.id);
+  if (sideState(side).builtWords[item.id]) return;
+  slots[slotIndex] = "";
+  render();
+}
+
+function checkWordBuild(side, item) {
+  const slots = getSlots(side, item.id);
+  if (slots.some((value) => !value)) return;
+  if (slots.join("") === item.word) {
+    sideState(side).builtWords[item.id] = true;
+    sideState(side).wordResults[item.id] = {
+      displayWord: item.word,
+      status: "correct",
+      flags: []
+    };
+    sideState(side).stationError = false;
+    recordStationAttempt(side, item, slots, "correct", []);
+    if (state.mode !== "diagnostic") {
+      speak(item.word);
+    }
+  } else {
+    const flags = analyzeStationAttempt(item, slots);
+    const attemptedWord = slots.join("");
+    sideState(side).stationError = true;
+    recordStationAttempt(
+      side,
+      item,
+      slots,
+      state.mode === "diagnostic" ? "flagged" : "blocked",
+      flags
+    );
+    if (state.mode === "diagnostic") {
+      sideState(side).builtWords[item.id] = true;
+      sideState(side).wordResults[item.id] = {
+        displayWord: attemptedWord,
+        status: "flagged",
+        flags
+      };
+      setTimeout(() => {
+        sideState(side).stationError = false;
+        render();
+      }, 500);
+    } else {
+      setTimeout(() => {
+        sideState(side).stationSlots[item.id] = Array(item.letters.length).fill("");
+        sideState(side).stationError = false;
+        render();
+      }, 650);
+    }
+  }
+}
+
+function sideWordDone(side, wordId) {
+  return !!sideState(side).builtWords[wordId];
+}
+
+function renderTrain(side, mini = false) {
+  const item     = currentWord();
+  const hasError = sideState(side).stationError && state.mode !== "diagnostic";
+  const errorClass = hasError ? " error-pulse" : "";
+
+  // Build every car that has been reached so far (completed + current active)
+  const carsHtml = WORDS.slice(0, state.stationIndex + 1).map((word, idx) => {
+    const isActive = idx === state.stationIndex;
+    const isDone   = !!sideState(side).builtWords[word.id];
+    const wordResult = sideState(side).wordResults[word.id];
+    const flaggedVisual = state.mode !== "diagnostic" && wordResult && wordResult.status === 'flagged';
+
+    if (isActive) {
+      const slots = getSlots(side, word.id);
+      const slotsHtml = slots.map((letter, si) => `
+        <div class="car-slot ${letter ? 'filled' : ''} ${hasError && letter ? 'slot-error' : ''}"
+             ondragover="allowDrop(event)"
+             ondrop="dropLetter('${side}', ${si})"
+             onclick="${letter && !isDone ? `clearLetter('${side}', ${si})` : ''}">
+          ${letter ? `<div class="slot-crate"><img src="assets/CrateBig.png" alt=""><span class="slot-letter">${letter}</span></div>` : ''}
+        </div>
+      `).join('');
+      return `
+        <div class="train-car-wrap${errorClass}">
+          <img class="train-car-img" src="${word.carImg}" alt="Train car">
+          <div class="car-slots-row">${slotsHtml}</div>
+        </div>`;
+    } else {
+      return `
+        <div class="train-car-wrap ${flaggedVisual ? 'flagged' : ''}">
+          <img class="train-car-img" src="${word.carImg}" alt="Train car">
+          <div class="car-done-label ${flaggedVisual ? 'flagged' : ''}">${wordResult ? wordResult.displayWord : word.word}</div>
+        </div>`;
+    }
+  }).join('');
+
+  return `
+    <div class="station-strip${state.trainNeedsAnim ? ' run-right' : ''}">${state.trainNeedsAnim = false, ''}
+      ${carsHtml}
+      <div class="train-head">
+        <img src="assets/train_v18.gif" alt="Train engine">
+        <div class="coal-overlay">
+          <div class="coal-letter">a</div>
+          <button class="coal-speaker" onclick="playTargetSound()">&#128266;</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDock(side, mini = false) {
+  const item = currentWord();
+
+  const speakerCrate = `
+    <div class="crate-box speaker-crate" onclick="listenCurrentWord()">
+      <img src="assets/CrateBig.png" alt="">
+      <span class="crate-content">&#128266;</span>
+    </div>
+  `;
+
+  const letterCrates = item.choices.map(letter => {
+    const available = availableLetter(side, item, letter);
+    return `
+      <div class="crate-box ${available ? '' : 'used'}"
+           draggable="${available}"
+           ondragstart="${available ? `dragLetterStart('${side}', '${letter}')` : ''}">
+        <img src="assets/CrateBig.png" alt="">
+        <span class="crate-content">${letter}</span>
+      </div>
+    `;
+  }).join('');
+
+  const fillerCrates = Array.from({ length: 3 }, () => `
+    <div class="crate-box filler">
+      <img src="assets/CrateBig.png" alt="">
+    </div>
+  `).join('');
+
+  return `
+    <div class="crate-dock">
+      ${speakerCrate}
+      ${letterCrates}
+      ${fillerCrates}
+    </div>
+  `;
+}
+
+function renderStationScene(side, mini = false) {
+  const showSceneButton = side === "board" && !mini;
+  const nextLabel = state.stationIndex === WORDS.length - 1 ? "Final Yard ->" : "Next Station ->";
+  return `
+    <div class="station-stage-shell ${mini ? 'tablet-mini' : ''}">
+      <div class="station-dock-wrap">
+        ${renderDock(side, mini)}
+      </div>
+      <div class="station-train-wrap">
+        ${renderTrain(side, mini)}
+      </div>
+      ${showSceneButton ? `<div class="diagnostic-scene-action station-scene-action"><button class="btn-primary" onclick="nextStep()" ${boardReadyForNext() ? "" : "disabled"}>${nextLabel}</button></div>` : ``}
+    </div>
+  `;
+}
+
+function renderCargoIntroScene(side, mini = false) {
+  const practiced = sideState(side).cargoPracticed || {};
+  const hideSpellings = isDiagnosticSingleScreen();
+  const showSceneButton = side === "board" && !mini;
+  const rows = WORDS.map((word, index) => {
+    const done = !!practiced[word.id];
+    const cargoLabel = hideSpellings ? `Word ${index + 1}` : word.word;
+    return `
+      <div class="cargo-row ${done ? 'done' : ''}">
+        <div class="cargo-word">${cargoLabel}</div>
+        <button class="cargo-action" onclick="speak('${word.word}')">Listen</button>
+        ${side === "tablet" && !hideSpellings
+          ? `<button class="cargo-check" onclick="markCargoPracticed('tablet', '${word.id}')" aria-label="Mark ${cargoLabel} practiced">${done ? '&#10003;' : ''}</button>`
+          : `<div class="cargo-check">${done ? '&#10003;' : ''}</div>`}
+      </div>
+    `;
+  }).join("");
+  return `
+    <div class="cargo-shell${mini ? ' tablet-mini' : ''}">
+      <div class="cargo-paper">
+        <div class="cargo-title">Word Cargo List</div>
+        <div class="cargo-sub">${hideSpellings
+          ? 'Preview the sounds for Word 1 to Word 5 before starting the station sequence.'
+          : 'Listen to the short a words. Say them with the teacher first, then practice them on your own.'}</div>
+        <div class="cargo-list">
+          ${rows}
+        </div>
+      </div>
+      ${showSceneButton ? `<div class="diagnostic-scene-action cargo-scene-action"><button class="btn-primary" onclick="nextStep()">Go to Station 1 -></button></div>` : ``}
+    </div>
+  `;
+}
+
+function renderCutsceneScene(mini = false) {
+  const completedCount = state.stationIndex + 1;
+  const trainSide = "board";
+  const carsHtml = WORDS.slice(0, completedCount).map(word => {
+    const wordResult = sideState(trainSide).wordResults[word.id];
+    const displayWord = wordResult ? wordResult.displayWord : word.word;
+    return `
+    <div class="train-car-wrap">
+      <img class="train-car-img" src="${word.carImg}" alt="">
+      <div class="car-done-label">${displayWord}</div>
+    </div>
+  `;
+  }).join('');
+  return `
+    <div class="cutscene-shell${mini ? ' tablet-mini' : ''}">
+      <div class="cutscene-train${mini ? ' tablet-mini' : ''}">
+        ${carsHtml}
+        <div class="train-head">
+          <img src="assets/train_v18.gif" alt="Train engine">
+          <div class="coal-overlay">
+            <div class="coal-letter">a</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderWordCrateCombo(side, word, mini = false, interactive = true, index = 0) {
+  const wordResult = sideState(side).wordResults[word.id];
+  const displayLetters = wordResult ? wordResult.displayWord.split("") : word.letters;
+  return `
+    <div class="word-crate-combo ${wordResult && wordResult.status === 'flagged' ? 'diagnostic-flagged' : ''}"
+         style="--combo-index:${index}; --intro-x:${(index - 2) * 44}px;">
+      ${displayLetters.map((letter) => `
+        <div class="combo-crate">
+          <img src="assets/CrateBig.png" alt="">
+          <span class="combo-letter">${letter}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderYardScene(side, mini = false) {
+  const yardReady = !!sideState(side).yardReady;
+  const trainCarsHtml = WORDS.map(word => `
+    <div class="train-car-wrap">
+      <img class="train-car-img" src="${word.carImg}" alt="">
+      <div class="car-done-label">${word.word}</div>
+    </div>
+  `).join('');
+  return `
+      <div class="yard-shell ${mini ? 'tablet-mini' : ''} ${yardReady ? 'yard-ready' : 'intro-playing'}">
+        ${yardReady ? '' : `
+          <div class="yard-train-lane">
+            <div class="yard-arrival-train${mini ? ' tablet-mini' : ''}">
+              ${trainCarsHtml}
+              <div class="train-head">
+                <img src="assets/train_v18.gif" alt="Train engine">
+                <div class="coal-overlay">
+                  <div class="coal-letter">a</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `}
+        <div class="yard-summary">
+          <h3>Good Job!</h3>
+          <p>You finished the train run and dropped off all of the word cargo.</p>
+        </div>
+        <div class="crate-combo-row">
+          ${WORDS.map((word, index) => renderWordCrateCombo(side, word, mini, false, index)).join("")}
+        </div>
+        ${yardReady ? `<div class="success-banner">Great work! Your cargo has been delivered.</div>` : ``}
+      </div>
+  `;
+}
+
+function renderTabletScene(sceneClass, content, fullBleed = false) {
+  if (fullBleed) {
+    return `<div class="scene ${sceneClass} tablet-mini">${content}</div>`;
+  }
+  return `
+    <div class="scene ${sceneClass} tablet-mini">
+      <div class="scene-zone">
+        ${content}
+      </div>
+    </div>
+  `;
+}
+
+function boardControlsHtml() {
+  if (state.phase === "cutscene") return "";
+  if (state.phase === "cargo" || state.phase === "stations") {
+    return "";
+  }
+  return `<button class="btn-primary" onclick="openDashboard()">View Dashboard</button>`;
+}
+
+function renderBoard() {
+  const boardScene = document.getElementById("boardScene");
+  const boardCaption = document.getElementById("boardCaption");
+  const boardZone = document.getElementById("boardZone");
+  const boardNote = document.getElementById("boardNote");
+  const boardControls = document.getElementById("boardControls");
+
+  if (state.phase === "cutscene") {
+    const n = state.stationIndex + 1;
+    boardScene.className = "scene cutscene-bg";
+    boardCaption.textContent = n === 1 ? "1 word car loaded ??next stop ahead!" : `${n} word cars loaded ??next stop ahead!`;
+    boardNote.textContent = "";
+    boardControls.innerHTML = "";
+    boardZone.innerHTML = renderCutsceneScene(false);
+    return;
+  }
+  boardScene.className = state.phase === "stations" ? "scene station-bg" : "scene yard";
+  boardCaption.textContent = state.phase === "cargo"
+    ? "Word Cargo List"
+    : state.phase === "stations"
+      ? `Station ${state.stationIndex + 1}: build the short a word`
+      : "Final Yard: cargo drop and diagnostic summary";
+  boardNote.textContent = state.phase === "cargo"
+    ? ""
+    : state.phase === "stations"
+      ? "Tap the coal wagon speaker, build the short a word on the train car, and move left to right through the yard."
+      : "The train drops off the completed word cargo. Open the dashboard to review flagged error types and missed words.";
+  boardControls.innerHTML = boardControlsHtml();
+  boardZone.innerHTML = state.phase === "cargo"
+    ? renderCargoIntroScene("board", false)
+    : state.phase === "stations"
+      ? renderStationScene("board", false)
+      : renderYardScene("board", false);
+}
+
+function renderTablet() {
+  return;
+
+  const tabletStageLabel = document.getElementById("tabletStageLabel");
+  const tabletProgress = document.getElementById("tabletProgress");
+  const tabletHint = document.getElementById("tabletHint");
+  const tabletArea = document.getElementById("tabletArea");
+  const tabletReadBtn = document.getElementById("tabletReadBtn");
+
+  // Cutscene always shows on tablet automatically
+  if (state.phase === "cutscene") {
+    tabletStageLabel.textContent = "?쉨 On the move!";
+    tabletProgress.textContent = "";
+    tabletHint.textContent = "";
+    tabletReadBtn.style.visibility = "hidden";
+    tabletArea.innerHTML = renderTabletScene("cutscene-bg", renderCutsceneScene(true), true);
+    return;
+  }
+
+  if (state.tabletReleasedKey !== stageKey()) {
+    tabletStageLabel.textContent = "";
+    tabletProgress.textContent = "";
+    tabletHint.textContent = "";
+    tabletReadBtn.style.visibility = "hidden";
+    tabletArea.innerHTML = `<div class="hold-screen">LOOK AT YOUR TEACHER</div>`;
+    return;
+  }
+
+  tabletReadBtn.style.visibility = "visible";
+  if (state.phase === "cargo") {
+    const doneCount = WORDS.filter((word) => sideState("tablet").cargoPracticed[word.id]).length;
+    tabletStageLabel.textContent = "Word Cargo List";
+    tabletProgress.textContent = `${doneCount} / ${WORDS.length} practiced`;
+    tabletHint.textContent = "Listen to each word, say it yourself, and check it off.";
+    tabletArea.innerHTML = renderTabletScene("yard", renderCargoIntroScene("tablet", true));
+  } else if (state.phase === "stations") {
+    const builtCount = WORDS.filter((word) => sideWordDone("tablet", word.id)).length;
+    tabletStageLabel.textContent = "Spelling Station";
+    tabletProgress.textContent = `${builtCount} / ${WORDS.length} built`;
+    tabletHint.textContent = "Tap the speaker, hear the short a word, and build it on the train.";
+    tabletArea.innerHTML = renderTabletScene("station-bg", renderStationScene("tablet", true));
+  } else {
+     const builtCount = WORDS.filter((word) => sideWordDone("tablet", word.id)).length;
+     tabletStageLabel.textContent = "Cargo Drop";
+     tabletProgress.textContent = `${builtCount} / ${WORDS.length} word sets delivered`;
+     tabletHint.textContent = "Watch the cargo drop, then open the dashboard to review the flagged results.";
+     tabletArea.innerHTML = renderTabletScene("yard", renderYardScene("tablet", true));
+  }
+}
+
+function updateChrome() {
+  const atStations = state.phase === "stations" || state.phase === "cutscene";
+  document.getElementById("pill-cargo").className = "pill" + (state.phase === "cargo" ? " active" : "");
+  document.getElementById("pill-stations").className = "pill" + (atStations ? " active" : "");
+  document.getElementById("pill-yard").className = "pill" + (state.phase === "yard" ? " active" : "");
+  document.getElementById("modeInstructionalBtn").className = "mode-btn" + (state.mode === "instructional" ? " active" : "");
+  document.getElementById("modeDiagnosticBtn").className = "mode-btn" + (state.mode === "diagnostic" ? " active" : "");
+}
+
+function render() {
+  updateChrome();
+  renderBoard();
+  renderTablet();
+  window.render_game_to_text = renderGameToText;
+  window.advanceTime = advanceTime;
+}
+
+function renderGameToText() {
+  const payload = {
+    phase: state.phase,
+    mode: state.mode,
+    stationIndex: state.stationIndex,
+    currentWord: currentWord().word,
+    boardBuilt: sideState("board").builtWords,
+    tabletBuilt: sideState("tablet").builtWords,
+    boardWordResults: sideState("board").wordResults,
+    tabletWordResults: sideState("tablet").wordResults,
+    attemptsLogged: state.currentSession.attempts.length,
+    tabletReleasedKey: state.tabletReleasedKey
+  };
+  return JSON.stringify(payload);
+}
+
+function advanceTime() {
+  render();
+}
+
+document.getElementById("resetBtn").addEventListener("click", resetStage);
+document.getElementById("tabletReadBtn").addEventListener("click", readStage);
+
+persistCurrentSession();
+render();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

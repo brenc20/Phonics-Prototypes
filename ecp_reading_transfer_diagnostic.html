@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phonics Diagnostic — Reading Transfer</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #153a61;
+  --blue: #2a6fb0;
+  --green: #28a45d;
+  --rose: #d94d61;
+  --ink: #1d2b3a;
+  --muted: #667788;
+}
+
+body {
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(180deg, #08142a 0%, #122040 100%);
+  color: var(--ink);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ══════════════════════════════════════════════
+   SETUP SCREEN
+══════════════════════════════════════════════ */
+#setupScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 40px 32px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+.setup-logo   { font-size: 38px; margin-bottom: -6px; }
+.setup-title  { font-size: 24px; font-weight: 900; color: white; }
+.setup-sub    { font-size: 12px; color: rgba(255,255,255,.45); margin-top: -14px; }
+.setup-group  { width: 100%; }
+.setup-label  {
+  font-size: 10px; font-weight: 800; letter-spacing: 1.2px;
+  color: rgba(255,255,255,.4); text-transform: uppercase;
+  margin-bottom: 9px; text-align: left;
+}
+.setup-opts   { display: flex; gap: 10px; }
+.setup-opt    {
+  flex: 1; padding: 14px 12px; border-radius: 16px;
+  border: 2px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.62); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .18s ease; text-align: left;
+}
+.setup-opt:hover  { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.24); color: white; }
+.setup-opt.sel    { background: rgba(42,111,176,.35); border-color: #2a6fb0; color: white; }
+.opt-title { font-size: 15px; font-weight: 900; margin-bottom: 5px; }
+.opt-desc  { font-size: 10px; line-height: 1.5; opacity: .72; }
+.start-btn {
+  width: 100%; padding: 16px; border-radius: 18px;
+  background: #ffdb68; color: #644700;
+  font-size: 16px; font-weight: 900; cursor: pointer; border: none;
+  opacity: .42; pointer-events: none; transition: all .18s ease; margin-top: 4px;
+}
+.start-btn.ready { opacity: 1; pointer-events: all; }
+.start-btn.ready:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(255,180,0,.28); }
+
+/* ══════════════════════════════════════════════
+   GAME SCREEN
+══════════════════════════════════════════════ */
+#gameScreen {
+  display: none; flex-direction: column;
+  width: 100vw; height: 100vh;
+  position: fixed; inset: 0;
+}
+.topbar {
+  flex-shrink: 0; background: var(--navy); color: white;
+  padding: 10px 18px; display: flex; align-items: center; gap: 14px; z-index: 10;
+}
+.game-title { font-size: 12px; font-weight: 800; color: rgba(255,255,255,.6); min-width: 110px; }
+.pills { display: flex; gap: 6px; flex: 1; justify-content: center; }
+.pill {
+  padding: 6px 14px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  font-size: 10px; font-weight: 700; opacity: .4; transition: all .2s ease;
+}
+.pill.active { opacity: 1; background: rgba(255,255,255,.18); }
+.pill.done   { opacity: .85; background: rgba(40,164,93,.25); border-color: rgba(40,164,93,.4); }
+.mode-tag {
+  font-size: 10px; font-weight: 800; padding: 5px 11px; border-radius: 999px;
+  background: rgba(255,255,255,.1); color: rgba(255,255,255,.65);
+  border: 1px solid rgba(255,255,255,.14);
+}
+.mode-tag.diag { background: rgba(217,77,97,.22); color: #ffb3be; border-color: rgba(217,77,97,.3); }
+
+/* ══════════════════════════════════════════════
+   PHASE AREA & SCENES
+══════════════════════════════════════════════ */
+#phaseArea { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+.scene {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;
+}
+.scene-space {
+  background: linear-gradient(180deg,rgba(5,12,27,.18),rgba(14,36,66,.24)),
+    url("assets/space background.png") center/cover no-repeat;
+  background-color: #08142a;
+}
+.scene-sky {
+  background: linear-gradient(180deg,rgba(7,18,43,.05),rgba(14,32,68,.09)),
+    url("assets/atmo phrase.png") center/cover no-repeat;
+  background-color: #b5d5ee;
+}
+.scene-earth {
+  background: linear-gradient(180deg,rgba(14,24,44,.05),rgba(18,36,68,.12)),
+    url("assets/level 3 background.png") center/cover no-repeat;
+  background-color: #7aaa68;
+}
+
+/* progress pill */
+.prog {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  background: rgba(255,255,255,.9); border-radius: 999px; padding: 5px 16px;
+  font-size: 12px; font-weight: 800; color: var(--navy); z-index: 30;
+  box-shadow: 0 4px 14px rgba(0,0,0,.14); white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════════
+   PHASE 1 — WORD METEORS at top, speaker bottom
+══════════════════════════════════════════════ */
+.p1-meteors {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 0; padding: 50px 2% 0;
+  min-height: 0;
+}
+.p1-speaker {
+  flex-shrink: 0; height: 130px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* ══════════════════════════════════════════════
+   PHASE 2 — word meteor top, phrase clouds bottom
+══════════════════════════════════════════════ */
+.p2-word {
+  flex-shrink: 0; height: 210px;
+  display: flex; align-items: center; justify-content: center;
+  padding-top: 44px;
+}
+.p2-word .meteor-wrap { cursor: pointer; }
+.p2-clouds {
+  flex: 1; display: flex; align-items: flex-end; justify-content: center;
+  gap: 14px; padding: 0 3% 44px;
+  min-height: 0;
+}
+
+/* ══════════════════════════════════════════════
+   PHASE 3 — WORD METEOR top, stacked sentence tiles bottom
+══════════════════════════════════════════════ */
+.p3-word {
+  flex-shrink: 0; height: 210px;
+  display: flex; align-items: center; justify-content: center;
+  padding-top: 44px;
+}
+.p3-sentences {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-end;
+  gap: 10px; padding: 0 0 44px;
+}
+
+/* ══════════════════════════════════════════════
+   METEOR COMPONENT (shared)
+══════════════════════════════════════════════ */
+.meteor-wrap {
+  display: flex; align-items: center; justify-content: center;
+  position: relative; cursor: pointer; flex: 1;
+  min-height: 180px;
+}
+
+.meteor-text {
+  position: relative; z-index: 2;
+  background: transparent; border: none; box-shadow: none;
+  color: #fff7d5;
+  text-shadow:
+    -1px -1px 0 rgba(0,0,0,.92), 1px -1px 0 rgba(0,0,0,.92),
+    -1px  1px 0 rgba(0,0,0,.92), 1px  1px 0 rgba(0,0,0,.92);
+  font-weight: 900; white-space: nowrap; user-select: none;
+  pointer-events: none; line-height: 1;
+  transition: transform .18s ease, color .18s ease;
+}
+.meteor-text::before {
+  content: "";
+  position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -52%);
+  background: url("assets/meteor.png") center/contain no-repeat;
+  mix-blend-mode: screen; opacity: .96; pointer-events: none; z-index: -1;
+}
+.meteor-text::after {
+  content: "";
+  position: absolute; left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(0,0,0,.22) 0%, rgba(0,0,0,.06) 58%, transparent 74%);
+  pointer-events: none; z-index: -2;
+}
+
+/* Size variants */
+.meteor-lg .meteor-text          { font-size: 30px; }
+.meteor-lg .meteor-text::before  { width: 540px; height: 540px; }
+.meteor-lg .meteor-text::after   { bottom: -90px; width: 150px; height: 32px; }
+
+.meteor-xl .meteor-text          { font-size: 36px; }
+.meteor-xl .meteor-text::before  { width: 640px; height: 640px; }
+.meteor-xl .meteor-text::after   { bottom: -100px; width: 180px; height: 36px; }
+
+.meteor-display .meteor-text     { font-size: 30px; }
+.meteor-display .meteor-text::before { width: 420px; height: 420px; }
+.meteor-display .meteor-text::after  { bottom: -80px; width: 130px; height: 28px; }
+
+.meteor-display-xl .meteor-text     { font-size: 38px; }
+.meteor-display-xl .meteor-text::before { width: 520px; height: 520px; }
+.meteor-display-xl .meteor-text::after  { bottom: -90px; width: 160px; height: 32px; }
+
+.meteor-wrap:hover .meteor-text { transform: translateY(-5px) scale(1.06); }
+.meteor-wrap.flash-ok .meteor-text {
+  color: #b8ffd0;
+  filter: drop-shadow(0 0 14px rgba(80,255,140,.55));
+  animation: popOk .38s ease forwards;
+}
+.meteor-wrap.flash-no .meteor-text {
+  color: #ffb3c0;
+  animation: shakeX .35s ease;
+}
+.meteor-wrap.disabled { opacity: .3; cursor: default; pointer-events: none; }
+.meteor-wrap.drop-out { animation: fallOff .9s ease-in forwards; }
+.meteor-wrap.no-hover:hover .meteor-text { transform: none; cursor: default; }
+
+@keyframes popOk  {
+  0%{transform:scale(1)} 40%{transform:scale(1.14) translateY(-5px)} 100%{transform:scale(1)}
+}
+@keyframes shakeX {
+  0%,100%{transform:translateX(0)} 25%{transform:translateX(-9px)} 75%{transform:translateX(9px)}
+}
+@keyframes fallOff {
+  0%  { transform: translateY(0) scale(1); }
+  15% { transform: translateY(20px) scale(1.05); }
+  100%{ transform: translateY(180vh) scale(.85); }
+}
+
+/* ══════════════════════════════════════════════
+   CRATER IMPACT
+══════════════════════════════════════════════ */
+.ground-impact {
+  position: absolute;
+  width: 96px; height: 96px;
+  pointer-events: none; z-index: 50;
+  transform: translate(-50%, -50%);
+}
+.crater-burst {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 88px; height: 88px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  background: url("assets/impact.png") center/contain no-repeat;
+  filter: drop-shadow(0 6px 14px rgba(32,18,8,.28));
+  animation: craterExpand .85s ease-out forwards;
+}
+.crater-burst.persistent {
+  animation: none;
+  opacity: .92;
+  transform: translate(-50%, -50%) scale(1);
+}
+@keyframes craterExpand {
+  0%  { transform: translate(-50%,-50%) scale(0);   opacity: 1; }
+  60% { transform: translate(-50%,-50%) scale(1.3); opacity: .7; }
+  100%{ transform: translate(-50%,-50%) scale(2);   opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════
+   SPEAKER BUTTON
+══════════════════════════════════════════════ */
+.speaker-btn {
+  width: 74px; height: 74px; border-radius: 50%;
+  background: white; border: 4px solid #d6e6f5;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 30px; cursor: pointer;
+  box-shadow: 0 10px 26px rgba(0,0,0,.2);
+  transition: all .18s ease;
+  animation: spkPulse 2.2s ease-in-out infinite;
+}
+.speaker-btn:hover   { transform: scale(1.08); }
+.speaker-btn.playing { animation: none; background: #e4f0ff; border-color: #2a6fb0; transform: scale(1.06); }
+@keyframes spkPulse {
+  0%,100%{ box-shadow: 0 10px 26px rgba(0,0,0,.2); }
+  50%    { box-shadow: 0 10px 30px rgba(0,0,0,.24), 0 0 0 10px rgba(255,255,255,.12); }
+}
+.spk-hint {
+  font-size: 11px; font-weight: 700;
+  color: rgba(255,255,255,.72); background: rgba(0,0,0,.3);
+  padding: 4px 12px; border-radius: 999px;
+}
+
+/* ══════════════════════════════════════════════
+   PHRASE CLOUDS
+══════════════════════════════════════════════ */
+.cloud-choice {
+  flex: 1; max-width: 360px; position: relative;
+  aspect-ratio: 300 / 196; cursor: pointer;
+  transition: transform .18s ease, filter .18s ease;
+}
+.cloud-choice::before {
+  content: ""; position: absolute; inset: 0;
+  background: url("assets/clouds.png") center/100% 100% no-repeat;
+  filter: drop-shadow(0 8px 18px rgba(16,34,64,.18));
+  pointer-events: none; z-index: 0;
+}
+.cloud-text {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+  font-size: clamp(16px, 2.2vw, 22px);
+  font-weight: 900; color: #0a2840;
+  text-shadow: 0 0 6px rgba(255,255,255,1), 0 1px 0 rgba(255,255,255,.9);
+  text-align: center; padding: 0 14%;
+  pointer-events: none; user-select: none;
+}
+.cloud-choice:hover { transform: translateY(-5px) scale(1.04); }
+.cloud-choice.flash-ok { filter: drop-shadow(0 0 16px rgba(40,164,93,.8)); animation: popOk .38s ease; }
+.cloud-choice.flash-no { filter: drop-shadow(0 0 16px rgba(217,77,97,.8)); animation: shakeX .35s ease; }
+.cloud-choice.disabled { opacity: .3; cursor: default; pointer-events: none; }
+
+/* ══════════════════════════════════════════════
+   SENTENCE TILES (Phase 3)
+══════════════════════════════════════════════ */
+.sent-choice {
+  width: 480px; max-width: 88vw;
+  background: rgba(255,255,255,.18);
+  border: 1.5px solid rgba(255,255,255,.38);
+  border-radius: 16px; padding: 13px 22px;
+  font-size: 15px; font-weight: 800;
+  color: rgba(255,255,255,.95);
+  text-shadow: 0 1px 4px rgba(0,0,0,.4);
+  cursor: pointer; transition: all .18s ease;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 18px rgba(0,0,0,.12);
+  text-align: center;
+}
+.sent-choice:hover {
+  background: rgba(255,255,255,.28);
+  border-color: rgba(255,255,255,.6);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.18);
+}
+.sent-choice.flash-ok { background: rgba(40,164,93,.45); border-color: rgba(80,220,140,.7); animation: popOk .38s ease; }
+.sent-choice.flash-no { background: rgba(217,77,97,.45); border-color: rgba(255,130,150,.7); animation: shakeX .35s ease; }
+.sent-choice.disabled { opacity: .3; cursor: default; pointer-events: none; }
+
+.word-blank {
+  display: inline-block; min-width: 80px; height: 20px;
+  border-bottom: 3px solid #0a2840; vertical-align: middle; margin: 0 4px;
+}
+
+/* ══════════════════════════════════════════════
+   TRY-AGAIN HINT
+══════════════════════════════════════════════ */
+.try-again {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: rgba(217,77,97,.92); color: white;
+  font-size: 13px; font-weight: 800; padding: 8px 20px; border-radius: 999px;
+  z-index: 60; pointer-events: none;
+  animation: hintPop .28s ease;
+}
+@keyframes hintPop {
+  from{opacity:0;transform:translate(-50%,-50%) scale(.88)}
+  to  {opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+
+/* ══════════════════════════════════════════════
+   PHASE TRANSITION OVERLAY
+══════════════════════════════════════════════ */
+#transitionOverlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(8,16,36,.94); z-index: 200;
+  flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+}
+#transitionOverlay.show { display: flex; animation: fadeIn .4s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.tr-icon  { font-size: 56px; }
+.tr-title { font-size: 28px; font-weight: 900; color: white; }
+.tr-sub   { font-size: 14px; color: rgba(255,255,255,.52); }
+.tr-dots  { display: flex; gap: 8px; margin-top: 8px; }
+.tr-dot   {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,.28); animation: dotBlink 1.2s ease-in-out infinite;
+}
+.tr-dot:nth-child(2){ animation-delay:.2s; }
+.tr-dot:nth-child(3){ animation-delay:.4s; }
+@keyframes dotBlink {
+  0%,100%{background:rgba(255,255,255,.28)} 50%{background:rgba(255,255,255,.9)}
+}
+
+/* ══════════════════════════════════════════════
+   END SCREEN
+══════════════════════════════════════════════ */
+#endScreen {
+  display: none; position: fixed; inset: 0;
+  background: linear-gradient(180deg,#08142a 0%,#122040 100%);
+  z-index: 300; flex-direction: column;
+  align-items: center; justify-content: center; gap: 18px; padding: 40px;
+}
+#endScreen.show { display: flex; }
+.end-star  { font-size: 72px; animation: starPop .6s cubic-bezier(.22,1,.36,1) both; }
+@keyframes starPop {
+  0%  {transform:scale(0) rotate(-20deg); opacity:0}
+  70% {transform:scale(1.18) rotate(6deg); opacity:1}
+  100%{transform:scale(1) rotate(0deg)}
+}
+.end-title { font-size: 28px; font-weight: 900; color: white; text-align: center; }
+.end-msg   { font-size: 15px; color: rgba(255,255,255,.55); text-align: center; }
+.play-again-btn {
+  padding: 16px 40px; border-radius: 18px; background: #ffdb68; color: #644700;
+  font-size: 16px; font-weight: 900; border: none; cursor: pointer; margin-top: 10px;
+  transition: all .18s ease;
+}
+.play-again-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(255,180,0,.28); }
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP SCREEN ════════════════════════════════ -->
+<div id="setupScreen">
+  <div class="setup-logo">🪐</div>
+  <div class="setup-title">Reading Transfer</div>
+  <div class="setup-sub">Phonics Diagnostic · Student Game</div>
+
+  <div class="setup-group" id="grpWord">
+    <div class="setup-label">Word Set</div>
+    <div class="setup-opts">
+      <div class="setup-opt" onclick="pickSet('ecp6',this)">
+        <div class="opt-title">ECP6</div>
+        <div class="opt-desc">Short vowel CVC<br>Detects vowel confusion &amp; final sound errors</div>
+      </div>
+      <div class="setup-opt" onclick="pickSet('ecp7',this)">
+        <div class="opt-title">ECP7</div>
+        <div class="opt-desc">Silent-e CVCe<br>Detects CVCe &amp; vowel confusion errors</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="setup-group" id="grpMode">
+    <div class="setup-label">Mode</div>
+    <div class="setup-opts">
+      <div class="setup-opt" onclick="pickMode('free',this)">
+        <div class="opt-title">Free Mode</div>
+        <div class="opt-desc">Shows errors. Must correct before moving on.</div>
+      </div>
+      <div class="setup-opt" onclick="pickMode('diagnostic',this)">
+        <div class="opt-title">Diagnostic Mode</div>
+        <div class="opt-desc">No feedback. Logs all responses silently.</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="start-btn" id="startBtn" onclick="startGame()">Start Session</button>
+</div>
+
+<!-- ══ GAME SCREEN ═════════════════════════════════ -->
+<div id="gameScreen">
+  <div class="topbar">
+    <div class="game-title" id="gameTitle">Reading Transfer</div>
+    <div class="pills">
+      <div class="pill" id="pill-1">1 · Words</div>
+      <div class="pill" id="pill-2">2 · Phrases</div>
+      <div class="pill" id="pill-3">3 · Sentences</div>
+    </div>
+    <div class="mode-tag" id="modeTag">Free</div>
+  </div>
+  <div id="phaseArea"></div>
+</div>
+
+<!-- ══ PHASE TRANSITION ════════════════════════════ -->
+<div id="transitionOverlay">
+  <div class="tr-icon"  id="trIcon">⭐</div>
+  <div class="tr-title" id="trTitle">Phase Complete!</div>
+  <div class="tr-sub"   id="trSub">Loading next phase…</div>
+  <div class="tr-dots"><div class="tr-dot"></div><div class="tr-dot"></div><div class="tr-dot"></div></div>
+</div>
+
+<!-- ══ END SCREEN ══════════════════════════════════ -->
+<div id="endScreen">
+  <div class="end-star">🌟</div>
+  <div class="end-title" id="endTitle">Great Job!</div>
+  <div class="end-msg"   id="endMsg">You finished all three phases.</div>
+  <button class="play-again-btn" onclick="restartGame()">Play Again</button>
+</div>
+
+<!-- ══ SCRIPT ══════════════════════════════════════ -->
+<script>
+// ════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════
+
+// ECP6 — short vowel CVC
+// Phase 2: word meteor at top; phrase clouds show phrases WITH blanks
+// Phase 3: word meteor at top; sentence tiles show sentences WITH blanks
+const ECP6_ITEMS = [
+  {
+    id:"bag", word:"bag",
+    wordChoices:[
+      {text:"bag",  correct:true},
+      {text:"bug",  errorType:"shortVowelConfusion"},
+      {text:"ba",   errorType:"finalSoundMissing"}
+    ],
+    phraseChoices:[
+      {text:"pack a ___",      correct:true},
+      {text:"___ on one leg",  errorType:"contextualGuessing"},
+      {text:"___ the rope",    errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"She packed her ___ for the trip.",  correct:true},
+      {text:"The frog can ___ across the pond.", errorType:"contextualGuessing"},
+      {text:"She will ___ the paper in half.",   errorType:"contextualGuessing"}
+    ]
+  },
+  {
+    id:"pin", word:"pin",
+    wordChoices:[
+      {text:"pin",  correct:true},
+      {text:"pan",  errorType:"shortVowelConfusion"},
+      {text:"pi",   errorType:"finalSoundMissing"}
+    ],
+    phraseChoices:[
+      {text:"stick in a ___",  correct:true},
+      {text:"pack a ___",      errorType:"contextualGuessing"},
+      {text:"___ the dog",     errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"He put a ___ on the map.",          correct:true},
+      {text:"She packed her ___ for the trip.",  errorType:"contextualGuessing"},
+      {text:"She will ___ the paper in half.",   errorType:"contextualGuessing"}
+    ]
+  },
+  {
+    id:"hop", word:"hop",
+    wordChoices:[
+      {text:"hop",  correct:true},
+      {text:"hip",  errorType:"shortVowelConfusion"},
+      {text:"ho",   errorType:"finalSoundMissing"}
+    ],
+    phraseChoices:[
+      {text:"___ on one leg",  correct:true},
+      {text:"pack a ___",      errorType:"contextualGuessing"},
+      {text:"___ the rope",    errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"The frog can ___ across the pond.", correct:true},
+      {text:"He put a ___ on the map.",          errorType:"contextualGuessing"},
+      {text:"Mom ___ the dog this morning.",     errorType:"contextualGuessing"}
+    ]
+  },
+  {
+    id:"fed", word:"fed",
+    wordChoices:[
+      {text:"fed",  correct:true},
+      {text:"fad",  errorType:"shortVowelConfusion"},
+      {text:"fe",   errorType:"finalSoundMissing"}
+    ],
+    phraseChoices:[
+      {text:"___ the dog",     correct:true},
+      {text:"stick in a ___",  errorType:"contextualGuessing"},
+      {text:"___ on one leg",  errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"Mom ___ the dog this morning.",     correct:true},
+      {text:"The frog can ___ across the pond.", errorType:"contextualGuessing"},
+      {text:"She will ___ the paper in half.",   errorType:"contextualGuessing"}
+    ]
+  },
+  {
+    id:"cut", word:"cut",
+    wordChoices:[
+      {text:"cut",  correct:true},
+      {text:"cat",  errorType:"shortVowelConfusion"},
+      {text:"cu",   errorType:"finalSoundMissing"}
+    ],
+    phraseChoices:[
+      {text:"___ the rope",    correct:true},
+      {text:"pack a ___",      errorType:"contextualGuessing"},
+      {text:"stick in a ___",  errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"She will ___ the paper in half.",   correct:true},
+      {text:"She packed her ___ for the trip.",  errorType:"contextualGuessing"},
+      {text:"He put a ___ on the map.",          errorType:"contextualGuessing"}
+    ]
+  }
+];
+
+// ECP7 — silent-e CVCe
+const ECP7_ITEMS = [
+  {
+    id:"cake", word:"cake",
+    wordChoices:[
+      {text:"cake", correct:true},
+      {text:"cak",  errorType:"cvceError"},
+      {text:"coke", errorType:"shortVowelConfusion"}
+    ],
+    phraseChoices:[
+      {text:"bake a ___",       correct:true},
+      {text:"ride a ___",       errorType:"contextualGuessing"},
+      {text:"chew a ___",       errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"She baked a ___ for the party.",    correct:true},
+      {text:"He rode his ___ to school.",        errorType:"contextualGuessing"},
+      {text:"The dog found a ___ in the yard.",  errorType:"contextualGuessing"}
+    ]
+  },
+  {
+    id:"pine", word:"pine",
+    wordChoices:[
+      {text:"pine", correct:true},
+      {text:"pin",  errorType:"cvceError"},
+      {text:"pane", errorType:"shortVowelConfusion"}
+    ],
+    phraseChoices:[
+      {text:"a tall ___ tree",  correct:true},
+      {text:"bake a ___",       errorType:"contextualGuessing"},
+      {text:"so ___",           errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"The ___ tree grew by the lake.",    correct:true},
+      {text:"She baked a ___ for the party.",    errorType:"contextualGuessing"},
+      {text:"The puppy looks so ___.",           errorType:"contextualGuessing"}
+    ]
+  },
+  {
+    id:"bone", word:"bone",
+    wordChoices:[
+      {text:"bone", correct:true},
+      {text:"bon",  errorType:"cvceError"},
+      {text:"bane", errorType:"shortVowelConfusion"}
+    ],
+    phraseChoices:[
+      {text:"chew a ___",       correct:true},
+      {text:"bake a ___",       errorType:"contextualGuessing"},
+      {text:"ride a ___",       errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"The dog found a ___ in the yard.",  correct:true},
+      {text:"The ___ tree grew by the lake.",    errorType:"contextualGuessing"},
+      {text:"He rode his ___ to school.",        errorType:"contextualGuessing"}
+    ]
+  },
+  {
+    id:"bike", word:"bike",
+    wordChoices:[
+      {text:"bike", correct:true},
+      {text:"bik",  errorType:"cvceError"},
+      {text:"bake", errorType:"shortVowelConfusion"}
+    ],
+    phraseChoices:[
+      {text:"ride a ___",       correct:true},
+      {text:"chew a ___",       errorType:"contextualGuessing"},
+      {text:"a tall ___ tree",  errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"He rode his ___ to school.",        correct:true},
+      {text:"The dog found a ___ in the yard.",  errorType:"contextualGuessing"},
+      {text:"She baked a ___ for the party.",    errorType:"contextualGuessing"}
+    ]
+  },
+  {
+    id:"cute", word:"cute",
+    wordChoices:[
+      {text:"cute", correct:true},
+      {text:"cut",  errorType:"cvceError"},
+      {text:"cate", errorType:"shortVowelConfusion"}
+    ],
+    phraseChoices:[
+      {text:"so ___",           correct:true},
+      {text:"bake a ___",       errorType:"contextualGuessing"},
+      {text:"ride a ___",       errorType:"contextualGuessing"}
+    ],
+    sentenceChoices:[
+      {text:"The puppy looks so ___.",           correct:true},
+      {text:"The ___ tree grew by the lake.",    errorType:"contextualGuessing"},
+      {text:"He rode his ___ to school.",        errorType:"contextualGuessing"}
+    ]
+  }
+];
+
+// ════════════════════════════════════════════════
+//  IMPACT POSITIONS  (percent-based, spread across bottom of scene)
+// ════════════════════════════════════════════════
+const IMPACT_POSITIONS = [
+  {left:"18%", top:"58%"},
+  {left:"35%", top:"55%"},
+  {left:"52%", top:"60%"},
+  {left:"68%", top:"54%"},
+  {left:"82%", top:"58%"}
+];
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+const S = {
+  mode:    null,
+  wordSet: null,
+  phase:   1,
+  qIdx:    0,
+  items:   [],
+  choices: [],
+  log:     [],
+  disabled:new Set(),
+  locked:  false,
+  craters: []   // persistent crater positions for current phase
+};
+
+// ════════════════════════════════════════════════
+//  SETUP
+// ════════════════════════════════════════════════
+function pickSet(v,el){
+  S.wordSet=v;
+  document.querySelectorAll('#grpWord .setup-opt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel'); checkReady();
+}
+function pickMode(v,el){
+  S.mode=v;
+  document.querySelectorAll('#grpMode .setup-opt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel'); checkReady();
+}
+function checkReady(){
+  document.getElementById('startBtn').classList.toggle('ready',!!(S.mode&&S.wordSet));
+}
+function startGame(){
+  if(!S.mode||!S.wordSet) return;
+  S.items   = shuffle([...(S.wordSet==='ecp6'?ECP6_ITEMS:ECP7_ITEMS)]);
+  S.phase   = 1; S.qIdx = 0; S.log = []; S.locked = false; S.disabled = new Set();
+  document.getElementById('setupScreen').style.display='none';
+  document.getElementById('gameScreen').style.display='flex';
+  const tag = document.getElementById('modeTag');
+  tag.textContent  = S.mode==='free'?'Free Mode':'Diagnostic';
+  tag.className    = 'mode-tag'+(S.mode==='diagnostic'?' diag':'');
+  document.getElementById('gameTitle').textContent = (S.wordSet==='ecp6'?'ECP6':'ECP7')+' · Reading Transfer';
+  render();
+}
+function restartGame(){
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('gameScreen').style.display='none';
+  document.getElementById('setupScreen').style.display='flex';
+  S.mode=null; S.wordSet=null;
+  document.querySelectorAll('.setup-opt').forEach(e=>e.classList.remove('sel'));
+  checkReady();
+}
+
+// ════════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════════
+function stampCraters(){
+  const scene = document.querySelector('.scene');
+  if(!scene) return;
+  S.craters.forEach(pos => {
+    const wrap = document.createElement('div');
+    wrap.className = 'ground-impact';
+    wrap.style.left = pos.left;
+    wrap.style.top  = pos.top;
+    const burst = document.createElement('div');
+    burst.className = 'crater-burst persistent';
+    wrap.appendChild(burst);
+    scene.appendChild(wrap);
+  });
+}
+
+function render(){
+  updatePills();
+  const item = S.items[S.qIdx];
+  const key  = ['wordChoices','phraseChoices','sentenceChoices'][S.phase-1];
+  S.choices  = shuffle([...item[key]]);
+  S.disabled = new Set(); S.locked = false;
+
+  const area = document.getElementById('phaseArea');
+  const prog = `${S.qIdx+1} / ${S.items.length}`;
+
+  if(S.phase===1){
+    area.innerHTML=`
+      <div class="scene scene-space">
+        <div class="prog">${prog}</div>
+        <div class="p1-meteors" id="choicesRow">
+          ${S.choices.map((c,i)=>`
+            <div class="meteor-wrap meteor-lg" id="ch${i}" onclick="pick(${i})">
+              <div class="meteor-text">${c.text}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="p1-speaker">
+          <button class="speaker-btn" id="spkBtn" onclick="playWord()">🔊</button>
+          <div class="spk-hint">Tap to hear the word</div>
+        </div>
+      </div>`;
+    // Auto-play word when meteors appear
+    setTimeout(()=>speak(item.word), 400);
+    setTimeout(stampCraters, 50);
+  }
+
+  else if(S.phase===2){
+    area.innerHTML=`
+      <div class="scene scene-sky">
+        <div class="prog">${prog}</div>
+        <div class="p2-word" onclick="playWord()">
+          <div class="meteor-wrap meteor-display no-hover">
+            <div class="meteor-text">${item.word}</div>
+          </div>
+        </div>
+        <div class="p2-clouds" id="choicesRow">
+          ${S.choices.map((c,i)=>`
+            <div class="cloud-choice" id="ch${i}" onclick="pick(${i})">
+              <div class="cloud-text">${c.text.replace('___','<span class="word-blank"></span>')}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    setTimeout(stampCraters, 50);
+  }
+
+  else{
+    area.innerHTML=`
+      <div class="scene scene-earth">
+        <div class="prog">${prog}</div>
+        <div class="p3-word" onclick="playWord()" style="cursor:pointer;">
+          <div class="meteor-wrap meteor-display-xl no-hover" style="cursor:pointer;">
+            <div class="meteor-text">${item.word}</div>
+          </div>
+        </div>
+        <div class="p3-sentences" id="choicesRow">
+          ${S.choices.map((c,i)=>`
+            <div class="sent-choice" id="ch${i}" onclick="pick(${i})">
+              ${c.text.replace('___','<span class="word-blank"></span>')}
+            </div>
+          `).join('')}
+        </div>
+      </div>`;
+    setTimeout(stampCraters, 50);
+  }
+}
+
+function updatePills(){
+  [1,2,3].forEach(p=>{
+    const el=document.getElementById(`pill-${p}`);
+    if(p<S.phase)        el.className='pill done';
+    else if(p===S.phase) el.className='pill active';
+    else                 el.className='pill';
+  });
+}
+
+// ════════════════════════════════════════════════
+//  INTERACTION
+// ════════════════════════════════════════════════
+function playWord(){
+  speak(S.items[S.qIdx].word);
+  const btn=document.getElementById('spkBtn');
+  if(btn){ btn.classList.add('playing'); setTimeout(()=>btn.classList.remove('playing'),900); }
+}
+
+function dropDisplay(){
+  const wordEl = document.querySelector('.p2-word .meteor-wrap') ||
+                 document.querySelector('.p3-word .meteor-wrap');
+  if(wordEl) wordEl.classList.add('drop-out');
+}
+
+function spawnCrater(){
+  const scene = document.querySelector('.scene');
+  if(!scene) return;
+  const pos = IMPACT_POSITIONS[S.craters.length % IMPACT_POSITIONS.length];
+
+  // Burst animation
+  const wrap = document.createElement('div');
+  wrap.className = 'ground-impact';
+  wrap.style.left = pos.left;
+  wrap.style.top  = pos.top;
+  const burst = document.createElement('div');
+  burst.className = 'crater-burst';
+  wrap.appendChild(burst);
+  scene.appendChild(wrap);
+
+  // After burst, swap to persistent mark
+  setTimeout(() => {
+    burst.className = 'crater-burst persistent';
+  }, 860);
+
+  // Save position so it survives the next render
+  S.craters.push(pos);
+}
+
+function pick(idx){
+  if(S.locked||S.disabled.has(idx)) return;
+  const choice = S.choices[idx];
+  const item   = S.items[S.qIdx];
+  const el     = document.getElementById(`ch${idx}`);
+  if(!el) return;
+
+  if(choice.correct){
+    S.locked = true;
+    S.log.push({
+      phase:     S.phase,
+      wordId:    item.id,
+      word:      item.word,
+      chose:     choice.text,
+      errorType: null,
+      correct:   true,
+      timestamp: new Date().toISOString()
+    });
+    if(S.phase !== 1) speak(item.word);
+
+    // Free mode only: green flash on choice
+    if(S.mode === 'free') el.classList.add('flash-ok');
+
+    if(S.phase === 1){
+      setTimeout(() => el.classList.add('drop-out'), 340);
+    } else if(S.phase === 2){
+      setTimeout(() => dropDisplay(), 340);
+    } else {
+      setTimeout(() => { dropDisplay(); spawnCrater(); }, 340);
+    }
+    setTimeout(advance, 1050);
+
+  } else {
+    S.log.push({
+      phase:     S.phase,
+      wordId:    item.id,
+      word:      item.word,
+      chose:     choice.text,
+      errorType: choice.errorType || 'unknown',
+      correct:   false,
+      timestamp: new Date().toISOString()
+    });
+
+    if(S.mode === 'free'){
+      el.classList.add('flash-no');
+      setTimeout(() => el.classList.remove('flash-no'), 400);
+      S.disabled.add(idx);
+      el.classList.add('disabled');
+      showTryAgain();
+    } else {
+      // Diagnostic: zero feedback — drop and advance silently
+      S.locked = true;
+      if(S.phase === 1){
+        el.classList.add('drop-out');
+      } else if(S.phase === 2){
+        setTimeout(() => dropDisplay(), 100);
+      } else {
+        setTimeout(() => { dropDisplay(); spawnCrater(); }, 100);
+      }
+      setTimeout(advance, 860);
+    }
+  }
+}
+
+function showTryAgain(){
+  const scene=document.querySelector('.scene');
+  if(!scene) return;
+  const prev=scene.querySelector('.try-again');
+  if(prev) prev.remove();
+  const h=document.createElement('div');
+  h.className='try-again'; h.textContent='Try again!';
+  scene.appendChild(h);
+  setTimeout(()=>h.remove(),1100);
+}
+
+function advance(){
+  S.qIdx++;
+  if(S.qIdx>=S.items.length){
+    if(S.phase<3){
+      const next=S.phase+1;
+      showTransition(S.phase,()=>{ S.phase=next; S.qIdx=0; S.craters=[]; render(); });
+    } else {
+      showEnd();
+    }
+  } else {
+    render();
+  }
+}
+
+// ════════════════════════════════════════════════
+//  PHASE TRANSITION
+// ════════════════════════════════════════════════
+const TR=[null,
+  {icon:'⭐',title:'Words Done!',   sub:'Next: Phrase Matching'},
+  {icon:'🌤️',title:'Phrases Done!', sub:'Next: Sentence Reading'},
+  {icon:'🌍',title:'All Done!',     sub:''}
+];
+function showTransition(p,cb){
+  const d=TR[p];
+  document.getElementById('trIcon').textContent =d.icon;
+  document.getElementById('trTitle').textContent=d.title;
+  document.getElementById('trSub').textContent  =d.sub;
+  const ov=document.getElementById('transitionOverlay');
+  ov.classList.add('show');
+  setTimeout(()=>{ ov.classList.remove('show'); cb(); },1900);
+}
+
+// ════════════════════════════════════════════════
+//  END SCREEN
+// ════════════════════════════════════════════════
+function showEnd(){
+  const correct = S.log.filter(e=>e.correct).length;
+  const total   = S.items.length * 3;
+  const pct     = Math.round((correct/total)*100);
+
+  let title='Great Job! 🎉', msg='You finished all three phases!';
+  if(pct===100){ title='Perfect Score! 🌟'; msg='No mistakes — amazing work!'; }
+  else if(pct>=80){ title='Great Job! 🎉'; msg='Really strong reading today!'; }
+  else if(pct>=60){ title='Nice Work! 👍'; msg="Keep practicing — you're getting there!"; }
+  else { title='Good Try! 💪'; msg='Practice makes perfect. Try again!'; }
+
+  document.getElementById('endTitle').textContent=title;
+  document.getElementById('endMsg').textContent=msg;
+  document.getElementById('endScreen').classList.add('show');
+  pushToDashboard();
+}
+
+// ════════════════════════════════════════════════
+//  DASHBOARD INTEGRATION
+// ════════════════════════════════════════════════
+function buildReport(){
+  const sessionId = 'session-'+Date.now();
+  return {
+    sessionId,
+    gameId:      'reading-transfer-diagnostic',
+    gameTitle:   'Reading Transfer Diagnostic',
+    mode:        S.mode,
+    level:       S.wordSet,
+    pattern:     S.wordSet==='ecp6'?'CVC short vowel':'CVCe silent-e',
+    wordSource:  S.wordSet.toUpperCase(),
+    createdAt:   new Date().toISOString(),
+    attempts:    S.log.map(e=>({
+      timestamp:    e.timestamp,
+      side:         e.phase===1?'word':e.phase===2?'phrase':'sentence',
+      targetWord:   e.word,
+      attemptedWord:e.chose,
+      status:       e.correct?'correct':'flagged',
+      flags:        e.correct?[]:[{errorType:e.errorType,position:e.phase}]
+    }))
+  };
+}
+
+function pushToDashboard(){
+  const key  = 'polyPhonicsDiagnosticStoreV1';
+  const store = JSON.parse(localStorage.getItem(key)||'{"sessions":[],"lastSessionId":null}');
+  const report= buildReport();
+  store.sessions.push(report);
+  store.lastSessionId = report.sessionId;
+  localStorage.setItem(key, JSON.stringify(store));
+  window.dispatchEvent(new CustomEvent('phonicsDiagnosticComplete',{detail:report}));
+}
+
+window.getDiagnosticReport = ()=>buildReport();
+
+// ════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function speak(t){
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(t);
+  u.lang='en-US'; u.rate=0.78; u.pitch=1.04;
+  speechSynthesis.speak(u);
+}
+</script>
+</body>
+</html>
