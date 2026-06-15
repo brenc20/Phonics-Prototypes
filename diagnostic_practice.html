@@ -93,6 +93,12 @@
       line-height: 1.55;
       flex: 1;
     }
+    .errors {
+      display: block;
+      margin-top: 9px;
+      color: var(--navy);
+      font-weight: 800;
+    }
     .launch {
       text-decoration: none;
       text-align: center;
@@ -117,7 +123,10 @@
       <div class="card">
         <div class="tag">Runner</div>
         <h2>Crystal Planet Runner</h2>
-        <p>Listening-based phonics runner tied into the shared diagnostic dashboard.</p>
+        <p>
+          Students hear a word and select the matching spelling while moving through the runner game.
+          <span class="errors">Corpus errors: short vowel confusion, digraph confusion, and CVCe/final-e error.</span>
+        </p>
         <a class="launch" href="crystal_planet_phonics_runner.html">Open</a>
       </div>
     
@@ -125,7 +134,10 @@
       <div class="card">
         <div class="tag">Spelling Diagnostic</div>
         <h2>Train Diagnostic</h2>
-        <p>Diagnostic and practice train activity with captured spelling responses.</p>
+        <p>
+          Students hear each target word and build the spelling from letter crates.
+          <span class="errors">Corpus errors: short vowel confusion, final sound missing, digraph confusion, CVCe/final-e error, and dictation error.</span>
+        </p>
         <a class="launch" href="ecp6_spelling_transfer_train_diagnostic.html">Open</a>
       </div>
     
@@ -133,14 +145,20 @@
       <div class="card">
         <div class="tag">Reading Diagnostic</div>
         <h2>Fall Diagnostic</h2>
-        <p>Diagnostic and practice reading transfer game with dashboard logging.</p>
+        <p>
+          Students identify a heard word, then transfer it into the correct phrase and sentence context.
+          <span class="errors">Corpus errors: short vowel confusion, final sound missing, digraph confusion, CVCe/final-e error, and contextual guessing.</span>
+        </p>
         <a class="launch" href="ecp_reading_transfer_diagnostic.html">Open</a>
       </div>
 
       <div class="card">
         <div class="tag">Connected Reading</div>
         <h2>Reading Research Island</h2>
-        <p>Finger tracking and voice recognition work together to charge an incubator, then hatch a gacha-style egg reward.</p>
+        <p>
+          Students read connected text aloud while using their finger to track the print and charge an incubator.
+          <span class="errors">Corpus errors: slow/choppy blending, schwa insertion, and contextual guessing during connected reading.</span>
+        </p>
         <a class="launch" href="ecp6_passage_tracking_incubator.html">Open</a>
       </div>
     
