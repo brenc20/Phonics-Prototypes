@@ -705,7 +705,7 @@
 
   <script>
     const STORE_KEY = "polyPhonicsDiagnosticStoreV1";
-    const WORKSHEET_URL = "file:///C:/Users/USER/OneDrive/Desktop/HQ%20Projects/Phonics/Short%20Vowel%20Aa%20Worksheet.pdf";
+    const WORKSHEET_URL = "Short%20Vowel%20Aa%20Worksheet.pdf";
     const CLASS_BY_LEVEL = {
       ECP6: ["Cedar"],
       ECP7: ["Willow"]
@@ -1358,11 +1358,14 @@
       document.getElementById("actionModalText").textContent = config.text;
       confirmBtn.textContent = config.confirmLabel;
       confirmBtn.disabled = items.length === 0;
+      const emptyMessage = config.type === "worksheet-final"
+        ? "No worksheet skills are queued yet. Open this student's report, choose Create Worksheet under a flagged activity, select the skills, and click Add to Queue."
+        : "No flagged skills were found for this selection.";
       document.getElementById("actionModalList").innerHTML = items.length
         ? (config.selectable
           ? items.map((item, index) => `<label class="action-list-item selectable"><input class="action-check" type="checkbox" value="${index}" checked><span>${item}</span></label>`).join("")
           : items.map((item) => `<div class="action-list-item">${item}</div>`).join(""))
-        : `<div class="action-list-item">No flagged skills were found for this selection.</div>`;
+        : `<div class="action-list-item">${emptyMessage}</div>`;
       modal.classList.add("show");
       modal.setAttribute("aria-hidden", "false");
     }
