@@ -1412,7 +1412,7 @@
     </div>
     <div class="toolbar">
       <div class="mode-toggle">
-        <button class="mode-btn active" id="modeInstructionalBtn" onclick="setMode('instructional')">Error-Free</button>
+        <button class="mode-btn active" id="modeInstructionalBtn" onclick="setMode('instructional')">Practice</button>
         <button class="mode-btn" id="modeDiagnosticBtn" onclick="setMode('diagnostic')">Diagnostic</button>
       </div>
       <button class="btn-light" id="dashboardBtn" onclick="openDashboard()">Dashboard</button>
@@ -1448,7 +1448,7 @@
               <button class="btn-light" id="tabletReadBtn">Read Stage</button>
             </div>
           </div>
-          <div class="footer-note">Build the ECP6 short a words from sound. Diagnostic mode logs error types; error-free mode gives immediate correction.</div>
+          <div class="footer-note">Build the ECP6 short a words from sound. Diagnostic mode logs error types; practice mode gives immediate correction.</div>
         </div>
       </div>
     </section>
@@ -1527,7 +1527,7 @@ function createSession(mode) {
     level: LEVEL_META.level,
     wordSource: LEVEL_META.wordSource,
     pattern: LEVEL_META.pattern,
-    mode,
+    mode: mode === "instructional" ? "practice" : mode,
     createdAt: new Date().toISOString(),
     attempts: []
   };
@@ -1697,7 +1697,7 @@ function recordStationAttempt(side, item, slots, status, flags = []) {
     timestamp: new Date().toISOString(),
     side,
     phase: "stations",
-    mode: state.mode,
+    mode: state.mode === "instructional" ? "practice" : state.mode,
     level: LEVEL_META.level,
     pattern: LEVEL_META.pattern,
     targetWord: item.word,
