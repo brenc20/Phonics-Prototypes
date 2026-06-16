@@ -454,7 +454,7 @@ body {
     <div class="setup-label">Mode</div>
     <div class="setup-opts">
       <div class="setup-opt" onclick="pickMode('free',this)">
-        <div class="opt-title">Free Mode</div>
+        <div class="opt-title">Practice Mode</div>
         <div class="opt-desc">Shows errors. Must correct before moving on.</div>
       </div>
       <div class="setup-opt" onclick="pickMode('diagnostic',this)">
@@ -476,7 +476,7 @@ body {
       <div class="pill" id="pill-2">2 · Phrases</div>
       <div class="pill" id="pill-3">3 · Sentences</div>
     </div>
-    <div class="mode-tag" id="modeTag">Free</div>
+    <div class="mode-tag" id="modeTag">Practice</div>
   </div>
   <div id="phaseArea"></div>
 </div>
@@ -743,7 +743,7 @@ function startGame(){
   document.getElementById('setupScreen').style.display='none';
   document.getElementById('gameScreen').style.display='flex';
   const tag = document.getElementById('modeTag');
-  tag.textContent  = S.mode==='free'?'Free Mode':'Diagnostic';
+  tag.textContent  = S.mode==='free'?'Practice Mode':'Diagnostic';
   tag.className    = 'mode-tag'+(S.mode==='diagnostic'?' diag':'');
   document.getElementById('gameTitle').textContent = (S.wordSet==='ecp6'?'ECP6':'ECP7')+' · Reading Transfer';
   render();
@@ -913,9 +913,9 @@ function pick(idx){
       correct:   true,
       timestamp: new Date().toISOString()
     });
-    if(S.phase !== 1) speak(item.word);
+    if(S.phase === 2) speak(item.word);
 
-    // Free mode only: green flash on choice
+    // Practice mode only: green flash on choice
     if(S.mode === 'free') el.classList.add('flash-ok');
 
     if(S.phase === 1){
