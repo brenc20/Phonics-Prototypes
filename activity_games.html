@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Phonics Prototypes</title>
+  <title>Activity / Games Prototypes</title>
   <style>
     :root {
-      --bg1: #eef5fb;
-      --bg2: #d8edf8;
+      --bg1: #eff7ff;
+      --bg2: #d8effa;
       --panel: rgba(255,255,255,0.95);
-      --line: #d6e1ec;
+      --line: #d5e4ef;
       --navy: #12395a;
       --muted: #557089;
-      --gold: #ffdb68;
-      --mint: #dff4e8;
       --blue: #dfeeff;
+      --mint: #dff4e8;
+      --gold: rgba(255,219,104,0.42);
     }
     * { box-sizing: border-box; }
     body {
@@ -23,13 +23,11 @@
       font-family: "Segoe UI", Arial, sans-serif;
       background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
       color: var(--navy);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 28px;
     }
     .wrap {
-      width: min(1120px, 100%);
+      width: min(1160px, 100%);
+      margin: 0 auto;
     }
     .hero {
       background: var(--panel);
@@ -38,11 +36,17 @@
       padding: 30px 32px;
       box-shadow: 0 20px 36px rgba(22,53,84,0.12);
       margin-bottom: 22px;
-      text-align: center;
+    }
+    .back {
+      display: inline-flex;
+      margin-bottom: 14px;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 700;
     }
     h1 {
       margin: 0 0 10px;
-      font-size: 40px;
+      font-size: 38px;
       line-height: 1.05;
     }
     .hero p {
@@ -60,11 +64,11 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
-      min-height: 280px;
-      padding: 26px 24px;
+      min-height: 250px;
+      padding: 24px;
       background: var(--panel);
       border: 2px solid var(--line);
-      border-radius: 26px;
+      border-radius: 24px;
       box-shadow: 0 18px 28px rgba(22,53,84,0.10);
       text-decoration: none;
       color: inherit;
@@ -85,7 +89,7 @@
     }
     .pill.blue { background: var(--blue); }
     .pill.mint { background: var(--mint); }
-    .pill.gold { background: rgba(255,219,104,0.42); }
+    .pill.gold { background: var(--gold); }
     .tile h2 {
       margin: 0;
       font-size: 28px;
@@ -104,42 +108,54 @@
       color: var(--navy);
     }
     @media (max-width: 900px) {
+      h1 { font-size: 32px; }
       .grid { grid-template-columns: 1fr; }
       .tile { min-height: 0; }
-      h1 { font-size: 32px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="hero">
-      <h1>POLY Phonics Prototypes</h1>
-      <p>Select the section you want to open. Instructional and diagnostic activities each open to their own menu page. Dashboard opens directly.</p>
+      <a class="back" href="index.html">&larr; Back to Home</a>
+      <h1>Activity / Games Prototypes</h1>
+      <p>Open the interactive student-facing prototype set. This section is for game-style concepts, camera interactions, and high-engagement activity builds.</p>
     </div>
+
     <div class="grid">
-      <a class="tile" href="instructional.html">
-        <div class="pill blue">Teacher-Led</div>
-        <h2>Instructional</h2>
-        <p>Open the classroom modeling and lesson-delivery prototypes, including Elkonin, blending, reading transfer, and spelling transfer.</p>
-        <div class="cta">Open Instructional Menu -></div>
+      <a class="tile" href="camera-bubble-game/">
+        <div class="pill blue">Camera</div>
+        <h2>Phonics Bubble Pop</h2>
+        <p>Webcam hand-tracking prototype with fingertip cursor control and pinch-based bubble popping.</p>
+        <div class="cta">Open Bubble Game -></div>
       </a>
-      <a class="tile" href="diagnostic_practice.html">
-        <div class="pill mint">Student-Facing</div>
-        <h2>Diagnostic / Practice</h2>
-        <p>Open the game-based diagnostic and practice activities, including Runner, Fall, and Train.</p>
-        <div class="cta">Open Diagnostic Menu -></div>
+
+      <a class="tile" href="crystal_planet_phonics_runner.html">
+        <div class="pill mint">Runner</div>
+        <h2>Crystal Planet Runner</h2>
+        <p>Student-facing phonics runner prototype built around fast-response game interaction.</p>
+        <div class="cta">Open Runner -></div>
       </a>
-      <a class="tile" href="diagnostic_dashboard.html">
-        <div class="pill gold">Reporting</div>
-        <h2>Dashboard</h2>
-        <p>Go straight to the reporting dashboard for class summaries, student reports, voice review, and flagged phonics skills.</p>
-        <div class="cta">Open Dashboard -></div>
+
+      <a class="tile" href="ecp6_reading_transfer_fall.html">
+        <div class="pill gold">Reading</div>
+        <h2>Reading Transfer Fall</h2>
+        <p>Interactive reading-transfer game prototype with staged language progression and classroom-friendly visuals.</p>
+        <div class="cta">Open Reading Transfer -></div>
       </a>
-      <a class="tile" href="activity_games.html">
-        <div class="pill blue">New Section</div>
-        <h2>Activity / Games Prototypes</h2>
-        <p>Open the interactive prototype collection, including the camera bubble game and other student-facing game concepts.</p>
-        <div class="cta">Open Activity / Games -></div>
+
+      <a class="tile" href="ecp6_spelling_transfer_train.html">
+        <div class="pill blue">Spelling</div>
+        <h2>Spelling Transfer Train</h2>
+        <p>Train-themed spelling transfer activity prototype for student practice and instructional review.</p>
+        <div class="cta">Open Train -></div>
+      </a>
+
+      <a class="tile" href="ecp6_passage_tracking_incubator.html">
+        <div class="pill mint">Voice + Print</div>
+        <h2>Passage Tracking Incubator</h2>
+        <p>Connected-reading diagnostic/practice concept focused on finger tracking and spoken reading coordination.</p>
+        <div class="cta">Open Incubator -></div>
       </a>
     </div>
   </div>
