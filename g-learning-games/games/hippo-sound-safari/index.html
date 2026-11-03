@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e8fbf3">
+  <title>Hippo Sound Safari</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Hippo Sound Safari home"><span class="brand-mark">🦛</span><span>HIPPO <b>SOUND SAFARI</b></span></a>
+      <div class="top-note"><span class="sun-dot"></span> Jungle listening club</div>
+    </header>
+
+    <section id="menuScreen" class="screen menu-screen">
+      <div class="menu-copy">
+        <div class="eyebrow">A SPLASHY WORD SORT</div>
+        <h1>Feed the<br><span>sound hippos!</span></h1>
+        <p>Choose a book and a sound. Then drag each fruity word to the hippo that eats that sound.</p>
+        <div class="selection-card">
+          <label for="bookSelect">Choose your book</label>
+          <select id="bookSelect"></select>
+          <label for="soundSelect">Choose a lesson sound</label>
+          <select id="soundSelect"></select>
+          <label for="setSelect">Choose a word sort</label>
+          <select id="setSelect"></select>
+          <button id="startButton" class="primary-button">LET'S PLAY <span>➜</span></button>
+          <div id="menuStatus" class="menu-status">Loading word sorts…</div>
+        </div>
+        <div class="how-to"><span>①</span> Pick a fruit <span>②</span> Drag it to a hippo <span>③</span> Listen for the sound</div>
+      </div>
+      <div class="menu-art" aria-hidden="true">
+        <img class="menu-hippo" src="assets/hippo_closed.png" alt="">
+        <img class="menu-water-foreground" src="assets/water_foreground.png" alt="">
+        <span class="floating-fruit f1"><span class="fruit-art" style="--x:0%;--y:0%"></span></span>
+        <span class="floating-fruit f2"><span class="fruit-art" style="--x:25%;--y:0%"></span></span>
+        <span class="floating-fruit f3"><span class="fruit-art" style="--x:50%;--y:0%"></span></span>
+        <div class="art-caption">“Mmm… sound snacks!”</div>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen hidden">
+      <div class="game-toolbar">
+        <button id="menuButton" class="quiet-button">← Choose another sort</button>
+        <div class="round-title"><span class="tiny-leaf">✿</span><span id="roundLabel">FPR A · Lesson 1</span></div>
+        <div class="score-pill">EATEN <b id="scoreValue">0</b><span class="score-divider">/</span><span id="totalValue">0</span></div>
+      </div>
+      <div class="playfield" id="playfield">
+        <div class="scene-heading"><span class="scene-kicker">THE SOUND POND</span><h2>Feed each hippo the right sound!</h2><div class="sound-hint" id="soundHint"></div></div>
+        <div class="hippo-row" id="hippoRow" aria-label="Sound sorting hippos"></div>
+        <img class="water-foreground" src="assets/water_foreground.png" alt="">
+        <div class="fruit-tray-wrap"><div class="tray-label"><span>FRUIT WORDS</span><span>Drag a fruit to a hippo</span></div><div id="fruitTray" class="fruit-tray"></div></div>
+        <div class="complete-card hidden" id="completeCard"><div class="complete-emoji">🌟🍉🦛</div><h2>Sound snack champion!</h2><p id="completeText"></p><button id="againButton" class="primary-button">PLAY THIS SORT AGAIN <span>↻</span></button></div>
+      </div>
+    </section>
+    <footer><span>Listen to the word. Think about the sound. Help the hippos munch!</span><span class="footer-stars">✦ ✦ ✦</span></footer>
+  </main>
+  <script src="word_sort_data.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

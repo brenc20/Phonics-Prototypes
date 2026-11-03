@@ -1,0 +1,195 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@600;700;800;900&display=swap');
+:root{--ink:#21433d;--deep:#164d47;--mint:#e8fbf3;--lime:#d5f481;--coral:#ff806c;--sun:#ffd76c;--water:#57c8ba;--water-dark:#299a92;--cream:#fffdf0;--hippo:#9b7bc2;--hippo-dark:#73569a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#d9f3e8;color:var(--ink);font-family:'Nunito',system-ui,sans-serif}.app-shell{width:min(1440px,100%);min-height:100vh;margin:auto;padding:0 34px 15px;background:linear-gradient(180deg,#effbf4 0%,#dff5e9 100%);overflow:hidden;position:relative}.topbar{height:77px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:4}.brand{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--deep);font-size:17px;font-weight:900;letter-spacing:.4px}.brand b{color:#75aa4d}.brand-mark{font-size:29px;line-height:1}.top-note{font-size:13px;font-weight:800;color:#5c8375;display:flex;align-items:center;gap:8px}.sun-dot{width:10px;height:10px;border-radius:50%;background:#ffc957;box-shadow:0 0 0 5px #ffe9aa}.screen{min-height:calc(100vh - 127px)}.menu-screen{display:grid;grid-template-columns:minmax(380px,.9fr) 1.1fr;align-items:center;gap:4%;padding:5px 4% 22px}.menu-copy{max-width:530px;padding:10px 0 20px}.eyebrow,.scene-kicker{font-size:12px;letter-spacing:2.3px;font-weight:1000;color:#67a34f}.menu-copy h1{font-family:'Baloo 2',sans-serif;font-size:clamp(53px,6vw,84px);line-height:.93;letter-spacing:-2px;margin:12px 0 12px;color:#25584f}.menu-copy h1 span{color:#ef7966}.menu-copy>p{font-size:17px;line-height:1.55;color:#5d7d72;max-width:460px;margin:0 0 20px}.selection-card{display:grid;grid-template-columns:1fr 1fr;gap:8px 13px;background:#fff;border:1px solid #d6eee2;border-radius:24px;padding:19px;box-shadow:0 14px 30px #27634b12}.selection-card label{font-size:12px;font-weight:900;color:#638477;align-self:end}.selection-card label:nth-of-type(2),.selection-card label:nth-of-type(3){grid-column:1/-1}.selection-card select{width:100%;height:43px;border-radius:12px;border:1.5px solid #d7eae0;background:#f9fffb;color:#315c51;font:800 14px 'Nunito',sans-serif;padding:0 12px;outline:none}.selection-card select:focus{border-color:#63baa0;box-shadow:0 0 0 3px #b8efdb}.primary-button{border:0;border-radius:15px;background:#f47e67;color:white;font:1000 15px 'Nunito',sans-serif;letter-spacing:.5px;height:50px;padding:0 18px;box-shadow:0 6px 0 #cf5d50,0 10px 18px #d0644c24;cursor:pointer;transition:transform .15s,filter .15s}.primary-button:hover{transform:translateY(-2px);filter:saturate(1.12)}.primary-button:active{transform:translateY(3px);box-shadow:0 3px 0 #cf5d50}.selection-card .primary-button{grid-column:1/-1;margin-top:7px}.primary-button span{font-size:20px;margin-left:9px}.menu-status{grid-column:1/-1;text-align:center;min-height:16px;color:#779186;font-size:11px;font-weight:800}.how-to{display:flex;align-items:center;gap:8px;margin:16px 4px;color:#739187;font-size:12px;font-weight:800}.how-to span{color:#e67862;font-weight:1000}.menu-art{height:min(620px,68vh);min-height:425px;position:relative;border-radius:48% 48% 24% 24%;overflow:hidden;background:linear-gradient(180deg,#b5e6b0 0%,#8dd1a1 48%,#68b69b 49%,#4aa79a 100%);box-shadow:inset 0 0 0 8px #ffffff40,0 22px 45px #286c4b21}.menu-art:before,.menu-art:after{content:'';position:absolute;border-radius:50%;background:#e9ad4f}.menu-art:before{width:64px;height:64px;right:19%;top:11%;box-shadow:0 0 0 13px #ffdb7e45}.menu-art:after{width:270px;height:140px;left:-7%;top:41%;background:#6dbb79;transform:rotate(-15deg);box-shadow:340px -35px 0 #69b575}.sun{position:absolute;width:150px;height:80px;right:7%;top:0;border-radius:0 0 90px 90px;background:#eff7b4}.leaf{position:absolute;z-index:2;background:#3a966a;width:42px;height:160px;border-radius:100% 0 100% 0;transform:rotate(-33deg);top:-26px}.leaf-one{left:16%;}.leaf-two{right:9%;transform:rotate(42deg);height:130px;background:#368a61}.menu-water{position:absolute;left:-10%;right:-10%;height:44%;bottom:-11%;background:repeating-radial-gradient(ellipse at 50% 0%,#73d3c0 0 4px,#48b9ad 5px 20px);border-radius:50% 50% 0 0}.hero-hippo{position:absolute;z-index:3;width:340px;height:295px;bottom:14%;left:50%;transform:translateX(-50%);animation:bob 3s ease-in-out infinite}.hippo-head{position:absolute;width:285px;height:246px;left:28px;top:26px;background:#ac8ccf;border:8px solid #8068a5;border-radius:46% 47% 43% 44%;box-shadow:inset -12px -16px 0 #9376b8}.hippo-ear{position:absolute;z-index:2;width:65px;height:76px;background:#9e80c2;border:7px solid #8068a5;border-radius:50%;top:20px}.hippo-ear:after{content:'';position:absolute;inset:13px;background:#df9aa5;border-radius:50%}.ear-left{left:30px}.ear-right{right:30px}.hippo-eyes{position:absolute;top:57px;left:53px;right:53px;display:flex;justify-content:space-between}.hippo-eyes i{width:25px;height:33px;background:#fff;border:4px solid #624d7c;border-radius:50%;position:relative}.hippo-eyes i:after{content:'';position:absolute;width:9px;height:13px;background:#293c38;border-radius:50%;left:6px;top:7px}.hippo-muzzle{position:absolute;left:34px;right:34px;bottom:24px;height:110px;border-radius:48%;background:#d4b5d8;box-shadow:inset -5px -9px 0 #c29bcf}.hippo-muzzle i{position:absolute;top:33px;width:14px;height:10px;border-radius:50%;background:#594873}.hippo-muzzle i:first-child{left:56px}.hippo-muzzle i:nth-child(2){right:56px}.hippo-muzzle b{position:absolute;left:50%;top:40px;width:3px;height:28px;background:#896c9c}.hippo-smile{position:absolute;z-index:2;left:102px;bottom:37px;width:63px;height:24px;border-bottom:4px solid #745577;border-radius:50%}.floating-fruit{position:absolute;z-index:4;font-size:47px;filter:drop-shadow(0 6px 3px #17593e35);animation:float 2.7s ease-in-out infinite}.f1{top:32%;left:13%}.f2{top:45%;right:12%;animation-delay:.5s}.f3{top:19%;right:31%;font-size:38px;animation-delay:.9s}.art-caption{position:absolute;z-index:5;bottom:7%;left:50%;transform:translateX(-50%);background:#fffdf0e8;border:2px solid white;border-radius:30px;padding:10px 19px;white-space:nowrap;color:#48785f;font-family:'Baloo 2';font-size:18px;font-weight:800;box-shadow:0 6px 15px #124b3628}
+.game-screen{padding:0 0 18px}.game-toolbar{height:59px;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center}.quiet-button{justify-self:start;border:0;background:transparent;color:#558173;font:900 13px 'Nunito';cursor:pointer;padding:8px}.round-title{justify-self:center;font-size:14px;font-weight:1000;color:#326457}.tiny-leaf{color:#f4a45e;margin-right:8px}.score-pill{justify-self:end;background:#fff;border:1px solid #d8eee2;border-radius:30px;padding:8px 15px;color:#628578;font-size:11px;font-weight:1000;letter-spacing:.8px}.score-pill b{color:#ed795f;font-size:17px;margin-left:6px}.score-divider{margin:0 5px;color:#9fb8ad}.playfield{height:calc(100vh - 180px);min-height:590px;max-height:850px;position:relative;overflow:hidden;border-radius:28px;background:linear-gradient(180deg,#bde6af 0%,#9ad6a2 37%,#80c69c 38%,#69bca4 100%);box-shadow:inset 0 0 0 5px #ffffff75,0 16px 42px #286c4b18}.jungle-backdrop{position:absolute;inset:0 0 auto;height:25%;overflow:hidden}.canopy{position:absolute;width:42%;height:100%;top:-44%;background:#63ad72;border-radius:0 0 50% 50%;filter:drop-shadow(0 8px 0 #75bd7e)}.canopy-left{left:-8%;transform:rotate(9deg)}.canopy-right{right:-8%;transform:rotate(-9deg);background:#77b978}.vine{position:absolute;top:-7%;width:5px;height:31%;background:#43895e;border-radius:5px}.vine-a{left:17%;transform:rotate(-9deg)}.vine-b{right:21%;height:37%;transform:rotate(12deg)}.scene-heading{position:absolute;z-index:2;top:25px;left:50%;transform:translateX(-50%);text-align:center;width:90%}.scene-kicker{font-size:10px;color:#558d57;letter-spacing:2px}.scene-heading h2{font-family:'Baloo 2';font-size:clamp(22px,3vw,32px);color:#285d50;margin:0;line-height:1.25}.sound-hint{display:inline-block;margin-top:4px;padding:4px 12px;border-radius:20px;background:#eff9c9;color:#648341;font-size:12px;font-weight:900}.hippo-row{position:absolute;z-index:3;left:3%;right:3%;top:23%;height:46%;display:flex;justify-content:center;align-items:flex-end;gap:clamp(8px,2vw,26px)}.hippo-card{position:relative;flex:1 1 0;max-width:270px;min-width:130px;height:100%;display:flex;align-items:flex-end;justify-content:center;cursor:pointer;outline:none}.hippo-card.selected .hippo-label,.hippo-card:focus-visible .hippo-label{box-shadow:0 0 0 4px #fff76b,0 6px 14px #174f4c32;transform:translateY(-3px)}.hippo-card.correct .hippo-face{animation:chomp .52s ease 2}.hippo-card.wrong .hippo-face{animation:spit .55s ease}.hippo-face{position:relative;width:min(100%,230px);height:82%;min-height:165px;transition:transform .2s;filter:drop-shadow(0 9px 2px #277a6a3d)}.hippo-face:before{content:'';position:absolute;inset:7% 4% 0;background:#a987c8;border:6px solid #8068a5;border-bottom-width:9px;border-radius:48% 48% 31% 31%;box-shadow:inset -10px -10px 0 #9878b9}.hippo-ear{z-index:1;width:24%;height:31%;top:0}.hippo-face .ear-left{left:8%}.hippo-face .ear-right{right:8%}.hippo-eyes{z-index:2;top:22%;left:24%;right:24%}.hippo-eyes i{width:18px;height:25px;border-width:3px}.hippo-eyes i:after{width:7px;height:11px;left:4px;top:5px}.hippo-muzzle{z-index:2;left:13%;right:13%;bottom:4%;height:48%;background:#d9b9db}.hippo-muzzle i{top:30%;width:11px;height:8px}.hippo-muzzle i:first-child{left:30%}.hippo-muzzle i:nth-child(2){right:30%}.hippo-muzzle b{top:38%;height:24px}.hippo-smile{z-index:3;left:39%;bottom:13%;width:22%;height:13%}.hippo-label{position:absolute;z-index:4;left:50%;bottom:-17px;transform:translateX(-50%);min-width:90px;max-width:100%;padding:7px 13px;border:2px solid #fff;border-radius:16px;background:#fff9d9;color:#497044;text-align:center;font-size:clamp(12px,1.3vw,15px);font-weight:1000;box-shadow:0 5px 12px #164f4930;white-space:nowrap;transition:.2s}.hippo-caught{position:absolute;z-index:5;left:50%;top:14%;transform:translateX(-50%);display:flex;flex-wrap:wrap;justify-content:center;gap:4px;width:100%;pointer-events:none}.caught-word{background:#fffdf1;border:1.5px solid #efc96b;color:#6f653f;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:1000;box-shadow:0 3px 7px #235b4340;animation:pop .3s ease both}.pond{position:absolute;z-index:1;left:-3%;right:-3%;bottom:16%;height:34%;border-radius:50% 50% 0 0/24% 24% 0 0;background:repeating-linear-gradient(177deg,#58c3b3 0 3px,#72d0bd 4px 8px,#54b9ad 9px 17px);box-shadow:inset 0 12px 0 #9ce0c8}.water-glint{position:absolute;width:45px;height:5px;border-radius:50%;background:#c4f2d9;opacity:.8;top:22%}.glint-a{left:20%}.glint-b{left:71%;top:40%;width:60px}.glint-c{left:43%;top:64%;width:32px}.feedback{position:absolute;z-index:6;left:50%;bottom:30%;transform:translateX(-50%);min-width:240px;text-align:center;padding:8px 15px;border:2px solid #ffffffb0;border-radius:24px;background:#f8fff0e8;color:#528263;font-size:14px;font-weight:1000;box-shadow:0 6px 14px #2c695022;transition:opacity .2s}.feedback.good{background:#fff2a8;color:#658544}.feedback.bad{background:#ffe0d5;color:#b75b4f}.fruit-tray-wrap{position:absolute;z-index:7;bottom:0;left:0;right:0;height:19%;min-height:118px;padding:9px 22px 14px;background:#fffdf0;border-radius:24px 24px 0 0;box-shadow:0 -8px 24px #25655220}.tray-label{display:flex;justify-content:space-between;align-items:center;color:#688579;font-size:11px;font-weight:1000;letter-spacing:1px}.tray-label span+span{font-weight:800;letter-spacing:0;color:#93a99d}.fruit-tray{display:flex;align-items:center;gap:12px;overflow-x:auto;height:calc(100% - 19px);padding:5px 2px 8px;scrollbar-color:#b9dfce transparent;scrollbar-width:thin}.fruit-card{flex:0 0 90px;height:77px;position:relative;display:grid;place-items:center;border:2px solid #e3eee0;border-radius:20px;background:#fff;cursor:grab;user-select:none;touch-action:none;transition:transform .15s,opacity .18s,border-color .15s;box-shadow:0 4px 0 #eaf0de}.fruit-card:hover{transform:translateY(-4px) rotate(-2deg);border-color:#f6c769}.fruit-card:active{cursor:grabbing}.fruit-card.selected{border-color:#f19a5d;box-shadow:0 0 0 3px #ffe0a9,0 5px 0 #e9c77c;transform:translateY(-3px)}.fruit-card.used{opacity:.15;pointer-events:none;transform:scale(.72)}.fruit-card.dragging{opacity:.4}.fruit-emoji{position:absolute;top:2px;font-size:35px;line-height:1;filter:drop-shadow(0 3px 1px #553d2925);pointer-events:none}.fruit-word{position:absolute;z-index:1;bottom:6px;left:4px;right:4px;padding:2px 3px;border-radius:9px;background:#fffef1eF;color:#4b6255;text-align:center;font-size:12px;font-weight:1000;box-shadow:0 1px 4px #5c795428;pointer-events:none}.complete-card{position:absolute;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);width:min(420px,90%);padding:25px;text-align:center;border:5px solid #fff;border-radius:30px;background:#fffdf0;box-shadow:0 20px 70px #164f4866;animation:pop .35s ease}.complete-card h2{font:800 30px 'Baloo 2';color:#33705d;margin:4px}.complete-card p{font-size:14px;color:#6c8879;font-weight:800}.complete-emoji{font-size:44px}.complete-card .primary-button{margin-top:7px}.hidden{display:none!important}footer{height:50px;display:flex;align-items:center;justify-content:space-between;color:#82a195;font-size:11px;font-weight:800;padding:0 4px}.footer-stars{color:#f6b65b;letter-spacing:5px}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,-9px)}}@keyframes float{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-14px) rotate(7deg)}}@keyframes chomp{0%,100%{transform:scaleY(1)}45%{transform:scaleY(.78) translateY(12px)}}@keyframes spit{0%,100%{transform:translateX(0) rotate(0)}35%{transform:translateX(15px) rotate(5deg)}70%{transform:translateX(-5px) rotate(-2deg)}}@keyframes pop{from{opacity:0;scale:.75}to{opacity:1;scale:1}}
+@media(max-width:900px){.app-shell{padding:0 18px}.menu-screen{grid-template-columns:1fr 1fr;gap:15px;padding:15px 1%}.menu-art{min-height:380px;height:55vh}.menu-copy h1{font-size:56px}.how-to{flex-wrap:wrap}.hippo-row{left:1%;right:1%;gap:5px}.hippo-card{min-width:105px}.hippo-face{min-height:140px}.fruit-tray-wrap{padding-left:14px;padding-right:14px}}@media(max-width:650px){.app-shell{padding:0 10px}.topbar{height:60px}.top-note{font-size:0}.menu-screen{display:flex;flex-direction:column-reverse;align-items:stretch;padding:8px 3% 20px;gap:12px}.menu-art{min-height:260px;height:34vh;max-height:320px;border-radius:36px}.hero-hippo{transform:translateX(-50%) scale(.78);transform-origin:bottom center;bottom:5%}.menu-copy{padding:0}.menu-copy h1{font-size:51px;margin:7px 0}.menu-copy>p{font-size:14px;margin-bottom:12px}.selection-card{padding:14px;border-radius:19px}.how-to{font-size:10px;margin:10px 2px}.game-toolbar{grid-template-columns:1fr auto;height:52px}.round-title{display:none}.score-pill{grid-column:2;grid-row:1}.playfield{height:calc(100dvh - 130px);min-height:570px;border-radius:20px}.scene-heading{top:18px}.scene-heading h2{font-size:22px}.sound-hint{font-size:10px}.hippo-row{top:22%;height:41%;left:1%;right:1%;align-items:flex-end;gap:1px}.hippo-card{min-width:0}.hippo-face{width:100%;min-height:110px;height:73%}.hippo-face:before{border-width:4px}.hippo-card .hippo-ear{border-width:4px}.hippo-eyes i{width:13px;height:20px;border-width:2px}.hippo-muzzle i{width:8px;height:6px}.hippo-muzzle b{height:18px}.hippo-label{font-size:10px;padding:5px 7px;min-width:60px;bottom:-12px}.caught-word{font-size:9px;padding:2px 5px}.pond{bottom:17%;height:35%}.feedback{bottom:31%;font-size:12px;min-width:200px}.fruit-tray-wrap{height:20%;min-height:122px;padding:8px 10px 11px}.tray-label{font-size:9px}.fruit-card{flex-basis:76px;height:73px}.fruit-emoji{font-size:31px}.fruit-word{font-size:11px}.quiet-button{font-size:11px;padding-left:1px}footer{font-size:9px;height:37px}.footer-stars{letter-spacing:2px}}
+/* Prototype refinement: make the pond visibly lap across the hippos. */
+.hippo-card{border:0;padding:0;background:transparent;font:inherit;color:inherit}
+.hippo-row:after{content:'';position:absolute;z-index:4;left:-3%;right:-3%;bottom:-1%;height:31%;pointer-events:none;background:repeating-linear-gradient(177deg,#65c8b5e8 0 4px,#8bdec3e8 5px 9px,#55bcaee8 10px 18px);border-top:5px solid #a5e5c9;clip-path:ellipse(57% 54% at 50% 54%)}
+.hippo-label{z-index:5}
+.fruit-card.spit-back{animation:spitback .62s ease}
+.hippo-card.selected .hippo-label,.hippo-card:focus-visible .hippo-label{transform:translate(-50%,-3px)}
+@keyframes spitback{0%{transform:translateY(-40px) scale(.8) rotate(0)}45%{transform:translateY(6px) scale(1.1) rotate(16deg)}70%{transform:translateY(-4px) rotate(-8deg)}100%{transform:translateY(0) scale(1) rotate(0)}}
+/* Keep the category tags and response prompt above the water and clear of one another. */
+.hippo-label{top:55%;bottom:auto;z-index:5}
+.feedback{bottom:20%;z-index:8}
+@media(max-width:650px){.hippo-label{top:55%;bottom:auto}.feedback{bottom:21%}}
+.hippo-label.not-label{color:#c94e4e;background:#ffe3df;border-color:#fff7f2;text-transform:uppercase}
+.hippo-reaction{position:absolute;z-index:6;top:87%;left:50%;transform:translateX(-50%) scale(.7);visibility:hidden;white-space:nowrap;padding:8px 13px;border:3px solid #fff;border-radius:46% 54% 48% 52%/55% 45% 55% 45%;color:#fff;font-size:clamp(11px,1.2vw,14px);font-weight:1000;text-shadow:0 1px 1px #275c5948;box-shadow:0 4px 0 #246a5b35;pointer-events:none}
+.hippo-reaction.show{visibility:visible;transform:translateX(-50%) scale(1);animation:splash-pop .28s cubic-bezier(.18,.89,.32,1.28)}
+.hippo-reaction.positive{background:#65b85e}
+.hippo-reaction.negative{background:#ed7465}
+@keyframes splash-pop{0%{transform:translateX(-50%) scale(.35) rotate(-8deg)}75%{transform:translateX(-50%) scale(1.12) rotate(3deg)}100%{transform:translateX(-50%) scale(1) rotate(0)}}
+@media(max-width:650px){.hippo-reaction{top:88%;font-size:9px;padding:6px 8px;border-width:2px}}
+
+/* Painted assets: one shared jungle and the generated hippo, fruit, and water art. */
+.menu-art{background-image:url('assets/jungle_lagoon_background.png');background-size:cover;background-position:center;}
+.menu-art:before,.menu-art:after{display:none}
+.menu-art .sun,.menu-art .leaf,.menu-water,.hero-hippo{display:none}
+.menu-hippo{position:absolute;z-index:3;left:50%;bottom:6%;width:min(58%,390px);max-height:78%;object-fit:contain;transform:translateX(-50%);filter:drop-shadow(0 12px 9px #164d4740);animation:menu-hippo-bob 3s ease-in-out infinite}
+.floating-fruit{width:74px;height:74px;font-size:0;filter:drop-shadow(0 5px 3px #174f4840)}
+.floating-fruit .fruit-art{width:100%;height:100%}
+.menu-art .f1{left:13%;top:32%}.menu-art .f2{right:14%;top:25%;animation-delay:.35s}.menu-art .f3{right:23%;top:54%;animation-delay:.7s}
+.art-caption{z-index:5}
+.playfield{background-image:url('assets/jungle_lagoon_background.png');background-size:100% 100%;background-position:center;}
+.jungle-backdrop,.pond{display:none!important}
+.hippo-row{isolation:isolate;overflow:visible}
+.hippo-row:after{display:none}
+.hippo-face{width:min(100%,270px);height:100%;min-height:0;aspect-ratio:1/1;filter:drop-shadow(0 9px 5px #174f4840);animation:none!important}
+.hippo-face:before{display:none}
+.hippo-art{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;user-select:none}
+.hippo-art-open{opacity:0}
+.hippo-card.correct .hippo-face{animation:hippo-chew-bob .42s ease 3!important}
+.hippo-card.wrong .hippo-face{animation:spit .55s ease!important}
+.hippo-card.correct .hippo-art-closed{animation:hippo-closed-chew .42s steps(1) 3}
+.hippo-card.correct .hippo-art-open{animation:hippo-open-chew .42s steps(1) 3}
+.hippo-card.wrong .hippo-art-closed{animation:hippo-closed-wrong .62s steps(1) both}
+.hippo-card.wrong .hippo-art-open{animation:hippo-open-wrong .62s steps(1) both}
+.water-foreground{position:absolute;z-index:4;pointer-events:none;left:-3%;top:-50%;width:106%;height:217%;object-fit:fill;user-select:none}
+.hippo-label{z-index:5}
+.hippo-caught{z-index:5}
+.hippo-reaction{z-index:7;width:190px;height:64px;min-width:0;padding:0;border:0;border-radius:0;background-color:transparent;background-position:center;background-size:100% 100%;background-repeat:no-repeat;box-shadow:none;text-shadow:none;display:grid;place-items:center;color:#245c54;font-size:14px;}
+.hippo-reaction.positive{background-color:transparent;background-image:url('assets/reaction_yes_plate.png')}
+.hippo-reaction.negative{background-color:transparent;background-image:url('assets/reaction_retry_plate.png');color:#784c46}
+.reaction-copy{position:relative;z-index:1;max-width:88%;text-align:center;line-height:1.05}
+.water-splash{position:absolute;z-index:6;left:50%;top:51%;width:120px;height:120px;object-fit:contain;opacity:0;transform:translate(-50%,-50%) scale(.25);pointer-events:none}
+.hippo-card.splash .water-splash{animation:water-burst .62s ease-out both}
+.fruit-art{display:block;width:55px;height:55px;background-image:url('assets/fruit_sprite_sheet.png');background-size:500% 300%;background-position:var(--x,0%) var(--y,0%);background-repeat:no-repeat;pointer-events:none;}
+.fruit-flight{transition:transform .52s cubic-bezier(.2,.75,.2,1),opacity .52s ease;}
+.fruit-flight.fly{transform:translate(var(--fly-x),var(--fly-y)) scale(.32) rotate(12deg);opacity:.25;}
+.fruit-card .fruit-art{position:absolute;top:0;left:50%;transform:translateX(-50%);width:57px;height:57px;}
+.fruit-card .fruit-word{z-index:2}
+.menu-art .fruit-art{background-size:500% 300%;}
+@keyframes hippo-open-chew{0%,27%,65%,100%{opacity:0}28%,64%{opacity:1}}
+@keyframes hippo-closed-chew{0%,27%,65%,100%{opacity:1}28%,64%{opacity:0}}
+@keyframes hippo-open-wrong{0%,42%{opacity:1}43%,100%{opacity:0}}
+@keyframes hippo-closed-wrong{0%,42%{opacity:0}43%,100%{opacity:1}}
+@keyframes hippo-chew-bob{0%,100%{transform:translateY(0)}45%{transform:translateY(5px) scaleY(.98)}}
+@keyframes water-burst{0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}28%{opacity:1;transform:translate(-50%,-58%) scale(1.05)}70%{opacity:.85;transform:translate(-50%,-60%) scale(1.12)}100%{opacity:0;transform:translate(-50%,-65%) scale(1.24)}}
+@keyframes menu-hippo-bob{0%,100%{translate:0 0}50%{translate:0 -8px}}
+@media(max-width:650px){.water-foreground{top:-50%;height:217%}.fruit-card .fruit-art{width:52px;height:52px}.hippo-reaction{width:138px;height:49px;font-size:10px;padding:0;border:0}.water-splash{width:85px;height:85px}.menu-hippo{width:min(67%,300px);bottom:3%}.floating-fruit{width:53px;height:53px}}
+/* Use the generated scene and matching transparent water layer as one aligned illustration. */
+.playfield{background-size:cover;background-position:center 52%}
+.hippo-row{z-index:auto;isolation:auto}
+.hippo-row:after{display:none}
+.hippo-face{position:relative;z-index:3}
+.water-foreground{position:absolute;z-index:4;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 52%;left:0;top:0}
+.menu-art{background-size:cover;background-position:center}
+.menu-water-foreground{position:absolute;z-index:4;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;pointer-events:none}
+.menu-hippo{z-index:3}
+.menu-art .floating-fruit{z-index:5}
+.fruit-card.in-flight{opacity:0!important}
+.hippo-row{top:18%;height:50%}
+.hippo-face{width:min(100%,270px);height:auto;aspect-ratio:1/1}
+@media(max-width:650px){.water-foreground{inset:0;width:100%;height:100%;object-fit:cover;object-position:center 52%}.hippo-row{top:18%;height:48%}.hippo-face{height:auto}}
+
+/* Raise the hippos so their mouths stay clear above the illustrated waterline. */
+.hippo-row{top:12%;height:50%}
+.hippo-card.correct .hippo-face{animation:hippo-chew-bob .58s ease 3!important}
+.hippo-card.correct .hippo-art-open{animation:hippo-open-chew .58s steps(1) 3}
+.hippo-card.correct .hippo-art-closed{animation:hippo-closed-chew .58s steps(1) 3}
+@keyframes hippo-open-chew{0%,18%,53%,100%{opacity:0}19%,52%{opacity:1}}
+@keyframes hippo-closed-chew{0%,18%,53%,100%{opacity:1}19%,52%{opacity:0}}
+@keyframes hippo-chew-bob{0%,100%{transform:translateY(0) scale(1)}42%{transform:translateY(7px) scale(1.025,.96)}}
+
+/* Let the fruit art carry the tray; remove the row of distracting white tiles. */
+.fruit-tray-wrap{background:linear-gradient(180deg,#e5f4dff2,#f5f0d9f5);border-top:3px solid #ffffffc9;box-shadow:0 -7px 22px #174f4828}
+.fruit-tray{gap:10px}
+.fruit-card{flex-basis:88px;height:84px;display:flex;align-items:flex-start;justify-content:center;border:0;border-radius:12px;background:transparent;box-shadow:none;overflow:visible}
+.fruit-card:hover{border:0;background:#ffffff38;box-shadow:none;transform:translateY(-3px) scale(1.04)}
+.fruit-card.selected{border:0;background:#fff5c455;box-shadow:none;transform:translateY(-4px) scale(1.06)}
+.fruit-card.selected .fruit-word{background:#ffe27e;color:#5e4b2c}
+.fruit-card .fruit-art{top:0;width:70px;height:70px;filter:drop-shadow(0 5px 3px #23412f50)}
+.fruit-card .fruit-word{bottom:0;left:50%;right:auto;transform:translateX(-50%);min-width:48px;max-width:100%;padding:2px 9px;border:1px solid #fff;border-radius:999px;background:#fffdf0ed;box-shadow:0 2px 5px #23412f2b;font-size:13px;line-height:1.15;white-space:nowrap}
+.fruit-card.used{opacity:.12}
+
+/* Comic-book response burst: thick white keyline, ink outline, and oversized lettering. */
+.hippo-reaction{top:72%;width:clamp(220px,25vw,310px);height:clamp(96px,11vw,132px);padding:0;overflow:visible;background:none!important;filter:drop-shadow(0 5px 2px #183b37a6);transform:translateX(-50%) scale(.45) rotate(-7deg)}
+.hippo-reaction::before,.hippo-reaction::after{content:"";position:absolute;inset:0;clip-path:polygon(50% 0%,59% 13%,70% 3%,75% 17%,89% 11%,88% 26%,100% 32%,91% 44%,100% 55%,87% 62%,94% 78%,78% 79%,75% 96%,61% 87%,50% 100%,40% 87%,25% 97%,22% 80%,6% 81%,12% 65%,0% 56%,10% 45%,1% 32%,15% 26%,11% 10%,28% 17%,32% 2%,43% 13%)}
+.hippo-reaction::before{inset:-6px;background:#fff;filter:drop-shadow(0 0 0 #183b37);z-index:0}
+.hippo-reaction::after{background:#efc93d;border:0;z-index:1}
+.hippo-reaction.negative::after{background:#ff735e}
+.hippo-reaction.show{transform:translateX(-50%) scale(1) rotate(-4deg);animation:comic-burst .36s cubic-bezier(.16,1.35,.35,1) both}
+.hippo-reaction .reaction-copy{display:block;max-width:80%;margin:0 auto;position:relative;z-index:2;color:#fff;font-family:'Baloo 2','Nunito',sans-serif;font-size:clamp(23px,2.6vw,34px);font-weight:1000;line-height:.94;letter-spacing:.5px;text-transform:uppercase;-webkit-text-stroke:1.5px #173b36;text-shadow:2px 3px 0 #173b36,-2px 3px 0 #173b36,2px -1px 0 #173b36,-2px -1px 0 #173b36,0 5px 0 #173b36;}
+.hippo-reaction.positive .reaction-copy{color:#fffbe3}
+.hippo-reaction.negative .reaction-copy{color:#fff}
+@keyframes comic-burst{0%{transform:translateX(-50%) scale(.35) rotate(-15deg)}72%{transform:translateX(-50%) scale(1.12) rotate(2deg)}100%{transform:translateX(-50%) scale(1) rotate(-4deg)}}
+@media(max-width:650px){.hippo-row{top:12%;height:50%}.fruit-card{flex-basis:76px;height:79px}.fruit-card .fruit-art{width:64px;height:64px}.fruit-card .fruit-word{font-size:11px}.hippo-reaction{top:71%;width:205px;height:94px}.hippo-reaction .reaction-copy{font-size:23px;-webkit-text-stroke:1.25px #173b36}}
+
+/* Keep the scene immersive: labels are type over the artwork, not cards on it. */
+.fruit-tray-wrap{height:20%;min-height:116px;padding:8px 22px 12px;background:transparent;border:0;border-radius:0;box-shadow:none}
+.tray-label{color:#fffdf0;text-shadow:0 2px 4px #153c36,0 0 3px #153c36;letter-spacing:1.1px}
+.tray-label span+span{color:#fffdf0;text-shadow:0 2px 4px #153c36,0 0 3px #153c36}
+.fruit-tray{gap:12px}
+.fruit-card{background:transparent!important;border:0!important;border-radius:0;box-shadow:none!important;overflow:visible;transform:none}
+.fruit-card:hover{transform:translateY(-3px) scale(1.06)}
+.fruit-card.selected{transform:translateY(-5px) scale(1.1);filter:drop-shadow(0 0 8px #ffe47d)}
+.fruit-card .fruit-art{filter:drop-shadow(0 6px 4px #153b3266)}
+.fruit-card .fruit-word,.fruit-card.selected .fruit-word{background:none;border:0;border-radius:0;box-shadow:none;padding:0;color:#fffdf0;text-shadow:0 2px 3px #173b36,0 0 4px #173b36;font-weight:1000}
+.fruit-card.selected .fruit-word{color:#ffe77e}
+.fruit-card.used{opacity:.08}
+.hippo-label,.hippo-label.not-label{top:auto;bottom:-3rem;left:50%;min-width:0;max-width:115%;width:max-content;padding:0;border:0;border-radius:0;background:transparent;color:#fff7db;box-shadow:none;text-shadow:0 2px 4px #153b36,0 0 3px #153b36;font-size:clamp(13px,1.3vw,16px);line-height:1.05;letter-spacing:.3px;white-space:normal}
+.hippo-label.not-label{color:#ffb1a3;text-transform:uppercase}
+.hippo-card.correct .hippo-label,.hippo-card.wrong .hippo-label{opacity:0}
+.hippo-caught{background:transparent;box-shadow:none}
+.caught-word{padding:0 3px;border:0;border-radius:0;background:transparent;color:#fffbe1;box-shadow:none;text-shadow:1px 2px 2px #173b36,-1px -1px 2px #173b36;font-size:clamp(13px,1.3vw,16px);font-weight:1000}
+.score-pill{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:#fffdf0;text-shadow:0 2px 4px #153b36}
+.score-pill b{color:#ffe77e;text-shadow:0 2px 4px #153b36}
+.sound-hint{padding:0;margin-top:2px;border-radius:0;background:transparent;color:#fff7db;text-shadow:0 2px 4px #153b36,0 0 3px #153b36}
+.hippo-reaction{top:72%}
+.complete-card{background:transparent;border:0;box-shadow:none}
+.complete-card h2{color:#fff8d8;text-shadow:0 3px 4px #153b36,-1px -1px 2px #153b36}
+.complete-card p{color:#fff;text-shadow:0 2px 4px #153b36}
+@media(max-width:650px){
+  .fruit-tray-wrap{height:21%;padding:7px 10px 10px}
+  .fruit-card{flex-basis:72px;height:76px}
+  .fruit-card .fruit-art{width:61px;height:61px}
+  .fruit-card .fruit-word{font-size:11px}
+  .hippo-label,.hippo-label.not-label{bottom:-2.5rem;font-size:10px;max-width:110%}
+  .caught-word{font-size:11px}
+  .score-pill{font-size:10px}
+}
+
+/* Give the fruit more room, put sound names under the mouths, and flash a compact cue overhead. */
+.fruit-tray-wrap{height:24%;min-height:130px;padding:7px 22px 10px}
+.fruit-card{flex-basis:96px;height:100px}
+.fruit-card .fruit-art{width:86px;height:86px}
+.fruit-card .fruit-word{bottom:0}
+.hippo-label,.hippo-label.not-label{top:74%;bottom:auto}
+.hippo-reaction{top:-12%;width:164px;height:76px;filter:drop-shadow(0 4px 1px #183b37a6)}
+.hippo-reaction.show{transform:translateX(-50%) scale(1) rotate(-4deg);animation:comic-flash 1.05s ease-out both}
+.hippo-reaction .reaction-copy{font-size:clamp(18px,1.75vw,23px);-webkit-text-stroke:1.2px #173b36;text-shadow:1.5px 2px 0 #173b36,-1.5px 2px 0 #173b36,1.5px -1px 0 #173b36,-1.5px -1px 0 #173b36,0 3px 0 #173b36}
+.scene-heading{transition:opacity .12s ease}
+.scene-heading.reaction-hidden{opacity:0}
+@keyframes comic-flash{0%{opacity:0;transform:translateX(-50%) scale(.45) rotate(-12deg)}10%{opacity:1;transform:translateX(-50%) scale(1.08) rotate(3deg)}18%{opacity:.25;transform:translateX(-50%) scale(.95) rotate(-2deg)}27%,70%{opacity:1;transform:translateX(-50%) scale(1) rotate(-4deg)}100%{opacity:0;transform:translateX(-50%) scale(.72) rotate(5deg)}}
+@media(max-width:650px){
+  .fruit-tray-wrap{height:24%;min-height:128px;padding:6px 9px 9px}
+  .fruit-card{flex-basis:84px;height:92px}
+  .fruit-card .fruit-art{width:78px;height:78px}
+  .fruit-card .fruit-word{font-size:11px}
+  .hippo-label,.hippo-label.not-label{top:74%;bottom:auto;font-size:10px}
+  .hippo-reaction{top:-12%;width:146px;height:66px}
+  .hippo-reaction .reaction-copy{font-size:18px;-webkit-text-stroke:1px #173b36}
+}
+
+/* Use the new transparent burst art for feedback; keep the water splash at the lower mouth. */
+.hippo-reaction{top:-22%;width:132px;height:112px;filter:none;background-size:contain!important;background-repeat:no-repeat!important;background-position:center!important}
+.hippo-reaction::before,.hippo-reaction::after{display:none}
+.hippo-reaction.positive{background-image:url('assets/comic_burst.png')!important}
+.hippo-reaction.negative{background-image:url('assets/comic_burst_coral.png')!important}
+.hippo-reaction .reaction-copy{max-width:70%;font-size:17px;line-height:.98;-webkit-text-stroke:1px #173b36;text-shadow:1px 2px 0 #173b36,-1px 2px 0 #173b36,1px -1px 0 #173b36,-1px -1px 0 #173b36,0 3px 0 #173b36}
+.hippo-reaction.show{animation:comic-flash 1.05s ease-out both}
+.water-splash{top:74%;width:98px;height:98px}
+@media(max-width:650px){
+  .hippo-reaction{top:-22%;width:112px;height:98px}
+  .hippo-reaction .reaction-copy{max-width:70%;font-size:15px;-webkit-text-stroke:.8px #173b36}
+  .water-splash{top:74%;width:78px;height:78px}
+}
+.fruit-tray{scrollbar-width:none;-ms-overflow-style:none}
+.fruit-tray::-webkit-scrollbar{display:none}
+.fruit-tray-wrap{height:25%;min-height:140px}
+.fruit-card{flex-basis:110px;height:112px}
+.fruit-card .fruit-word{font-size:22px;line-height:1.02;text-shadow:0 2px 3px #102e29,0 0 5px #102e29}
+.caught-word{font-size:26px;text-shadow:1px 2px 3px #102e29,-1px -1px 3px #102e29,0 0 5px #102e29}
+@media(max-width:650px){.fruit-tray-wrap{height:26%;min-height:140px}.fruit-card{flex-basis:92px;height:102px}.fruit-card .fruit-word{font-size:18px}.caught-word{font-size:21px}}

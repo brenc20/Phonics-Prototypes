@@ -1,0 +1,1373 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Penguin Phonics Crossing</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg-top:#edf8ff;
+  --bg-bottom:#d7ebf6;
+  --card:rgba(255,255,255,.72);
+  --card-solid:#ffffff;
+  --line:rgba(18,48,74,.12);
+  --shadow:0 22px 48px rgba(62,109,150,.16);
+  --ink:#203040;
+  --muted:#5e7387;
+  --clay:#294761;
+  --blue-a:#4f95c8;
+  --blue-b:#87caea;
+  --easy-col:#a8ddf5;
+  --medium-col:#7ac5e0;
+  --hard-col:#6d9fdd;
+  --good:#2e9960;
+  --bad:#d46873;
+}
+html,body{
+  min-height:100%;
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,.68), transparent 28%),
+    linear-gradient(180deg,var(--bg-top) 0%,var(--bg-bottom) 100%);
+  color:var(--ink);
+  font-family:"Trebuchet MS","Segoe UI",sans-serif;
+}
+body{padding:10px;}
+button{border:0;cursor:pointer;}
+.screen{display:none;width:100%;}
+.screen.active{display:block;}
+.screen-shell{position:relative;width:100%;max-width:1240px;margin:0 auto;padding-top:54px;}
+.screen-nav{position:absolute;top:0;left:0;z-index:5;display:flex;gap:10px;flex-wrap:wrap;}
+.screen-home{position:static;}
+.shell{width:100%;max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+.btn,.diff-btn,.menu-diff-card,.choice-btn{font:inherit;}
+.btn,.diff-btn,.menu-diff-card,.choice-btn{border-radius:16px;transition:transform 120ms ease, box-shadow 120ms ease, background 120ms ease, border-color 120ms ease;}
+.btn:hover,.diff-btn:hover,.menu-diff-card:hover,.choice-btn:hover{transform:translateY(-1px);}
+.btn:disabled,.choice-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.btn-home,.btn-secondary{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 14px;text-decoration:none;background:rgba(255,255,255,.7);color:var(--ink);border:1px solid var(--line);box-shadow:0 8px 20px rgba(54,97,138,.08);}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 15px;background:linear-gradient(135deg,var(--blue-a),var(--blue-b));color:#fffdf8;font-weight:900;box-shadow:0 12px 24px rgba(68,128,177,.28);}
+.board-card,.panel,.topbar{background:var(--card);border:1px solid rgba(255,255,255,.52);box-shadow:var(--shadow);backdrop-filter:blur(10px);}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-radius:22px;}
+.brand{display:flex;flex-direction:column;gap:6px;min-width:0;}
+.eyebrow{display:inline-flex;align-self:flex-start;padding:7px 12px;border-radius:999px;background:rgba(18,48,74,.08);color:var(--clay);font-size:12px;font-weight:900;letter-spacing:1.8px;text-transform:uppercase;}
+h1{margin:0;font-family:Impact,Haettenschweiler,"Arial Narrow Bold",sans-serif;font-size:clamp(26px,3vw,40px);line-height:.98;letter-spacing:1px;color:var(--clay);}
+.top-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;align-items:center;}
+.mode-switch{display:inline-flex;align-items:center;gap:8px;padding:5px;border-radius:18px;background:rgba(255,255,255,.6);border:1px solid rgba(18,48,74,.1);box-shadow:0 8px 20px rgba(54,97,138,.08);}
+.mode-summary{display:flex;flex-direction:column;padding:4px 10px;gap:2px;}
+.mode-label{font-size:11px;font-weight:900;color:var(--clay);text-transform:uppercase;letter-spacing:1px;}
+#diff-subtitle{font-size:12px;color:var(--muted);font-weight:700;}
+#screen-menu{padding-bottom:12px;}
+.menu-shell{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,380px);gap:18px;align-items:start;}
+.menu-main{padding:28px;display:flex;flex-direction:column;gap:22px;}
+.menu-title-block{display:flex;flex-direction:column;gap:14px;}
+.menu-sub{margin:0;max-width:700px;color:var(--muted);font-size:16px;line-height:1.6;font-weight:700;}
+.menu-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;padding:20px 24px 18px;border-radius:30px;background:radial-gradient(circle at 12% 18%, rgba(255,255,255,.78), transparent 24%),radial-gradient(circle at 88% 20%, rgba(255,255,255,.6), transparent 18%),linear-gradient(180deg, rgba(248,253,255,.98), rgba(221,242,252,.92) 58%, rgba(197,226,244,.94));border:1px solid rgba(18,48,74,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.85);overflow:hidden;}
+.hero-copy{display:flex;flex-direction:column;gap:8px;max-width:520px;}
+.hero-tag{display:inline-flex;align-self:flex-start;padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.74);border:1px solid rgba(18,48,74,.08);color:var(--clay);font-size:11px;font-weight:900;letter-spacing:.9px;text-transform:uppercase;}
+.hero-copy p{margin:0;color:var(--ink);font-size:14px;line-height:1.6;font-weight:800;}
+.hero-copy .hero-note{color:var(--muted);font-size:13px;font-weight:700;}
+.hero-penguins{display:flex;align-items:flex-end;gap:16px;padding-right:10px;}
+.hero-penguin{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.hero-bird{display:flex;align-items:flex-end;justify-content:center;width:76px;height:100px;border-radius:40px 40px 32px 32px;background:linear-gradient(180deg,#263f56,#182837 72%);box-shadow:0 12px 18px rgba(30,61,86,.14);color:#fff;font-size:44px;padding-bottom:10px;}
+.hero-bird.small{width:58px;height:76px;border-radius:30px 30px 24px 24px;font-size:32px;padding-bottom:8px;}
+.hero-caption{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:rgba(255,255,255,.78);color:var(--clay);font-size:11px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;}
+.menu-diff-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.menu-diff-card{padding:14px 12px;border:1px solid rgba(18,48,74,.08);background:rgba(255,255,255,.78);text-align:left;box-shadow:0 10px 18px rgba(78,122,157,.1);}
+.menu-diff-card.selected,.menu-diff-card.sel{border-color:rgba(68,128,177,.34);box-shadow:0 16px 28px rgba(68,128,177,.18);}
+.menu-diff-card[data-d="easy"]{background:linear-gradient(180deg,#f7fdff,#e4f4fb);}
+.menu-diff-card[data-d="medium"]{background:linear-gradient(180deg,#eff9ff,#d8edf8);}
+.menu-diff-card[data-d="hard"]{background:linear-gradient(180deg,#eaf4ff,#d3e5f7);}
+.menu-diff-name{margin:0 0 6px;font-size:20px;color:var(--clay);font-weight:900;}
+.menu-diff-copy{color:var(--muted);font-size:13px;line-height:1.45;font-weight:700;}
+.menu-start-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.menu-mode-copy{display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:13px;font-weight:700;}
+.menu-mode-copy strong{color:var(--clay);font-size:17px;}
+.start-btn{min-width:180px;}
+.menu-side{display:flex;flex-direction:column;gap:10px;}
+.panel{padding:12px 14px;border-radius:22px;}
+.panel h3{margin:0;color:var(--clay);letter-spacing:.4px;}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px;}
+.panel-note{color:var(--muted);font-size:12px;font-weight:800;}
+.menu-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px;}
+.menu-summary-chip{padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.72);border:1px solid rgba(18,48,74,.08);display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:12px;font-weight:800;}
+.menu-summary-chip span{color:var(--clay);font-size:18px;font-weight:900;}
+.menu-steps{display:grid;gap:10px;}
+.menu-step{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border-radius:16px;background:rgba(255,255,255,.68);border:1px solid rgba(18,48,74,.08);color:var(--ink);font-size:14px;line-height:1.45;font-weight:700;}
+.menu-step-num{width:24px;height:24px;border-radius:999px;background:linear-gradient(135deg,var(--blue-a),var(--blue-b));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;}
+.layout{display:flex;flex-direction:column;gap:10px;}
+.board-card{padding:10px;display:flex;flex-direction:column;gap:10px;}
+.board-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.meta-block{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+.chip{display:inline-flex;align-items:center;min-height:38px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.7);border:1px solid rgba(24,35,49,.08);color:var(--ink);font-weight:800;}
+.chip strong{margin-right:6px;color:var(--clay);}
+.board-stage{position:relative;padding-bottom:12px;}
+.prototype-scene{position:relative;min-height:510px;border-radius:20px;overflow:hidden;border:1px solid rgba(18,48,74,.12);box-shadow:inset 0 0 0 1px rgba(255,255,255,.28);background:radial-gradient(circle at 10% 12%, rgba(255,255,255,.48), transparent 18%),linear-gradient(180deg,#eefaff 0%, #d6ecf7 40%, #97c7e3 100%);}
+.scene{position:relative;min-height:510px;}
+.scene::before{content:"";position:absolute;inset:auto 0 0 0;height:38%;background:linear-gradient(180deg,#a0d0e7 0%, #2d84b7 18%, #0f5f92 100%);}
+.scene::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 18%, rgba(255,255,255,.3), transparent 22%),radial-gradient(circle at 78% 14%, rgba(255,255,255,.25), transparent 18%);pointer-events:none;}
+.scene-caption{position:absolute;top:16px;left:50%;transform:translateX(-50%);z-index:5;padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.92);color:var(--clay);font-size:13px;font-weight:800;box-shadow:0 2px 10px rgba(22,48,72,.1);white-space:nowrap;}
+.map-beam-picker{position:absolute;top:10px;left:10px;z-index:4;width:110px;}
+.bucket-grid{display:grid;gap:8px;}
+.bucket-btn{padding:8px 10px;text-align:left;background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.72));border:1px solid rgba(18,48,74,.1);border-radius:13px;box-shadow:0 8px 16px rgba(24,35,49,.08);}
+.bucket-btn strong{display:block;color:var(--ink);font-size:12px;margin-bottom:2px;white-space:nowrap;}
+.bucket-btn span{display:block;color:var(--muted);font-size:10px;line-height:1.25;}
+.bucket-btn[data-bucket="easy"]{background:linear-gradient(180deg,#f5fcff,#dff0fa);}
+.bucket-btn[data-bucket="medium"]{background:linear-gradient(180deg,#e9f7ff,#cfe8f5);}
+.bucket-btn[data-bucket="hard"]{background:linear-gradient(180deg,#ddeefe,#bedaf4);}
+.path-strip{position:absolute;left:0;right:0;bottom:56px;height:44%;display:flex;align-items:flex-end;overflow-x:auto;overflow-y:visible;padding:0 36px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.path-strip::-webkit-scrollbar{display:none;}
+.path-inner{display:flex;align-items:flex-end;min-width:max-content;height:100%;position:relative;}
+.bridge-layer,.anchor-layer{position:absolute;inset:0;pointer-events:none;}
+.tile{flex-shrink:0;width:100px;height:58px;background:linear-gradient(180deg,#f4fbff 0%,#cce6f4 60%,#a0c8e0 100%);border-radius:10px 10px 4px 4px;border-top:4px solid rgba(255,255,255,.95);border-left:1px solid rgba(255,255,255,.5);box-shadow:0 5px 12px rgba(10,60,100,.14);}
+.tile.start-tile,.tile.end-tile{width:120px;}
+.gap-slot{flex-shrink:0;width:90px;height:58px;position:relative;display:flex;align-items:center;justify-content:center;}
+.gap-slot::before{content:"";position:absolute;inset:10px 4px 0;background:linear-gradient(180deg,rgba(15,80,140,.45) 0%,rgba(8,50,100,.65) 100%);border-radius:6px;}
+.gap-slot::after{content:"WATER";position:absolute;bottom:7px;font-size:9px;letter-spacing:2.2px;color:rgba(255,255,255,.42);pointer-events:none;}
+.gap-slot.open-gap::before{animation:gapPulse 2s ease-in-out infinite;}
+.gap-slot.filled::before,.gap-slot.filled::after{display:none;}
+.gap-slot.hover-target::before{background:linear-gradient(180deg,rgba(46,169,98,.65) 0%,rgba(20,110,60,.75) 100%) !important;animation:none !important;box-shadow:0 0 0 3px rgba(46,169,98,.45);}
+@keyframes gapPulse{0%,100%{background:linear-gradient(180deg,rgba(15,80,140,.45) 0%,rgba(8,50,100,.65) 100%);}50%{background:linear-gradient(180deg,rgba(28,120,195,.6) 0%,rgba(14,76,148,.75) 100%);}}
+.placed-bridge,.draft-bridge{position:absolute;transform-origin:left center;height:18px;border-radius:999px;border-top:3px solid rgba(255,255,255,.75);box-shadow:0 4px 10px rgba(0,0,0,.18);}
+.draft-bridge{opacity:.6;box-shadow:0 0 0 2px rgba(255,255,255,.4),0 6px 14px rgba(0,0,0,.16);}
+.placed-bridge.d-easy,.draft-bridge.d-easy{background:linear-gradient(160deg,#4bbad4,#2490be);}
+.placed-bridge.d-medium,.draft-bridge.d-medium{background:linear-gradient(160deg,#967de8,#6848c0);}
+.placed-bridge.d-hard,.draft-bridge.d-hard{background:linear-gradient(160deg,#e07848,#bc4820);}
+.bridge-tag{position:absolute;min-width:78px;max-width:112px;padding:5px 8px 4px;border-radius:12px;background:rgba(19,40,60,.85);color:#fff;text-align:center;box-shadow:0 8px 18px rgba(0,0,0,.18);transform:translate(-50%,-50%);pointer-events:none;}
+.bridge-tag .br-word{display:block;font-size:11px;font-weight:900;letter-spacing:.35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bridge-tag .br-hint{display:block;font-size:8px;opacity:.8;letter-spacing:.4px;}
+.bridge-anchor{position:absolute;width:14px;height:14px;border-radius:999px;background:rgba(255,255,255,.9);border:2px solid rgba(35,83,120,.5);box-shadow:0 4px 10px rgba(0,0,0,.14);transform:translate(-50%,-50%);}
+.bridge-anchor.start{background:#fff7dd;border-color:rgba(202,160,44,.6);}
+.bridge-anchor.end{background:#ddfff0;border-color:rgba(46,153,96,.6);}
+.bridge-anchor.snap{transform:translate(-50%,-50%) scale(1.14);}
+.penguin-el,#baby-el{position:absolute;z-index:4;line-height:1;user-select:none;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.18));}
+.penguin-el{bottom:calc(44% - 20px);left:38px;font-size:44px;transition:left .38s linear;}
+#baby-el{right:40px;bottom:calc(44% - 18px);font-size:36px;}
+.preview-row{display:flex;align-items:center;justify-content:center;position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:2;width:min(620px,calc(100% - 72px));padding:9px 16px;border-radius:18px;background:linear-gradient(180deg,rgba(117,176,216,.88),rgba(82,144,188,.88));border:1px solid rgba(255,255,255,.34);box-shadow:0 10px 24px rgba(39,91,128,.18);color:#eef9ff;font-size:12px;font-weight:700;text-align:center;}
+#inst-hint{line-height:1.4;}
+.sidebar{display:flex;flex-direction:column;gap:10px;}
+.beam-box-layout{display:flex;align-items:stretch;gap:12px;}
+.beam-box-main{flex:1 1 auto;min-width:0;}
+.beam-box-dock{position:relative;min-height:118px;border-radius:18px;padding:14px;background:rgba(255,255,255,.6);border:1px solid rgba(18,48,74,.08);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.beam-box-empty{color:var(--muted);font-size:13px;font-weight:700;text-align:center;max-width:220px;}
+.beam-run-btn{min-width:88px;font-size:18px;border-radius:16px;align-self:stretch;}
+.gap-pills{display:flex;gap:6px;flex-wrap:wrap;min-height:14px;margin-top:10px;}
+.gpill{height:12px;border-radius:999px;background:#d9e5ef;flex-shrink:0;}
+.gpill.done{background:var(--good);}
+.beam-box-note{margin-top:6px;color:var(--muted);font-size:12px;font-weight:700;}
+.bottom-grid.single-panel{display:grid;grid-template-columns:1fr;}
+.selected-piece{color:var(--muted);font-size:13px;line-height:1.55;}
+.tools-label{color:var(--clay);}
+.panel-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px;}
+.score-card{padding:12px 14px;border-radius:18px;background:rgba(255,255,255,.72);border:1px solid rgba(18,48,74,.08);display:flex;flex-direction:column;gap:6px;}
+.score-label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:900;}
+.score-value{color:var(--ink);font-size:22px;font-weight:900;}
+.diff-badge,.diff-chip{display:inline-flex;align-items:center;justify-content:center;min-width:82px;padding:8px 12px;border-radius:999px;color:#fff;font-size:13px;font-weight:900;}
+.d-easy{background:linear-gradient(135deg,#5db4dc,#92d8f2);}
+.d-medium{background:linear-gradient(135deg,#73bad8,#5aa3c9);}
+.d-hard{background:linear-gradient(135deg,#5d92d1,#7cabdf);}
+#floating-piece{display:none;align-items:center;justify-content:center;}
+#floating-piece.dragging{cursor:grabbing !important;}
+#floating-piece.idle{animation:floaty 1.7s ease-in-out infinite;}
+@keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+#fp-label{font-size:14px;font-weight:900;}
+#fp-hint{font-size:9px;opacity:.82;letter-spacing:.5px;}
+#fp-prompt{position:fixed;z-index:89;display:none;padding:6px 16px;border-radius:999px;background:var(--clay);color:#fff;font-size:11px;font-weight:700;white-space:nowrap;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.2);}
+.overlay{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(18,36,58,.52);backdrop-filter:blur(4px);}
+#q-backdrop.open{display:flex;}
+.question-card{width:min(92vw,560px);background:var(--card-solid);border:2px solid rgba(215,227,238,.95);border-radius:22px;box-shadow:0 24px 52px rgba(0,0,0,.28);overflow:hidden;}
+.question-card-top{background:linear-gradient(180deg,#f6fbff 0%,#e7f1f8 100%);padding:16px 18px;border-bottom:1px solid #deebf4;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.question-card-top .title{font-size:16px;font-weight:900;color:var(--clay);}
+.question-body{padding:18px;}
+.q-text{font-size:1.12rem;font-weight:900;color:var(--ink);line-height:1.35;margin-bottom:16px;}
+.choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.choice-btn{min-height:56px;padding:10px 12px;background:#f4f9fd;border:2px solid #d8e6f0;color:var(--clay);font-size:.95rem;font-weight:800;text-align:center;}
+.choice-btn.correct{background:#def6e8;border-color:#94ddb1;color:#1d6f43;}
+.choice-btn.wrong{background:#ffe7eb;border-color:#f0a4b0;color:#9a2940;}
+#win-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(23,56,90,.55);backdrop-filter:blur(6px);}
+#win-overlay.open{display:flex;}
+.win-card{background:var(--card-solid);border:2px solid rgba(215,227,238,.95);border-radius:24px;padding:28px 36px;text-align:center;box-shadow:0 28px 64px rgba(0,0,0,.32);}
+.win-penguins{font-size:58px;animation:bounce .7s ease-in-out infinite alternate;}
+@keyframes bounce{to{transform:translateY(-10px);}}
+.win-title{font-size:clamp(1.3rem,3vw,1.8rem);font-weight:900;color:var(--clay);margin:8px 0 4px;}
+.win-sub{font-size:.88rem;color:var(--muted);margin-bottom:16px;}
+.win-stats{display:flex;gap:22px;justify-content:center;margin-bottom:20px;}
+.win-stat{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.win-stat-val{font-size:1.6rem;font-weight:900;color:var(--clay);}
+.win-stat-lbl{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.win-btns{display:flex;gap:10px;justify-content:center;}
+.btn-light{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;background:#fff;color:var(--clay);border:1px solid rgba(18,48,74,.12);box-shadow:0 8px 20px rgba(54,97,138,.08);border-radius:16px;}
+.btn-navy{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;background:var(--clay);color:#fff;border-radius:16px;box-shadow:0 10px 20px rgba(32,63,90,.22);}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(18px);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:200;white-space:nowrap;padding:8px 22px;border-radius:999px;background:var(--clay);color:#fff;font-weight:800;font-size:.85rem;box-shadow:0 6px 20px rgba(0,0,0,.2);}
+.toast.good{background:var(--good);}
+.toast.bad{background:var(--bad);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@keyframes shake{0%,100%{transform:translateX(0);}25%,75%{transform:translateX(-5px);}50%{transform:translateX(5px);}}
+.shake{animation:shake .3s ease;}
+@media (max-width:980px){.menu-shell{grid-template-columns:1fr;}}
+@media (max-width:760px){body{padding:8px;}.topbar{border-radius:20px;padding:12px;}.menu-diff-grid,.panel-actions,.choices-grid,.menu-summary{grid-template-columns:1fr;}.menu-hero{grid-template-columns:1fr;}.beam-box-layout{flex-direction:column;}.beam-run-btn{min-height:50px;}.preview-row{width:calc(100% - 30px);}.prototype-scene,.scene{min-height:460px;}}
+</style>
+</head>
+<body>
+<div id="screen-menu" class="screen active">
+  <div class="screen-shell">
+    <div class="screen-nav">
+      <span class="btn btn-home screen-home">Standalone Prototype</span>
+      <span class="btn btn-home screen-home">Penguin Layout Match Pass</span>
+    </div>
+    <div class="menu-shell">
+      <section class="board-card menu-main">
+        <div class="menu-title-block">
+          <h1>Penguin Phonics Crossing</h1>
+          <p class="menu-sub">Help mama penguin cross the ice by answering phonics questions, earning icy bridge pieces, and building a safe path to the baby penguin waiting across the water.</p>
+        </div>
+        <div class="menu-hero">
+          <div class="hero-copy">
+            <span class="hero-tag">Arctic Rescue</span>
+            <p>Mama penguin is ready to move, but the crossing is broken. Each correct phonics answer earns a bridge piece you can drag onto the ice.</p>
+            <p class="hero-note">Pick a level, build the crossing, and press Go when the path is ready.</p>
+          </div>
+          <div class="hero-penguins" aria-hidden="true">
+            <div class="hero-penguin">
+              <div class="hero-bird">&#128039;</div>
+              <span class="hero-caption">Mama</span>
+            </div>
+            <div class="hero-penguin">
+              <div class="hero-bird small">&#128035;</div>
+              <span class="hero-caption">Baby</span>
+            </div>
+          </div>
+        </div>
+        <div class="menu-diff-grid" aria-label="Difficulty select">
+          <button class="menu-diff-card diff-btn sel selected" type="button" data-d="easy">
+            <h2 class="menu-diff-name">Easy</h2>
+            <p class="menu-diff-copy">Letter sounds, short vowels, and simple CVC bridges.</p>
+          </button>
+          <button class="menu-diff-card diff-btn" type="button" data-d="medium">
+            <h2 class="menu-diff-name">Medium</h2>
+            <p class="menu-diff-copy">Digraphs, blends, silent e, and chunkier bridge words.</p>
+          </button>
+          <button class="menu-diff-card diff-btn" type="button" data-d="hard">
+            <h2 class="menu-diff-name">Hard</h2>
+            <p class="menu-diff-copy">R-controlled vowels, vowel teams, and longer sound patterns.</p>
+          </button>
+        </div>
+        <div class="menu-start-row">
+          <div class="menu-mode-copy">
+            <strong>Build The Crossing</strong>
+            <span>Answer, earn, place, then send mama across.</span>
+          </div>
+          <button class="btn btn-primary start-btn" id="play-btn" type="button">Start Rescue</button>
+        </div>
+      </section>
+      <aside class="menu-side">
+        <section class="panel">
+          <div class="panel-head">
+            <h3>How It Works</h3>
+            <span class="panel-note">Prototype Flow</span>
+          </div>
+          <div class="menu-summary">
+            <div class="menu-summary-chip"><strong>Questions</strong><span>Phonics</span></div>
+            <div class="menu-summary-chip"><strong>Reward</strong><span>Ice Beams</span></div>
+          </div>
+          <div class="menu-steps">
+            <div class="menu-step"><span class="menu-step-num">1</span><span>Answer the phonics question that pops up.</span></div>
+            <div class="menu-step"><span class="menu-step-num">2</span><span>A correct answer earns one bridge piece.</span></div>
+            <div class="menu-step"><span class="menu-step-num">3</span><span>Drag the beam from the Beam Box onto an open water gap.</span></div>
+            <div class="menu-step"><span class="menu-step-num">4</span><span>When every gap is covered, press <strong>Go</strong> and watch mama cross.</span></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+<div id="screen-game" class="screen">
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="eyebrow">Live Rescue</span>
+        <h1>Penguin Phonics Crossing</h1>
+      </div>
+      <div class="top-actions">
+        <button class="btn btn-secondary" id="menu-btn" type="button">Menu</button>
+        <div class="mode-switch">
+          <div class="mode-summary">
+            <span class="mode-label">Difficulty</span>
+            <span id="diff-subtitle">Easy · letter sounds and CVC words</span>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div class="layout">
+      <section class="board-card">
+        <div class="board-meta">
+          <div class="meta-block">
+            <div class="chip"><strong>Mode</strong><span id="diff-chip-top">Phonics Rescue</span></div>
+            <div class="chip"><strong>Bridges</strong><span id="gap-count-head">0 / 0 gaps filled</span></div>
+            <div class="chip"><strong>Correct</strong><span id="score-correct">0</span></div>
+            <div class="chip"><strong>Wrong</strong><span id="score-wrong">0</span></div>
+          </div>
+        </div>
+        <div class="board-stage">
+          <div class="prototype-scene">
+            <div class="scene" id="main-scene">
+              <div class="map-beam-picker">
+                <div class="bucket-grid">
+                  <button class="bucket-btn" type="button" data-bucket="easy" disabled><strong>Easy Beam</strong><span>Simple sounds</span></button>
+                  <button class="bucket-btn" type="button" data-bucket="medium" disabled><strong>Medium Beam</strong><span>Chunks and teams</span></button>
+                  <button class="bucket-btn" type="button" data-bucket="hard" disabled><strong>Hard Beam</strong><span>Complex patterns</span></button>
+                </div>
+              </div>
+              <div class="scene-caption" id="scene-caption">Answer the question to earn a bridge piece.</div>
+              <div class="path-strip" id="path-strip"><div class="path-inner" id="path-inner"></div></div>
+              <div id="baby-el">&#128035;</div>
+            </div>
+          </div>
+          <div class="preview-row"><div id="inst-hint">Answer the phonics question to earn your first bridge piece.</div></div>
+        </div>
+      </section>
+      <aside class="sidebar">
+        <section class="panel">
+          <div class="beam-box-layout">
+            <div class="beam-box-main">
+              <div class="panel-head">
+                <h3>Beam Box</h3>
+                <span class="panel-note">Earned bridge pieces</span>
+              </div>
+              <div class="beam-box-dock">
+                <div class="beam-box-empty">Correct answers will appear here as draggable ice beams.</div>
+                <div id="floating-piece">
+                  <div id="fp-label">word</div>
+                  <div id="fp-hint">h·i·n·t</div>
+                </div>
+              </div>
+              <div class="gap-pills" id="gap-pills"></div>
+              <div class="beam-box-note" id="gap-text">0 of 0 gaps filled</div>
+            </div>
+            <button class="btn btn-primary beam-run-btn" id="go-btn" type="button" disabled>Go</button>
+          </div>
+        </section>
+        <div class="bottom-grid single-panel">
+          <section class="panel">
+            <p class="selected-piece"><strong class="tools-label">Tools:</strong> Drag the earned beam from the Beam Box onto an open gap. When the full path is covered, press Go to send mama penguin across the ice.</p>
+            <div class="panel-actions">
+              <div class="score-card"><span class="score-label">Difficulty</span><span class="diff-badge d-easy" id="diff-badge">Easy</span></div>
+              <div class="score-card"><span class="score-label">Correct</span><span class="score-value" id="score-correct-panel">0</span></div>
+              <div class="score-card"><span class="score-label">Wrong</span><span class="score-value" id="score-wrong-panel">0</span></div>
+            </div>
+          </section>
+        </div>
+      </aside>
+    </div>
+  </div>
+  <div class="overlay" id="q-backdrop">
+    <div class="question-card">
+      <div class="question-card-top">
+        <div class="title">Phonics Question</div>
+        <span class="diff-chip d-easy" id="diff-chip">Easy</span>
+      </div>
+      <div class="question-body">
+        <div class="q-text" id="q-text">Loading...</div>
+        <div class="choices-grid" id="choices-grid"></div>
+      </div>
+    </div>
+  </div>
+  <div id="win-overlay">
+    <div class="win-card">
+      <div class="win-penguins">&#128035;&#128039;</div>
+      <div class="win-title">They made it!</div>
+      <div class="win-sub">Mama penguin crossed the ice safely.</div>
+      <div class="win-stats">
+        <div class="win-stat"><span class="win-stat-val" id="ws-bridges">0</span><span class="win-stat-lbl">Bridges</span></div>
+        <div class="win-stat"><span class="win-stat-val" id="ws-correct">0</span><span class="win-stat-lbl">Correct</span></div>
+        <div class="win-stat"><span class="win-stat-val" id="ws-wrong">0</span><span class="win-stat-lbl">Wrong</span></div>
+      </div>
+      <div class="win-btns">
+        <button class="btn-light" id="again-btn" type="button">Play Again</button>
+        <button class="btn-navy" id="harder-btn" type="button">Go Harder</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="fp-prompt">Drag this beam onto a water gap.</div>
+<div class="toast" id="toast"></div>
+<script>
+/* ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
+   PHONICS BANK
+?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
+const BANK = {
+  easy:[
+    {q:"Which word starts with /b/?",        choices:["bat","cat","sat","mat"],   ans:0, reward:"bat",   hint:"b·a·t"},
+    {q:"Which word has the short /a/ sound?", choices:["cat","coat","cute","boot"],ans:0, reward:"cat",   hint:"c·a·t"},
+    {q:"Which word starts with /f/?",         choices:["pan","can","fan","man"],   ans:2, reward:"fan",   hint:"f·a·n"},
+    {q:"Which word ends with /n/?",           choices:["bus","bug","bun","bud"],   ans:2, reward:"bun",   hint:"b·u·n"},
+    {q:"Which word has the short /i/ sound?", choices:["bit","beat","bite","boot"],ans:0, reward:"bit",   hint:"b·i·t"},
+    {q:"Which word starts with /h/?",         choices:["bat","rat","hat","pat"],   ans:2, reward:"hat",   hint:"h·a·t"},
+    {q:"Which word has the short /o/ sound?", choices:["boat","boot","hot","hose"],ans:2, reward:"hot",   hint:"h·o·t"},
+    {q:"Which word ends with /g/?",           choices:["but","bug","bus","bun"],   ans:1, reward:"bug",   hint:"b·u·g"},
+    {q:"Which word starts with /t/?",         choices:["hop","mop","top","pop"],   ans:2, reward:"top",   hint:"t·o·p"},
+    {q:"Which word has the short /e/ sound?", choices:["bead","bed","bide","bode"],ans:1, reward:"bed",   hint:"b·e·d"},
+    {q:"Which word starts with /s/?",         choices:["fun","run","sun","bun"],   ans:2, reward:"sun",   hint:"s·u·n"},
+    {q:"Which word ends with /p/?",           choices:["nag","nab","nap","nad"],   ans:2, reward:"nap",   hint:"n·a·p"},
+  ],
+  medium:[
+    {q:"Which word has the /sh/ sound?",           choices:["ship","skip","slip","drip"],  ans:0, reward:"ship",  hint:"sh·ip"},
+    {q:"Which word has the /ch/ sound?",           choices:["clip","drip","chip","flip"],  ans:2, reward:"chip",  hint:"ch·ip"},
+    {q:"Which word has a long vowel (silent e)?",  choices:["cap","can","cab","cake"],     ans:3, reward:"cake",  hint:"c·a·ke"},
+    {q:"Which word has the /th/ sound?",           choices:["flat","that","slat","brat"],  ans:1, reward:"that",  hint:"th·at"},
+    {q:"Which word starts with the blend /fl/?",   choices:["lag","bag","flag","nag"],     ans:2, reward:"flag",  hint:"fl·ag"},
+    {q:"Which word has the /ee/ sound?",           choices:["slap","slip","slop","sleep"], ans:3, reward:"sleep", hint:"sl·ee·p"},
+    {q:"Which word starts with /wh/?",             choices:["hen","ten","when","den"],     ans:2, reward:"when",  hint:"wh·en"},
+    {q:"Which word ends with /ck/?",               choices:["dunk","dung","dumb","duck"],  ans:3, reward:"duck",  hint:"du·ck"},
+    {q:"Which word has a long /i/ (silent e)?",    choices:["bit","bid","bike","big"],     ans:2, reward:"bike",  hint:"b·i·ke"},
+    {q:"Which word starts with the blend /gr/?",   choices:["rap","trap","gap","grab"],    ans:3, reward:"grab",  hint:"gr·ab"},
+    {q:"Which word has the /oa/ vowel team?",      choices:["got","boat","bot","boot"],    ans:1, reward:"boat",  hint:"b·oa·t"},
+    {q:"Which word starts with the blend /st/?",   choices:["top","stop","hop","shop"],    ans:1, reward:"stop",  hint:"st·op"},
+  ],
+  hard:[
+    {q:"Which word has the /ar/ sound?",              choices:["ban","born","boon","barn"],  ans:3, reward:"barn",   hint:"b·ar·n"},
+    {q:"Which word has the /or/ sound?",              choices:["coin","cone","come","corn"],  ans:3, reward:"corn",   hint:"c·or·n"},
+    {q:"Which word has the /oo/ sound (as in moon)?", choices:["moan","main","moon","mean"],  ans:2, reward:"moon",   hint:"m·oo·n"},
+    {q:"Which word has the /ow/ sound (as in cow)?",  choices:["tone","tune","teen","town"],  ans:3, reward:"town",   hint:"t·ow·n"},
+    {q:"Which word has the /igh/ pattern?",           choices:["knit","neat","note","night"], ans:3, reward:"night",  hint:"n·igh·t"},
+    {q:"Which word has the /er/ sound?",              choices:["fan","fun","fin","fern"],     ans:3, reward:"fern",   hint:"f·er·n"},
+    {q:"Which word has the /oi/ sound?",              choices:["con","can","cone","coin"],    ans:3, reward:"coin",   hint:"c·oi·n"},
+    {q:"Which word has the /air/ sound?",             choices:["far","fur","for","fair"],     ans:3, reward:"fair",   hint:"f·air"},
+    {q:"Which word has the /ur/ sound (as in turn)?", choices:["barn","born","boon","burn"],  ans:3, reward:"burn",   hint:"b·ur·n"},
+    {q:"Which word has the /au/ sound (as in Paul)?", choices:["coat","cute","cut","caught"], ans:3, reward:"caught", hint:"c·augh·t"},
+    {q:"Which word ends with /tch/?",                 choices:["much","muck","hutch","hull"], ans:2, reward:"hutch",  hint:"hu·tch"},
+    {q:"Which word uses the /eigh/ spelling?",        choices:["eight","eat","even","else"],  ans:0, reward:"eight",  hint:"e·igh·t"},
+  ],
+};
+const DIFF_CFG = {
+  easy:  {label:"Easy",   sub:"Easy · letter sounds & CVC words",          gaps:5, dc:"d-easy"},
+  medium:{label:"Medium", sub:"Medium · digraphs, blends & silent e",       gaps:6, dc:"d-medium"},
+  hard:  {label:"Hard",   sub:"Hard · r-controlled & vowel teams",          gaps:7, dc:"d-hard"},
+};
+
+/* ?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧
+   STATE
+?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧?먥븧 */
+let G = {};
+const PLAYER = {
+  speed: 110,
+  gravity: 1650,
+  stepUp: 34,
+  stepDown: 42,
+  landingSnap: 18,
+  bodyHeight: 42,
+  resetDepth: 420,
+};
+const PLACEMENT = {
+  anchorRadius: 26,
+  startAnchorRadius: 120,
+  minReach: 34,
+  maxSlope: 1.55,
+};
+const drag = {
+  active: false,
+  homeX: 0,
+  homeY: 0,
+  startAnchor: null,
+  geometry: null,
+};
+let frameId = 0;
+let lastFrameTs = 0;
+
+const $ = (id) => document.getElementById(id);
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
+function distance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach((screen) => screen.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+let toastTimer = 0;
+function showToast(msg, type = '') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function shakeEl(el) {
+  el.classList.remove('shake');
+  void el.offsetWidth;
+  el.classList.add('shake');
+}
+
+function rewardPieceForQuestion(question, diff) {
+  const letters = String(question.reward || '').replace(/[^a-z]/gi, '').length || 3;
+  const phonicsUnits = String(question.hint || '').split('·').filter(Boolean).length || 1;
+  const baseReach = diff === 'easy' ? 94 : diff === 'medium' ? 118 : 138;
+  const reachCap = diff === 'easy' ? 190 : diff === 'medium' ? 220 : 250;
+  return {
+    id: 'piece-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+    reward: question.reward,
+    hint: question.hint,
+    d: diff,
+    maxReach: clamp(baseReach + letters * 11 + phonicsUnits * 6, 94, reachCap),
+    thickness: clamp(16 + letters * 0.55, 16, 24),
+  };
+}
+
+function resetState(diff) {
+  const cfg = DIFF_CFG[diff];
+  G = {
+    diff,
+    cfg,
+    pool: shuffle([...BANK[diff]]),
+    poolIdx: 0,
+    currentQ: null,
+    gaps: cfg.gaps,
+    phase: 'asking',
+    heldPiece: null,
+    bridges: [],
+    baseSupports: [],
+    gapMetrics: [],
+    coveredGaps: [],
+    correct: 0,
+    wrong: 0,
+    runState: 'idle',
+    player: {
+      x: 0,
+      footY: 0,
+      vy: 0,
+      grounded: true,
+      supportId: null,
+    },
+    goalX: 0,
+  };
+}
+
+function currentSupports() {
+  return [...G.baseSupports, ...G.bridges.map((bridge) => bridge.support)];
+}
+
+function makeLineSupport(id, x1, y1, x2, y2, extra) {
+  return {
+    id,
+    points: [
+      { x: x1, y: y1 },
+      { x: x2, y: y2 },
+    ],
+    anchorable: true,
+    ...(extra || {}),
+  };
+}
+
+function supportSegments(points) {
+  const segments = [];
+  for (let index = 0; index < points.length - 1; index += 1) {
+    const p1 = points[index];
+    const p2 = points[index + 1];
+    if (Math.abs(p2.x - p1.x) < 0.01) continue;
+    segments.push({ p1, p2 });
+  }
+  return segments;
+}
+
+function yOnSupportAt(support, x) {
+  for (const segment of supportSegments(support.points)) {
+    const minX = Math.min(segment.p1.x, segment.p2.x);
+    const maxX = Math.max(segment.p1.x, segment.p2.x);
+    if (x < minX - 0.5 || x > maxX + 0.5) continue;
+    const span = segment.p2.x - segment.p1.x;
+    const t = Math.abs(span) < 0.0001 ? 0 : (x - segment.p1.x) / span;
+    return lerp(segment.p1.y, segment.p2.y, t);
+  }
+  return null;
+}
+
+function supportCornerPoints(support) {
+  const points = Array.isArray(support?.points) ? support.points : [];
+  if (!points.length) return [];
+  if (points.length === 1) return [points[0]];
+  return [points[0], points[points.length - 1]];
+}
+
+function createAnchor(point, support) {
+  return {
+    point: { x: point.x, y: point.y },
+    supportId: support ? support.id : null,
+    support: support || null,
+  };
+}
+
+function findNearestAnchor(point, tolerance, supports) {
+  let best = null;
+  for (const support of supports || currentSupports()) {
+    if (!support.anchorable) continue;
+    for (const corner of supportCornerPoints(support)) {
+      const d = Math.hypot(corner.x - point.x, corner.y - point.y);
+      if (d > tolerance) continue;
+      if (!best || d < best.distance) {
+        best = { ...createAnchor(corner, support), distance: d };
+      }
+    }
+  }
+  return best;
+}
+
+function worldPointFromClient(clientX, clientY) {
+  const inner = $('path-inner');
+  const rect = inner.getBoundingClientRect();
+  return {
+    x: clientX - rect.left,
+    y: clientY - rect.top,
+  };
+}
+
+function getPos(event) {
+  if (event.touches && event.touches.length) {
+    return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+  }
+  if (event.changedTouches && event.changedTouches.length) {
+    return { x: event.changedTouches[0].clientX, y: event.changedTouches[0].clientY };
+  }
+  return { x: event.clientX, y: event.clientY };
+}
+
+function ensureLayers() {
+  const inner = $('path-inner');
+  let bridgeLayer = inner.querySelector('.bridge-layer');
+  let anchorLayer = inner.querySelector('.anchor-layer');
+  if (!bridgeLayer) {
+    bridgeLayer = document.createElement('div');
+    bridgeLayer.className = 'bridge-layer';
+    inner.appendChild(bridgeLayer);
+  }
+  if (!anchorLayer) {
+    anchorLayer = document.createElement('div');
+    anchorLayer.className = 'anchor-layer';
+    inner.appendChild(anchorLayer);
+  }
+  return { bridgeLayer, anchorLayer };
+}
+
+function mkTile(cls = '') {
+  const tile = document.createElement('div');
+  tile.className = 'tile' + (cls ? ' ' + cls : '');
+  return tile;
+}
+
+function buildScene() {
+  const inner = $('path-inner');
+  inner.innerHTML = '';
+
+  inner.appendChild(mkTile('start-tile'));
+  for (let index = 0; index < G.gaps; index += 1) {
+    const gap = document.createElement('div');
+    gap.className = 'gap-slot open-gap';
+    gap.dataset.idx = index;
+    inner.appendChild(gap);
+    inner.appendChild(mkTile());
+  }
+  inner.appendChild(mkTile('end-tile'));
+
+  const peng = document.createElement('div');
+  peng.className = 'penguin-el';
+  peng.id = 'penguin-el';
+  peng.textContent = String.fromCodePoint(0x1F427);
+  inner.appendChild(peng);
+
+  const baby = $('baby-el');
+  inner.appendChild(baby);
+
+  ensureLayers();
+  requestAnimationFrame(() => {
+    computeBaseSupports();
+    resetPlayerToStart();
+    renderAll();
+  });
+}
+
+function computeBaseSupports() {
+  const inner = $('path-inner');
+  const tiles = Array.from(inner.querySelectorAll('.tile'));
+  const gaps = Array.from(inner.querySelectorAll('.gap-slot'));
+  PLAYER.resetDepth = inner.clientHeight + 110;
+  G.baseSupports = tiles.map((tile, index) => {
+    const x1 = tile.offsetLeft + 4;
+    const x2 = tile.offsetLeft + tile.offsetWidth - 4;
+    const y = tile.offsetTop + 4;
+    return makeLineSupport('terrain-' + index, x1, y, x2, y, { type: 'terrain' });
+  });
+  G.gapMetrics = gaps.map((gap) => ({
+    idx: Number(gap.dataset.idx),
+    x1: gap.offsetLeft,
+    x2: gap.offsetLeft + gap.offsetWidth,
+    centerX: gap.offsetLeft + gap.offsetWidth / 2,
+    element: gap,
+  }));
+  const lastSupport = G.baseSupports[G.baseSupports.length - 1];
+  G.goalX = lastSupport ? lastSupport.points[1].x - 20 : 0;
+  G.goalY = lastSupport ? lastSupport.points[0].y : 0;
+
+  const baby = $('baby-el');
+  if (lastSupport && baby) {
+    baby.style.right = 'auto';
+    baby.style.bottom = 'auto';
+    baby.style.left = (lastSupport.points[1].x - 10) + 'px';
+    baby.style.top = (lastSupport.points[1].y - 38) + 'px';
+  }
+}
+
+function resetPlayerToStart() {
+  const first = G.baseSupports[0];
+  if (!first) return;
+  G.player.x = first.points[0].x + 24;
+  G.player.footY = first.points[0].y;
+  G.player.vy = 0;
+  G.player.grounded = true;
+  G.player.supportId = first.id;
+  G.runState = 'idle';
+  cancelWalkLoop();
+}
+
+function updatePlayerVisual() {
+  const peng = $('penguin-el');
+  if (!peng) return;
+  peng.style.bottom = 'auto';
+  peng.style.left = (G.player.x - 18) + 'px';
+  peng.style.top = (G.player.footY - PLAYER.bodyHeight) + 'px';
+}
+
+function updateGapCoverage() {
+  G.coveredGaps = G.gapMetrics.filter((gap) => G.bridges.some((bridge) => yOnSupportAt(bridge.support, gap.centerX) != null));
+  for (const gap of G.gapMetrics) {
+    const covered = G.coveredGaps.some((entry) => entry.idx === gap.idx);
+    gap.element.classList.toggle('filled', covered);
+    gap.element.classList.toggle('open-gap', !covered);
+  }
+}
+
+function renderBridgeLayers() {
+  const { bridgeLayer } = ensureLayers();
+  bridgeLayer.innerHTML = '';
+
+  const drawBridge = (bridge, draftBridge) => {
+    const start = bridge.points[0];
+    const end = bridge.points[bridge.points.length - 1];
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const length = Math.hypot(dx, dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+    const bar = document.createElement('div');
+    bar.className = (draftBridge ? 'draft-bridge ' : 'placed-bridge ') + 'd-' + bridge.d;
+    bar.style.left = start.x + 'px';
+    bar.style.top = (start.y - bridge.thickness / 2) + 'px';
+    bar.style.width = length + 'px';
+    bar.style.height = bridge.thickness + 'px';
+    bar.style.transform = 'rotate(' + angle + 'deg)';
+    bridgeLayer.appendChild(bar);
+
+    const tag = document.createElement('div');
+    tag.className = 'bridge-tag';
+    tag.style.left = (start.x + dx / 2) + 'px';
+    tag.style.top = (start.y + dy / 2 - 20) + 'px';
+    tag.innerHTML = '<span class="br-word">' + bridge.reward + '</span><span class="br-hint">' + bridge.hint + '</span>';
+    bridgeLayer.appendChild(tag);
+  };
+
+  G.bridges.forEach((bridge) => drawBridge(bridge, false));
+  if (drag.geometry && drag.active && G.heldPiece) {
+    drawBridge({
+      points: drag.geometry.points,
+      reward: G.heldPiece.reward,
+      hint: G.heldPiece.hint,
+      d: G.heldPiece.d,
+      thickness: G.heldPiece.thickness,
+    }, true);
+  }
+}
+
+function renderAnchors() {
+  const { anchorLayer } = ensureLayers();
+  anchorLayer.innerHTML = '';
+  if (!drag.active || !drag.startAnchor) return;
+
+  const addAnchor = (anchor, className) => {
+    const dot = document.createElement('div');
+    dot.className = 'bridge-anchor ' + className;
+    dot.style.left = anchor.point.x + 'px';
+    dot.style.top = anchor.point.y + 'px';
+    anchorLayer.appendChild(dot);
+  };
+
+  addAnchor(drag.startAnchor, 'start');
+  if (drag.geometry && drag.geometry.endAnchor) {
+    addAnchor(drag.geometry.endAnchor, drag.geometry.endAnchor.supportId ? 'end snap' : 'end');
+  }
+}
+
+function renderAll() {
+  updateGapCoverage();
+  renderBridgeLayers();
+  renderAnchors();
+  updatePlayerVisual();
+  updateStatus();
+}
+
+function findSupportCandidate(x, footY, grounded, supports) {
+  let best = null;
+  for (const support of supports || currentSupports()) {
+    const y = yOnSupportAt(support, x);
+    if (y == null) continue;
+    const delta = y - footY;
+    if (grounded) {
+      if (delta < -PLAYER.stepUp || delta > PLAYER.stepDown) continue;
+    } else if (delta < -8 || delta > PLAYER.landingSnap) {
+      continue;
+    }
+    if (!best || y < best.y) {
+      best = { support, y };
+    }
+  }
+  return best;
+}
+
+function goalReached() {
+  return G.player.x >= G.goalX - 8 && Math.abs(G.player.footY - G.goalY) <= 24;
+}
+
+function advanceWalkerEntity(dt) {
+  const seconds = dt / 1000;
+  G.player.x += PLAYER.speed * seconds;
+
+  if (G.player.grounded) {
+    const ground = findSupportCandidate(G.player.x, G.player.footY, true);
+    if (ground) {
+      G.player.footY = ground.y;
+      G.player.vy = 0;
+      G.player.grounded = true;
+      G.player.supportId = ground.support.id;
+    } else {
+      G.player.grounded = false;
+      G.player.supportId = null;
+    }
+  }
+
+  if (!G.player.grounded) {
+    G.player.vy += PLAYER.gravity * seconds;
+    G.player.footY += G.player.vy * seconds;
+    const landing = findSupportCandidate(G.player.x, G.player.footY, false);
+    if (landing && G.player.vy >= 0) {
+      G.player.footY = landing.y;
+      G.player.vy = 0;
+      G.player.grounded = true;
+      G.player.supportId = landing.support.id;
+    }
+  }
+}
+
+function simulateRoute() {
+  const supports = currentSupports();
+  const first = G.baseSupports[0];
+  const walker = {
+    x: first ? first.points[0].x + 24 : 0,
+    footY: first ? first.points[0].y : 0,
+    vy: 0,
+    grounded: true,
+    supportId: first ? first.id : null,
+  };
+  let farthestX = walker.x;
+  let farthestFootY = walker.footY;
+  for (let index = 0; index < 600; index += 1) {
+    const seconds = 1000 / 60 / 1000;
+    walker.x += PLAYER.speed * seconds;
+    if (walker.grounded) {
+      const ground = findSupportCandidate(walker.x, walker.footY, true, supports);
+      if (ground) {
+        walker.footY = ground.y;
+        walker.vy = 0;
+        walker.grounded = true;
+        walker.supportId = ground.support.id;
+      } else {
+        walker.grounded = false;
+        walker.supportId = null;
+      }
+    }
+    if (!walker.grounded) {
+      walker.vy += PLAYER.gravity * seconds;
+      walker.footY += walker.vy * seconds;
+      const landing = findSupportCandidate(walker.x, walker.footY, false, supports);
+      if (landing && walker.vy >= 0) {
+        walker.footY = landing.y;
+        walker.vy = 0;
+        walker.grounded = true;
+        walker.supportId = landing.support.id;
+      }
+    }
+    if (walker.x > farthestX) {
+      farthestX = walker.x;
+      farthestFootY = walker.footY;
+    }
+    if (walker.footY > PLAYER.resetDepth || walker.x > G.goalX + 180) break;
+    if (walker.x >= G.goalX) break;
+  }
+  return { farthestX, farthestFootY };
+}
+
+function chooseStartAnchor() {
+  const sim = simulateRoute();
+  const supports = currentSupports();
+  const startPoint = { x: sim.farthestX + 12, y: sim.farthestFootY };
+  return findNearestAnchor(startPoint, PLACEMENT.startAnchorRadius, supports);
+}
+
+function buildBeamGeometry(piece, startAnchor, endPoint, clampMax) {
+  if (!piece || !startAnchor || !endPoint) return { valid: false, reason: 'Select a beam first.' };
+  let start = { x: startAnchor.point.x, y: startAnchor.point.y };
+  let resolvedEnd = { x: endPoint.x, y: endPoint.y };
+  const snap = findNearestAnchor(endPoint, PLACEMENT.anchorRadius, currentSupports());
+  let endAnchor = null;
+  if (snap && snap.point.x > start.x + 26) {
+    resolvedEnd = { x: snap.point.x, y: snap.point.y };
+    endAnchor = snap;
+  }
+
+  let dx = resolvedEnd.x - start.x;
+  let dy = resolvedEnd.y - start.y;
+  if (dx < 34) return { valid: false, reason: 'The beam needs to move forward to the right.' };
+
+  let length = Math.hypot(dx, dy);
+  if (length > piece.maxReach) {
+    if (!clampMax) return { valid: false, reason: 'That beam is not long enough to reach that far.' };
+    const scale = piece.maxReach / length;
+    resolvedEnd = { x: start.x + dx * scale, y: start.y + dy * scale };
+    dx = resolvedEnd.x - start.x;
+    dy = resolvedEnd.y - start.y;
+    length = piece.maxReach;
+    endAnchor = null;
+  }
+  if (length < PLACEMENT.minReach) return { valid: false, reason: 'Stretch the beam a little farther.' };
+  if (Math.abs(dy / dx) > PLACEMENT.maxSlope) return { valid: false, reason: 'That slope is too steep for mama penguin.' };
+
+  return {
+    valid: true,
+    startAnchor,
+    endAnchor: endAnchor ? createAnchor(endAnchor.point, endAnchor.support) : createAnchor(resolvedEnd, null),
+    start,
+    end: resolvedEnd,
+    points: [start, resolvedEnd],
+    length,
+  };
+}
+
+function followPlayer() {
+  const strip = $('path-strip');
+  const targetScroll = clamp(G.player.x - strip.clientWidth * 0.35, 0, Math.max(0, $('path-inner').scrollWidth - strip.clientWidth));
+  strip.scrollLeft = lerp(strip.scrollLeft, targetScroll, 0.22);
+}
+
+function cancelWalkLoop() {
+  if (frameId) cancelAnimationFrame(frameId);
+  frameId = 0;
+  lastFrameTs = 0;
+}
+
+function runFrame(ts) {
+  if (!lastFrameTs) lastFrameTs = ts;
+  const dt = clamp(ts - lastFrameTs, 12, 34);
+  lastFrameTs = ts;
+
+  if (G.runState === 'walking') {
+    advanceWalkerEntity(dt);
+    if (goalReached()) {
+      showWin();
+      return;
+    }
+    if (G.player.footY > PLAYER.resetDepth) {
+      G.runState = 'falling';
+      G.player.grounded = false;
+      if (G.player.vy < 140) G.player.vy = 140;
+      showToast('Splash. Add another beam.','bad');
+    }
+  } else if (G.runState === 'falling') {
+    const seconds = dt / 1000;
+    G.player.x += PLAYER.speed * 0.45 * seconds;
+    G.player.vy += PLAYER.gravity * seconds;
+    G.player.footY += G.player.vy * seconds;
+    if (G.player.footY > PLAYER.resetDepth) {
+      resetPlayerToStart();
+      renderAll();
+      showToast('Mama penguin reset. Your bridges stay in place.','good');
+      return;
+    }
+  } else {
+    return;
+  }
+
+  followPlayer();
+  renderAll();
+  frameId = requestAnimationFrame(runFrame);
+}
+
+function beginWalk() {
+  if (G.runState === 'walking' || G.runState === 'falling' || $('q-backdrop').classList.contains('open')) return;
+  G.runState = 'walking';
+  $('go-btn').textContent = 'Walking...';
+  $('scene-caption').textContent = 'Mama penguin is crossing!';
+  cancelWalkLoop();
+  frameId = requestAnimationFrame(runFrame);
+  updateStatus();
+}
+
+function buildBridgeSupport(piece, geometry) {
+  return makeLineSupport('bridge-' + piece.id, geometry.start.x, geometry.start.y, geometry.end.x, geometry.end.y, {
+    type: 'bridge',
+    thickness: piece.thickness,
+  });
+}
+
+function placeGeometry(geometry) {
+  if (!G.heldPiece || !geometry || !geometry.valid) return;
+  G.bridges.push({
+    id: G.heldPiece.id,
+    reward: G.heldPiece.reward,
+    hint: G.heldPiece.hint,
+    d: G.heldPiece.d,
+    thickness: G.heldPiece.thickness,
+    support: buildBridgeSupport(G.heldPiece, geometry),
+    points: geometry.points,
+  });
+  G.heldPiece = null;
+  G.phase = 'asking';
+  drag.active = false;
+  drag.startAnchor = null;
+  drag.geometry = null;
+  hidePiece();
+  renderAll();
+  showToast('Bridge placed!','good');
+  setTimeout(() => {
+    if (G.runState === 'idle' && !goalReached()) openQuestion();
+  }, 420);
+}
+
+function updateDockPieceVisibility() {
+  const empty = document.querySelector('.beam-box-empty');
+  if (empty) empty.style.display = G.heldPiece ? 'none' : '';
+}
+
+function spawnPiece(pieceData) {
+  G.phase = 'placing';
+  G.heldPiece = pieceData;
+  const fp = $('floating-piece');
+  $('fp-label').textContent = pieceData.reward;
+  $('fp-hint').textContent = pieceData.hint;
+  fp.className = (pieceData.d === 'easy' ? 'd-easy' : pieceData.d === 'medium' ? 'd-medium' : 'd-hard') + ' idle';
+
+  const dockRect = document.querySelector('.beam-box-dock').getBoundingClientRect();
+  drag.homeX = dockRect.left + dockRect.width / 2 - 55;
+  drag.homeY = dockRect.top + dockRect.height / 2 - 25;
+  drag.startAnchor = null;
+  drag.geometry = null;
+
+  fp.style.cssText = '';
+  fp.style.display = 'flex';
+  fp.style.left = drag.homeX + 'px';
+  fp.style.top = drag.homeY + 'px';
+  fp.style.position = 'fixed';
+  fp.style.zIndex = '90';
+  fp.style.width = '110px';
+  fp.style.height = '50px';
+  fp.style.borderRadius = '10px';
+  fp.style.borderTop = '3px solid rgba(255,255,255,.8)';
+  fp.style.color = '#fff';
+  fp.style.fontWeight = '900';
+  fp.style.textShadow = '0 1px 3px rgba(0,0,0,.3)';
+  fp.style.boxShadow = '0 8px 26px rgba(0,0,0,.28)';
+  fp.style.flexDirection = 'column';
+  fp.style.alignItems = 'center';
+  fp.style.justifyContent = 'center';
+  fp.style.gap = '2px';
+  fp.style.cursor = 'grab';
+  fp.style.userSelect = 'none';
+  fp.style.touchAction = 'none';
+  if (pieceData.d === 'easy') fp.style.background = 'linear-gradient(160deg,#4bbad4,#2490be)';
+  if (pieceData.d === 'medium') fp.style.background = 'linear-gradient(160deg,#967de8,#6848c0)';
+  if (pieceData.d === 'hard') fp.style.background = 'linear-gradient(160deg,#e07848,#bc4820)';
+
+  const prompt = $('fp-prompt');
+  prompt.style.display = 'block';
+  prompt.style.left = drag.homeX + 'px';
+  prompt.style.top = (drag.homeY + 58) + 'px';
+
+  updateDockPieceVisibility();
+  renderAll();
+}
+
+function hidePiece() {
+  $('floating-piece').style.display = 'none';
+  $('fp-prompt').style.display = 'none';
+  updateDockPieceVisibility();
+}
+
+function returnPieceHome(message) {
+  const fp = $('floating-piece');
+  fp.classList.add('idle');
+  fp.style.animation = '';
+  fp.style.transition = 'left .35s cubic-bezier(.34,1.56,.64,1),top .35s cubic-bezier(.34,1.56,.64,1)';
+  fp.style.left = drag.homeX + 'px';
+  fp.style.top = drag.homeY + 'px';
+  setTimeout(() => { fp.style.transition = ''; }, 400);
+  const prompt = $('fp-prompt');
+  prompt.style.display = 'block';
+  prompt.style.left = drag.homeX + 'px';
+  prompt.style.top = (drag.homeY + 58) + 'px';
+  if (message) showToast(message);
+}
+
+function onPieceDown(event) {
+  if (G.phase !== 'placing' || !G.heldPiece) return;
+  event.preventDefault();
+  drag.startAnchor = chooseStartAnchor();
+  if (!drag.startAnchor) {
+    showToast('No useful start point was found for this beam.','bad');
+    return;
+  }
+  drag.active = true;
+  const fp = $('floating-piece');
+  fp.classList.remove('idle');
+  fp.classList.add('dragging');
+  $('fp-prompt').style.display = 'none';
+  renderAll();
+}
+
+function onMove(event) {
+  if (!drag.active || !G.heldPiece) return;
+  event.preventDefault();
+  const pos = getPos(event);
+  const fp = $('floating-piece');
+  fp.style.left = (pos.x - 55) + 'px';
+  fp.style.top = (pos.y - 25) + 'px';
+
+  const world = worldPointFromClient(pos.x, pos.y);
+  drag.geometry = buildBeamGeometry(G.heldPiece, drag.startAnchor, world, true);
+  renderAll();
+}
+
+function onUp(event) {
+  if (!drag.active) return;
+  drag.active = false;
+  const fp = $('floating-piece');
+  fp.classList.remove('dragging');
+
+  if (drag.geometry && drag.geometry.valid) {
+    placeGeometry(drag.geometry);
+    return;
+  }
+
+  const failReason = drag.geometry && drag.geometry.reason;
+  drag.geometry = null;
+  drag.startAnchor = null;
+  renderAll();
+  returnPieceHome(failReason || 'Build from the highlighted edge and reach forward across the water.');
+}
+
+function updateStatus() {
+  const filled = G.coveredGaps.length;
+  $('gap-count-head').textContent = filled + ' / ' + G.gaps + ' gaps covered';
+  $('gap-text').textContent = filled + ' of ' + G.gaps + ' gaps covered';
+  $('score-correct').textContent = G.correct;
+  $('score-wrong').textContent = G.wrong;
+  if ($('score-correct-panel')) $('score-correct-panel').textContent = G.correct;
+  if ($('score-wrong-panel')) $('score-wrong-panel').textContent = G.wrong;
+
+  const row = $('gap-pills');
+  row.innerHTML = '';
+  const pillW = Math.min(28, (200 / G.gaps) - 6);
+  for (let index = 0; index < G.gaps; index += 1) {
+    const pill = document.createElement('div');
+    pill.className = 'gpill' + (G.coveredGaps.some((gap) => gap.idx === index) ? ' done' : '');
+    pill.style.width = pillW + 'px';
+    row.appendChild(pill);
+  }
+
+  $('go-btn').disabled = G.runState === 'walking' || G.runState === 'falling' || $('q-backdrop').classList.contains('open');
+
+  if (G.runState === 'walking') {
+    $('scene-caption').textContent = 'Mama penguin is crossing!';
+    $('inst-hint').textContent = 'The penguin is testing your bridge path right now.';
+    return;
+  }
+  if (G.runState === 'falling') {
+    $('scene-caption').textContent = 'The path broke!';
+    $('inst-hint').textContent = 'Mama penguin is falling. She will reset so you can keep building.';
+    return;
+  }
+  if (G.heldPiece) {
+    $('scene-caption').textContent = 'Drag the new beam onto the ice path.';
+    $('inst-hint').textContent = 'This beam can reach about ' + Math.round(G.heldPiece.maxReach) + ' pixels. Drag forward from the highlighted anchor.';
+  } else if (goalReached()) {
+    $('scene-caption').textContent = 'The crossing is complete.';
+    $('inst-hint').textContent = 'Mama penguin can reach the baby from here.';
+  } else {
+    $('scene-caption').textContent = 'Answer a question or press Go to test the path.';
+    $('inst-hint').textContent = 'Like the original game, you can test early. If the bridge path is incomplete, mama penguin will splash and reset.';
+  }
+
+  $('go-btn').textContent = G.runState === 'won' ? 'Go Again' : 'Go';
+}
+
+function openQuestion() {
+  if (G.phase !== 'asking') return;
+  if (G.poolIdx >= G.pool.length) {
+    G.pool = shuffle([...BANK[G.diff]]);
+    G.poolIdx = 0;
+  }
+  const q = G.pool[G.poolIdx++];
+  G.currentQ = q;
+  $('diff-chip').textContent = G.cfg.label;
+  $('diff-chip').className = 'diff-chip ' + G.cfg.dc;
+  $('q-text').textContent = q.q;
+
+  const grid = $('choices-grid');
+  grid.innerHTML = '';
+  q.choices.forEach((choice, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice;
+    btn.addEventListener('click', () => onAnswer(index, btn));
+    grid.appendChild(btn);
+  });
+  $('q-backdrop').classList.add('open');
+  updateStatus();
+}
+
+function onAnswer(index, button) {
+  const q = G.currentQ;
+  $('choices-grid').querySelectorAll('.choice-btn').forEach((choiceBtn) => {
+    choiceBtn.disabled = true;
+  });
+
+  if (index === q.ans) {
+    button.classList.add('correct');
+    G.correct += 1;
+    updateStatus();
+    showToast('Correct! New beam earned.','good');
+    setTimeout(() => {
+      $('q-backdrop').classList.remove('open');
+      spawnPiece(rewardPieceForQuestion(q, G.diff));
+    }, 700);
+    return;
+  }
+
+  button.classList.add('wrong');
+  $('choices-grid').querySelectorAll('.choice-btn')[q.ans].classList.add('correct');
+  G.wrong += 1;
+  updateStatus();
+  shakeEl($('q-text'));
+  showToast('Not quite. Try the next one.','bad');
+  setTimeout(() => {
+    $('choices-grid').querySelectorAll('.choice-btn').forEach((choiceBtn) => {
+      choiceBtn.disabled = false;
+      choiceBtn.classList.remove('wrong', 'correct');
+    });
+    openQuestion();
+  }, 1400);
+}
+
+function showWin() {
+  G.runState = 'won';
+  cancelWalkLoop();
+  $('ws-bridges').textContent = G.bridges.length;
+  $('ws-correct').textContent = G.correct;
+  $('ws-wrong').textContent = G.wrong;
+  $('win-overlay').classList.add('open');
+  renderAll();
+}
+
+function startGame() {
+  const diff = document.querySelector('.diff-btn.sel')?.dataset.d || 'easy';
+  resetState(diff);
+  $('diff-subtitle').textContent = DIFF_CFG[diff].sub;
+  $('diff-badge').textContent = DIFF_CFG[diff].label;
+  $('diff-badge').className = 'diff-badge ' + DIFF_CFG[diff].dc;
+  if ($('diff-chip-top')) $('diff-chip-top').textContent = DIFF_CFG[diff].label + ' Phonics';
+  hidePiece();
+  $('win-overlay').classList.remove('open');
+  $('q-backdrop').classList.remove('open');
+  showScreen('screen-game');
+  requestAnimationFrame(() => {
+    buildScene();
+    setTimeout(openQuestion, 450);
+  });
+}
+
+document.querySelectorAll('.diff-btn').forEach((button) => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('.diff-btn').forEach((other) => {
+      other.classList.remove('sel');
+      other.classList.remove('selected');
+    });
+    button.classList.add('sel');
+    button.classList.add('selected');
+  });
+});
+
+$('play-btn').addEventListener('click', startGame);
+$('go-btn').addEventListener('click', () => {
+  if (G.runState === 'won') {
+    showScreen('screen-menu');
+    return;
+  }
+  beginWalk();
+});
+$('menu-btn').addEventListener('click', () => {
+  cancelWalkLoop();
+  hidePiece();
+  showScreen('screen-menu');
+});
+$('again-btn').addEventListener('click', () => {
+  cancelWalkLoop();
+  hidePiece();
+  showScreen('screen-menu');
+});
+$('harder-btn').addEventListener('click', () => {
+  const order = ['easy', 'medium', 'hard'];
+  const next = order[Math.min(order.indexOf(G.diff) + 1, 2)];
+  document.querySelectorAll('.diff-btn').forEach((button) => {
+    const isNext = button.dataset.d === next;
+    button.classList.toggle('sel', isNext);
+    button.classList.toggle('selected', isNext);
+  });
+  cancelWalkLoop();
+  hidePiece();
+  $('win-overlay').classList.remove('open');
+  showScreen('screen-menu');
+});
+
+const fp = $('floating-piece');
+fp.addEventListener('mousedown', onPieceDown);
+fp.addEventListener('touchstart', onPieceDown, { passive: false });
+document.addEventListener('mousemove', onMove);
+document.addEventListener('touchmove', onMove, { passive: false });
+document.addEventListener('mouseup', onUp);
+document.addEventListener('touchend', onUp);
+</script>
+</body>
+</html>
+
+
