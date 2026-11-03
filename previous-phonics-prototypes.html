@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phonics Prototypes</title>
+  <style>
+    :root {
+      --bg1: #eef5fb;
+      --bg2: #d8edf8;
+      --panel: rgba(255,255,255,0.95);
+      --line: #d6e1ec;
+      --navy: #12395a;
+      --muted: #557089;
+      --gold: #ffdb68;
+      --mint: #dff4e8;
+      --blue: #dfeeff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+    }
+    .wrap {
+      width: min(1120px, 100%);
+    }
+    .hero {
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 28px;
+      padding: 30px 32px;
+      box-shadow: 0 20px 36px rgba(22,53,84,0.12);
+      margin-bottom: 22px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 40px;
+      line-height: 1.05;
+    }
+    .hero p {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.5;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+    .tile {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 280px;
+      padding: 26px 24px;
+      background: var(--panel);
+      border: 2px solid var(--line);
+      border-radius: 26px;
+      box-shadow: 0 18px 28px rgba(22,53,84,0.10);
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.14s ease, box-shadow 0.14s ease;
+    }
+    .tile:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 34px rgba(22,53,84,0.14);
+    }
+    .pill {
+      align-self: flex-start;
+      padding: 7px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+    }
+    .pill.blue { background: var(--blue); }
+    .pill.mint { background: var(--mint); }
+    .pill.gold { background: rgba(255,219,104,0.42); }
+    .tile h2 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+    .tile p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+      flex: 1;
+    }
+    .cta {
+      font-weight: 900;
+      font-size: 14px;
+      color: var(--navy);
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .tile { min-height: 0; }
+      h1 { font-size: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <p><a href="index.html">&larr; Back to G Learning Games</a></p>
+      <h1>POLY Phonics Prototypes</h1>
+      <p>Select the section you want to open. Instructional and diagnostic activities each open to their own menu page. Dashboard opens directly.</p>
+    </div>
+    <div class="grid">
+      <a class="tile" href="instructional.html">
+        <div class="pill blue">Teacher-Led</div>
+        <h2>Instructional</h2>
+        <p>Open the classroom modeling and lesson-delivery prototypes, including Elkonin, blending, reading transfer, and spelling transfer.</p>
+        <div class="cta">Open Instructional Menu -></div>
+      </a>
+      <a class="tile" href="diagnostic_practice.html">
+        <div class="pill mint">Student-Facing</div>
+        <h2>Diagnostic / Practice</h2>
+        <p>Open the game-based diagnostic and practice activities, including Runner, Fall, and Train.</p>
+        <div class="cta">Open Diagnostic Menu -></div>
+      </a>
+      <a class="tile" href="diagnostic_dashboard.html">
+        <div class="pill gold">Reporting</div>
+        <h2>Dashboard</h2>
+        <p>Go straight to the reporting dashboard for class summaries, student reports, voice review, and flagged phonics skills.</p>
+        <div class="cta">Open Dashboard -></div>
+      </a>
+      <a class="tile" href="activity_games.html">
+        <div class="pill blue">New Section</div>
+        <h2>Activity / Games Prototypes</h2>
+        <p>Open the interactive prototype collection, including the camera bubble game and other student-facing game concepts.</p>
+        <div class="cta">Open Activity / Games -></div>
+      </a>
+      <a class="tile" href="previous-demos.html">
+        <div class="pill gold">Earlier Work</div>
+        <h2>Previous Phonics Demos and Games</h2>
+        <p>Browse earlier standalone games and the FPR K and SAD K island examples.</p>
+        <div class="cta">Open Previous Demos -></div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
